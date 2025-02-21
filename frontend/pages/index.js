@@ -26,6 +26,15 @@ export default function Home() {
     }
   };
 
+  const updateTasks = async (updatedTasks) => {
+    try {
+      await axios.post('/tasks', updatedTasks);
+      setTasks(updatedTasks);
+    } catch (error) {
+      console.error("Error updating tasks:", error);
+    }
+  };
+
   const addTask = async (column) => {
     if (newTask.trim() === '') return;
     try {
@@ -96,10 +105,49 @@ export default function Home() {
                 </div>
               </div>
             </div>
+
+            <div className="col-md-4">
+              <h3 className="text-center">In Progress</h3>
+              <div className="card">
+                <div className="card-body">
+                  {tasks.inProgress.map((task, index) => (
+                    <div className="card mb-2" key={index}>
+                      <div className="card-body">
+                        {task}
+                        <div className="mt-2">
+                          <button className="btn btn-success btn-sm" onClick={() => moveTask('inProgress', 'done', index)}>Move to Done</button>
+                          <button className="btn btn-secondary btn-sm ms-2" onClick={() => moveTask('inProgress', 'todo', index)}>Move to To Do</button>
+                          <button className="btn btn-danger btn-sm ms-2" onClick={() => deleteTask('inProgress', index)}>Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="col-md-4">
+              <h3 className="text-center">Done</h3>
+              <div className="card">
+                <div className="card-body">
+                  {tasks.done.map((task, index) => (
+                    <div className="card mb-2" key={index}>
+                      <div className="card-body">
+                        {task}
+                        <div className="mt-2">
+                          <button className="btn btn-warning btn-sm" onClick={() => moveTask('done', 'inProgress', index)}>Move to In Progress</button>
+                          <button className="btn btn-danger btn-sm ms-2" onClick={() => deleteTask('done', index)}>Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </>
       )}
-      
+
       <footer className="text-center mt-5">
         <a href="https://docs.google.com/document/d/1H4fIfpSYVMuOPOFpm3m_X9mXNhM_UK8DlnqP_AJF_Lg/edit?tab=t.0" target="_blank" rel="noopener noreferrer">Privacy Policy</a> | 
         <a href="https://docs.google.com/document/d/130GbiVZCT9M9lM0X5b-kfyvs6m0cPxWQpgzPyleLdGg/edit?tab=t.0#heading=h.ng3xjmtnbph" target="_blank" rel="noopener noreferrer"> General Terms and Conditions</a>
