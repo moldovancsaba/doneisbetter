@@ -5,7 +5,7 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 import { io } from 'socket.io-client';
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL;
-const socket = io(process.env.NEXT_PUBLIC_API_URL);
+const socket = io(process.env.NEXT_PUBLIC_API_URL, { transports: ['websocket'] });
 
 export default function Home() {
   const { data: session } = useSession();
