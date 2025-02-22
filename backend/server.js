@@ -1,61 +1,67 @@
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const dotenv = require('dotenv');
+const { Server } = require('socket.io');
+const http = require('http');
 
+dotenv.config();
 const app = express();
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://doneisbetter.vercel.app'],
-  methods: ['GET', 'POST', 'DELETE'],
-  allowedHeaders: ['Content-Type']
-}));
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*'
+  }
+});
+
+app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI, {
-}).then(() => console.log("Connected to MongoDB Atlas"))
-  .catch(err => console.error("MongoDB connection error:", err));
-
-const taskSchema = new mongoose.Schema({
+const TaskSchema = new mongoose.Schema({
   todo: [String],
   inProgress: [String],
   done: [String]
 });
-const Task = mongoose.model('Task', taskSchema);
 
-app.get('/', (req, res) => {
-  res.send('Backend is running!');
-});
+const Task = mongoose.model('Task', TaskSchema);
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('Connected to MongoDB Atlas'))
+.catch(err => console.error('MongoDB connection error:', err));
 
 app.get('/tasks', async (req, res) => {
-  const tasks = await Task.findOne();
-  if (!tasks) {
-    const newTasks = new Task({ todo: ["Sample Task"], inProgress: [], done: [] });
-    await newTasks.save();
-    return res.json(newTasks);
+  try {
+    const tasks = await Task.findOne();
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
   }
-  res.json(tasks);
 });
 
 app.post('/tasks', async (req, res) => {
-  const tasks = await Task.findOneAndUpdate({}, req.body, { new: true, upsert: true });
-  res.json(tasks);
+  try {
+    const tasks = await Task.findOne();
+    tasks.todo = req.body.todo;
+    tasks.inProgress = req.body.inProgress;
+    tasks.done = req.body.done;
+    await tasks.save();
+    io.emit('tasksUpdated', req.body);  // Emit update event
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
-app.post('/tasks/add', async (req, res) => {
-  const { column, task } = req.body;
-  const tasks = await Task.findOne();
-  tasks[column].push(task);
-  await tasks.save();
-  res.json(tasks);
-});
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
 
-app.delete('/tasks/delete', async (req, res) => {
-  const { column, index } = req.body;
-  const tasks = await Task.findOne();
-  tasks[column].splice(index, 1);
-  await tasks.save();
-  res.json(tasks);
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
 });
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
