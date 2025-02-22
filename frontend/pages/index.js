@@ -12,6 +12,7 @@ export default function Home() {
     done: []
   });
   const [newTask, setNewTask] = useState('');
+  const [editTask, setEditTask] = useState({ column: '', index: -1, value: '' });
 
   useEffect(() => {
     fetchTasks();
@@ -69,6 +70,25 @@ export default function Home() {
     updateTasks(updatedTasks);
   };
 
+  const handleEdit = (column, index, value) => {
+    setEditTask({ column, index, value });
+  };
+
+  const saveEdit = () => {
+    if (editTask.index !== -1) {
+      const updatedTasks = { ...tasks };
+      updatedTasks[editTask.column][editTask.index] = editTask.value;
+      updateTasks(updatedTasks);
+      setEditTask({ column: '', index: -1, value: '' });
+    }
+  };
+
+  const columns = [
+    { key: 'todo', title: 'To Do' },
+    { key: 'inProgress', title: 'In Progress' },
+    { key: 'done', title: 'Done' }
+  ];
+
   return (
     <div className="container mt-5">
       <h1 className="text-center">Kanban Board</h1>
@@ -85,71 +105,56 @@ export default function Home() {
       </div>
 
       <div className="row mt-4">
-        <div className="col-md-4">
-          <h3 className="text-center">To Do</h3>
-          <input
-            type="text"
-            className="form-control mb-2"
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-            placeholder="New Task"
-          />
-          <button className="btn btn-success mb-3" onClick={() => addTask('todo')}>Add Task</button>
-          <div className="card">
-            <div className="card-body">
-              {tasks.todo.map((task, index) => (
-                <div className="card mb-2" key={index}>
-                  <div className="card-body">
-                    {task}
-                    <div className="mt-2">
-                      <button className="btn btn-primary btn-sm" onClick={() => moveTask('todo', 'inProgress', index)}>Move to In Progress</button>
-                      <button className="btn btn-danger btn-sm ms-2" onClick={() => deleteTask('todo', index)}>Delete</button>
+        {columns.map(column => (
+          <div className="col-md-4" key={column.key}>
+            <h3 className="text-center">{column.title}</h3>
+            {column.key === 'todo' && (
+              <>
+                <input
+                  type="text"
+                  className="form-control mb-2"
+                  value={newTask}
+                  onChange={(e) => setNewTask(e.target.value)}
+                  placeholder="New Task"
+                />
+                <button className="btn btn-success mb-3" onClick={() => addTask(column.key)}>Add Task</button>
+              </>
+            )}
+            <div className="card">
+              <div className="card-body">
+                {tasks[column.key].map((task, index) => (
+                  <div className="card mb-2" key={index}>
+                    <div className="card-body">
+                      {editTask.column === column.key && editTask.index === index ? (
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={editTask.value}
+                          onChange={(e) => setEditTask({ ...editTask, value: e.target.value })}
+                          onBlur={saveEdit}
+                          autoFocus
+                        />
+                      ) : (
+                        <div onDoubleClick={() => handleEdit(column.key, index, task)}>
+                          {task}
+                        </div>
+                      )}
+                      <div className="mt-2">
+                        {column.key !== 'done' && (
+                          <button className="btn btn-primary btn-sm" onClick={() => moveTask(column.key, columns[columns.findIndex(col => col.key === column.key) + 1].key, index)}>Move to Next</button>
+                        )}
+                        {column.key !== 'todo' && (
+                          <button className="btn btn-secondary btn-sm ms-2" onClick={() => moveTask(column.key, columns[columns.findIndex(col => col.key === column.key) - 1].key, index)}>Move to Previous</button>
+                        )}
+                        <button className="btn btn-danger btn-sm ms-2" onClick={() => deleteTask(column.key, index)}>Delete</button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="col-md-4">
-          <h3 className="text-center">In Progress</h3>
-          <div className="card">
-            <div className="card-body">
-              {tasks.inProgress.map((task, index) => (
-                <div className="card mb-2" key={index}>
-                  <div className="card-body">
-                    {task}
-                    <div className="mt-2">
-                      <button className="btn btn-success btn-sm" onClick={() => moveTask('inProgress', 'done', index)}>Move to Done</button>
-                      <button className="btn btn-secondary btn-sm ms-2" onClick={() => moveTask('inProgress', 'todo', index)}>Move to To Do</button>
-                      <button className="btn btn-danger btn-sm ms-2" onClick={() => deleteTask('inProgress', index)}>Delete</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-4">
-          <h3 className="text-center">Done</h3>
-          <div className="card">
-            <div className="card-body">
-              {tasks.done.map((task, index) => (
-                <div className="card mb-2" key={index}>
-                  <div className="card-body">
-                    {task}
-                    <div className="mt-2">
-                      <button className="btn btn-warning btn-sm" onClick={() => moveTask('done', 'inProgress', index)}>Move to In Progress</button>
-                      <button className="btn btn-danger btn-sm ms-2" onClick={() => deleteTask('done', index)}>Delete</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
       <footer className="text-center mt-5">
