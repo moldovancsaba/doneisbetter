@@ -8,7 +8,7 @@ const http = require('http');
 dotenv.config();
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: 'https://doneisbetter.vercel.app', methods: ['GET', 'POST'], credentials: true }, 
+const io = new Server(server, { cors: { origin: 'https://doneisbetter.vercel.app', methods: ['GET', 'POST'], credentials: true }, transports: ['websocket']  cors: { origin: 'https://doneisbetter.vercel.app', methods: ['GET', 'POST'], credentials: true }, 
   cors: {
     origin: '*'
   }
