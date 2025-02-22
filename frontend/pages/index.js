@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL;
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { io } from 'socket.io-client';
 
