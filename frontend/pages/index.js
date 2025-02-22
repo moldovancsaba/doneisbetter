@@ -35,6 +35,7 @@ export default function Home() {
   const updateTasks = async (updatedTasks) => {
     try {
       await axios.post('/tasks', updatedTasks);
+      socket.emit('tasksUpdated', updatedTasks);
     } catch (error) {
       console.error("Error updating tasks:", error);
     }
@@ -64,17 +65,42 @@ export default function Home() {
     if (editTask.index !== -1) {
       const updatedTasks = { ...tasks };
       updatedTasks[editTask.column][editTask.index] = editTask.value;
+      setTasks(updatedTasks);
       updateTasks(updatedTasks);
       setEditTask({ column: '', index: -1, value: '' });
     }
   };
 
   const moveTask = (fromColumn, toColumn, index) => {
-    const updatedTasks = { ...tasks };
-    const [movedTask] = updatedTasks[fromColumn].splice(index, 1);
-    updatedTasks[toColumn].push(movedTask);
-    setTasks(updatedTasks);
-    updateTasks(updatedTasks);
+    if (toColumn) {
+      const updatedTasks = { ...tasks };
+      const [movedTask] = updatedTasks[fromColumn].splice(index, 1);
+      updatedTasks[toColumn].push(movedTask);
+      setTasks(updatedTasks);
+      updateTasks(updatedTasks);
+    }
+  };
+
+  const moveTaskUp = (column, index) => {
+    if (index > 0) {
+      const updatedTasks = { ...tasks };
+      const temp = updatedTasks[column][index - 1];
+      updatedTasks[column][index - 1] = updatedTasks[column][index];
+      updatedTasks[column][index] = temp;
+      setTasks(updatedTasks);
+      updateTasks(updatedTasks);
+    }
+  };
+
+  const moveTaskDown = (column, index) => {
+    if (index < tasks[column].length - 1) {
+      const updatedTasks = { ...tasks };
+      const temp = updatedTasks[column][index + 1];
+      updatedTasks[column][index + 1] = updatedTasks[column][index];
+      updatedTasks[column][index] = temp;
+      setTasks(updatedTasks);
+      updateTasks(updatedTasks);
+    }
   };
 
   const columns = [
@@ -83,14 +109,16 @@ export default function Home() {
     { key: 'done', title: 'Done' }
   ];
 
-  const getNextColumnKey = (currentKey) => {
-    const currentIndex = columns.findIndex(col => col.key === currentKey);
-    return columns[currentIndex + 1]?.key;
+  const getPreviousColumn = (columnKey) => {
+    if (columnKey === 'todo') return null;
+    if (columnKey === 'inProgress') return 'todo';
+    if (columnKey === 'done') return 'inProgress';
   };
 
-  const getPrevColumnKey = (currentKey) => {
-    const currentIndex = columns.findIndex(col => col.key === currentKey);
-    return columns[currentIndex - 1]?.key;
+  const getNextColumn = (columnKey) => {
+    if (columnKey === 'todo') return 'inProgress';
+    if (columnKey === 'inProgress') return 'done';
+    if (columnKey === 'done') return null;
   };
 
   return (
@@ -124,72 +152,34 @@ export default function Home() {
                 <button className="btn btn-success mb-3" onClick={addTask}>Add Task</button>
               </>
             )}
-            <div className="card">
-              <div className="card-body">
-                {tasks[column.key].map((task, index) => {
-                  const nextColumn = getNextColumnKey(column.key);
-                  const prevColumn = getPrevColumnKey(column.key);
-
-                  return (
-                    <div
-                      key={index}
-                      className="card mb-2"
-                    >
-                      <div className="card-body">
-                        {(editTask?.column === column.key && editTask?.index === index) ? (
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={editTask.value}
-                            onChange={(e) => handleEdit(column.key, index, e.target.value)}
-                            onBlur={saveEdit}
-                            autoFocus
-                          />
-                        ) : (
-                          <div onDoubleClick={() => handleEdit(column.key, index, task)}>
-                            {task}
-                          </div>
-                        )}
-                        <div className="d-flex justify-content-between">
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => moveTask(column.key, prevColumn, index)}
-                            disabled={!prevColumn}
-                          >
-                            ←
-                          </button>
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => moveTask(column.key, nextColumn, index)}
-                            disabled={!nextColumn}
-                          >
-                            →
-                          </button>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => deleteTask(column.key, index)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
+            {tasks[column.key].map((task, index) => (
+              <div key={index} className="card mb-2">
+                <div className="card-body">
+                  {(editTask?.column === column.key && editTask?.index === index) ? (
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={editTask.value}
+                      onChange={(e) => handleEdit(column.key, index, e.target.value)}
+                      onBlur={saveEdit}
+                      autoFocus
+                    />
+                  ) : (
+                    <div onDoubleClick={() => handleEdit(column.key, index, task)}>
+                      {task}
                     </div>
-                  );
-                })}
+                  )}
+                  <button className="btn btn-secondary btn-sm" onClick={() => moveTaskUp(column.key, index)} disabled={index === 0}>↑</button>
+                  <button className="btn btn-secondary btn-sm" onClick={() => moveTaskDown(column.key, index)} disabled={index === tasks[column.key].length - 1}>↓</button>
+                  <button className="btn btn-warning btn-sm" onClick={() => moveTask(column.key, getPreviousColumn(column.key), index)} disabled={!getPreviousColumn(column.key)}>←</button>
+                  <button className="btn btn-warning btn-sm" onClick={() => moveTask(column.key, getNextColumn(column.key), index)} disabled={!getNextColumn(column.key)}>→</button>
+                  <button className="btn btn-danger btn-sm" onClick={() => deleteTask(column.key, index)}>Delete</button>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         ))}
       </div>
-
-      <footer className="text-center mt-5">
-        <a href="https://docs.google.com/document/d/1H4fIfpSYVMuOPOFpm3m_X9mXNhM_UK8DlnqP_AJF_Lg/edit?tab=t.0" target="_blank" rel="noopener noreferrer">
-          Privacy Policy
-        </a> | 
-        <a href="https://docs.google.com/document/d/130GbiVZCT9M9lM0X5b-kfyvs6m0cPxWQpgzPyleLdGg/edit?tab=t.0#heading=h.ng3xjmtnbph" target="_blank" rel="noopener noreferrer">
-          General Terms and Conditions
-        </a>
-      </footer>
     </div>
   );
 }
