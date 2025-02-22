@@ -17,6 +17,8 @@ export default function Home() {
   const [editTask, setEditTask] = useState({ column: '', index: -1, value: '' });
 
   useEffect(() => {
+  const interval = setInterval(() => { fetchTasks(); }, 60000); 
+  return () => clearInterval(interval);
     fetchTasks();
     socket.on('tasksUpdated', (updatedTasks) => {
       setTasks(updatedTasks);
