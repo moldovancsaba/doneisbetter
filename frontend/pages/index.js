@@ -1,44 +1,36 @@
-import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
-axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL;
 const socket = io(process.env.NEXT_PUBLIC_API_URL);
 
 export default function Home() {
   const [task, setTask] = useState('');
-  const [tasks, setTasks] = useState({
-    todo: [],
-    inProgress: [],
-    done: []
-  });
-
-  useEffect(() => {
-    fetchTasks();
-    socket.on('tasksUpdated', () => {
-      fetchTasks();
-    });
-
-    return () => {
-      socket.off('tasksUpdated');
-    };
-  }, []);
+  const [tasks, setTasks] = useState({ todo: [], inProgress: [], done: [] });
 
   const fetchTasks = async () => {
     try {
-      const response = await axios.get('/tasks');
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tasks`);
       setTasks(response.data || { todo: [], inProgress: [], done: [] });
     } catch (error) {
       console.error('Error fetching tasks:', error);
     }
   };
 
+  useEffect(() => {
+    fetchTasks();
+    socket.on('tasksUpdated', fetchTasks);
+
+    return () => {
+      socket.off('tasksUpdated', fetchTasks);
+    };
+  }, []);
+
   const addTask = async () => {
     if (task.trim() === '') return;
     try {
-      await axios.post('/tasks', { task });
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, { task });
       setTask('');
-      socket.emit('tasksUpdated');
     } catch (error) {
       console.error('Error adding task:', error);
     }
