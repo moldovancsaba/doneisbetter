@@ -3,7 +3,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL;
-const socket = io(process.env.NEXT_PUBLIC_API_URL, { transports: ['websocket', 'polling'] });
+const socket = io(process.env.NEXT_PUBLIC_API_URL);
 
 export default function Home() {
   const [task, setTask] = useState('');
@@ -23,10 +23,9 @@ export default function Home() {
   const fetchTasks = async () => {
     try {
       const response = await axios.get('/tasks');
-      setTasks(response.data.todo || []);  // Safe fallback if `todo` is null
+      setTasks(response.data.todo || []);
     } catch (error) {
       console.error('Error fetching tasks:', error);
-      setTasks([]); // Set empty array if error occurs
     }
   };
 
@@ -49,7 +48,12 @@ export default function Home() {
           type="text"
           value={task}
           onChange={(e) => setTask(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addTask()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              addTask();
+            }
+          }}
           placeholder="Add a card"
           className="w-full p-2 mb-4 border border-gray-300 rounded"
         />
