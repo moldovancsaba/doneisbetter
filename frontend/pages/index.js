@@ -5,32 +5,30 @@ import { io } from 'socket.io-client';
 const socket = io(process.env.NEXT_PUBLIC_API_URL);
 
 export default function Home() {
-  const [task, setTask] = useState('');
-  const [tasks, setTasks] = useState({ todo: [], inProgress: [], done: [] });
+  const [task, setCard] = useState('');
 
-  const fetchTasks = async () => {
+  const fetchCards = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tasks`);
-      setTasks(response.data || { todo: [], inProgress: [], done: [] });
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cards`);
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      console.error('Error fetching cards:', error);
     }
   };
 
   useEffect(() => {
-    fetchTasks();
-    socket.on('tasksUpdated', fetchTasks);
+    fetchCards();
+    socket.on('cardsUpdated', fetchCards);
 
     return () => {
-      socket.off('tasksUpdated', fetchTasks);
+      socket.off('cardsUpdated', fetchCards);
     };
   }, []);
 
-  const addTask = async () => {
+  const addCard = async () => {
     if (task.trim() === '') return;
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, { task });
-      setTask('');
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/cards`, { task });
+      setCard('');
     } catch (error) {
       console.error('Error adding task:', error);
     }
@@ -43,13 +41,12 @@ export default function Home() {
         <input
           type="text"
           value={task}
-          onChange={(e) => setTask(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addTask()}
+          onChange={(e) => setCard(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && addCard()}
           placeholder="Add a card"
           className="w-full p-2 mb-4 border border-gray-300 rounded"
         />
         <div className="space-y-2">
-          {tasks.todo.map((task, index) => (
             <div key={index} className="p-4 bg-white rounded shadow">
               {task}
             </div>

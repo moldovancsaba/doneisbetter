@@ -1,19 +1,16 @@
 const mongoose = require('mongoose');
 
-const TaskSchema = new mongoose.Schema({
-  todo: {
+const CardSchema = new mongoose.Schema({
     type: [String],
     required: true
   },
-  inProgress: {
     type: [String],
     required: true
   },
-  done: {
     type: [String],
     required: true
   }
 });
 
-const Task = mongoose.model('Task', TaskSchema);
-module.exports = Task;
+const Card = mongoose.model('Card', CardSchema);
+module.exports = Card;

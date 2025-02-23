@@ -1,3 +1,22 @@
+# DoneIsBetter: Setup Guide
+
+## Overview
+DoneIsBetter is a simple Hello World app with the following functionality:
+- A Google-like input field to add text as cards in a single column
+- Cards are stored in MongoDB so they can be viewed anywhere, anytime
+- Real-time synchronization: Cards added on one screen are instantly visible on all screens
+
+## Prerequisites
+Ensure you have the following tools installed:
+- macOS 15.3 on a Mac M1 computer
+- Node.js v22.14.0
+- npm (Comes with Node.js)
+- MongoDB Atlas Account
+- Vercel Account
+- GitHub Account
+
+## Initial Setup
+
 DoneIsBetter: Full Setup Guide
 
 This guide details how to set up the DoneIsBetter project from scratch, including frontend, backend, and real-time synchronization with MongoDB Atlas. Follow each command exactly as written to avoid errors. The guide is optimized for macOS 15.3 on a Mac M1 computer.

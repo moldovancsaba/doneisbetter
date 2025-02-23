@@ -23,43 +23,37 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('Connected to MongoDB Atlas'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-const TaskSchema = new mongoose.Schema({
-  todo: { type: Array, default: [] },
-  inProgress: { type: Array, default: [] },
-  done: { type: Array, default: [] }
+const CardSchema = new mongoose.Schema({
 });
 
-const Task = mongoose.model('Task', TaskSchema);
+const Card = mongoose.model('Card', CardSchema);
 
 app.get('/', (req, res) => {
   res.send('Doneisbetter Backend is running smoothly!');
 });
 
-app.get('/tasks', async (req, res) => {
+app.get('/cards', async (req, res) => {
   try {
-    const tasks = await Task.findOne().sort({ _id: -1 }).exec();
-    res.json(tasks || { todo: [], inProgress: [], done: [] });
+    const cards = await Card.findOne().sort({ _id: -1 }).exec();
   } catch (error) {
-    console.error('Error fetching tasks:', error);
+    console.error('Error fetching cards:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.post('/tasks', async (req, res) => {
+app.post('/cards', async (req, res) => {
   try {
     const { task } = req.body;
     if (task) {
-      let tasks = await Task.findOne().sort({ _id: -1 }).exec();
-      if (!tasks) {
-        tasks = new Task({ todo: [] });
+      let cards = await Card.findOne().sort({ _id: -1 }).exec();
+      if (!cards) {
       }
-      tasks.todo.push(task);
-      await tasks.save();
+      await cards.save();
 
-      io.emit('tasksUpdated');
-      res.status(201).json({ message: 'Task added successfully' });
+      io.emit('cardsUpdated');
+      res.status(201).json({ message: 'Card added successfully' });
     } else {
-      res.status(400).json({ error: 'Task is required' });
+      res.status(400).json({ error: 'Card is required' });
     }
   } catch (error) {
     console.error('Error adding task:', error);
@@ -70,8 +64,8 @@ app.post('/tasks', async (req, res) => {
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
-  socket.on('tasksUpdated', () => {
-    io.emit('tasksUpdated');
+  socket.on('cardsUpdated', () => {
+    io.emit('cardsUpdated');
   });
 
   socket.on('disconnect', () => {
