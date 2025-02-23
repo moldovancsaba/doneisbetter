@@ -1,63 +1,67 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
-const { Server } = require('socket.io');
+const socketIo = require('socket.io');
 const http = require('http');
+require('dotenv').config();
+const Task = require('./models/Task');
 
-dotenv.config();
 const app = express();
 const server = http.createServer(app);
-
-const io = new Server(server, { 
-  cors: { 
-    origin: 'https://doneisbetter.vercel.app', 
-    methods: ['GET', 'POST'], 
-    credentials: true 
-  }, 
-  transports: ['websocket'] 
+const io = socketIo(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST']
+  }
 });
-
 
 app.use(cors());
 app.use(express.json());
-app.get('/', (req, res) => { res.send('Doneisbetter Backend is running smoothly!'); });
 
-const TaskSchema = new mongoose.Schema({
-  todo: [String],
-  inProgress: [String],
-  done: [String]
+mongoose.connect(process.env.MONGO_URI, { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true 
+})
+.then(() => { 
+  console.log('Connected to MongoDB Atlas'); 
+})
+.catch(err => { 
+  console.error('MongoDB connection error:', err); 
 });
 
-const Task = mongoose.model('Task', TaskSchema);
-
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('Connected to MongoDB Atlas'))
-.catch(err => console.error('MongoDB connection error:', err));
+app.get('/', (req, res) => {
+  res.send('Doneisbetter Backend is running smoothly!');
+});
 
 app.get('/tasks', async (req, res) => {
   try {
-    const tasks = await Task.findOne();
-    res.json(tasks);
+    const tasks = await Task.findOne().sort({ _id: -1 }).exec();
+    res.json(tasks || { todo: [], inProgress: [], done: [] });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error fetching tasks:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 app.post('/tasks', async (req, res) => {
   try {
-    const tasks = await Task.findOne();
-    tasks.todo = req.body.todo;
-    tasks.inProgress = req.body.inProgress;
-    tasks.done = req.body.done;
-    await tasks.save();
-    io.emit('tasksUpdated', req.body);  // Emit update event
-    res.json(tasks);
+    const { task } = req.body;
+    if (!task) {
+      return res.status(400).json({ error: 'Task is required' });
+    }
+    const existingTasks = await Task.findOne().sort({ _id: -1 }).exec();
+    if (existingTasks) {
+      existingTasks.todo.push(task);
+      await existingTasks.save();
+    } else {
+      const newTask = new Task({ todo: [task], inProgress: [], done: [] });
+      await newTask.save();
+    }
+    io.emit('tasksUpdated');
+    res.json({ message: 'Task added successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error adding task:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -70,4 +74,6 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5001;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
