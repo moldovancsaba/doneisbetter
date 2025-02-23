@@ -1,13 +1,17 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import axios from 'axios';
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL;
 const socket = io(process.env.NEXT_PUBLIC_API_URL);
 
 export default function Home() {
   const [task, setTask] = useState('');
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState({
+    todo: [],
+    inProgress: [],
+    done: []
+  });
 
   useEffect(() => {
     fetchTasks();
@@ -23,7 +27,7 @@ export default function Home() {
   const fetchTasks = async () => {
     try {
       const response = await axios.get('/tasks');
-      setTasks(response.data.todo || []);
+      setTasks(response.data || { todo: [], inProgress: [], done: [] });
     } catch (error) {
       console.error('Error fetching tasks:', error);
     }
@@ -48,17 +52,12 @@ export default function Home() {
           type="text"
           value={task}
           onChange={(e) => setTask(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              addTask();
-            }
-          }}
+          onKeyDown={(e) => e.key === 'Enter' && addTask()}
           placeholder="Add a card"
           className="w-full p-2 mb-4 border border-gray-300 rounded"
         />
         <div className="space-y-2">
-          {tasks.map((task, index) => (
+          {tasks.todo.map((task, index) => (
             <div key={index} className="p-4 bg-white rounded shadow">
               {task}
             </div>
