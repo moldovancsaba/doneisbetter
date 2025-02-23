@@ -1,12 +1,7 @@
 const mongoose = require('mongoose');
 
 const CardSchema = new mongoose.Schema({
-    type: [String],
-    required: true
-  },
-    type: [String],
-    required: true
-  },
+  cards: {
     type: [String],
     required: true
   }
