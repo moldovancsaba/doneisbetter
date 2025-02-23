@@ -21,6 +21,7 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json());
+app.get('/', (req, res) => { res.send('Doneisbetter Backend is running smoothly!'); });
 
 const TaskSchema = new mongoose.Schema({
   todo: [String],
