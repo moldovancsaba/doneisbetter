@@ -2,53 +2,58 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const socket = io(process.env.NEXT_PUBLIC_API_URL);
+axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Home() {
-  const [task, setCard] = useState('');
-
-  const fetchCards = async () => {
-    try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cards`);
-    } catch (error) {
-      console.error('Error fetching cards:', error);
-    }
-  };
+  const [cards, setCards] = useState([]);
 
   useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const response = await axios.get('/tasks');
+        setCards(response.data.cards || []);
+      } catch (error) {
+        console.error('Error fetching cards:', error);
+      }
+    };
+
     fetchCards();
-    socket.on('cardsUpdated', fetchCards);
+
+    const socket = io(process.env.NEXT_PUBLIC_API_URL);
+    socket.on('updateCards', fetchCards);
 
     return () => {
-      socket.off('cardsUpdated', fetchCards);
+      socket.disconnect();
     };
   }, []);
 
-  const addCard = async () => {
-    if (task.trim() === '') return;
-    try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/cards`, { task });
-      setCard('');
-    } catch (error) {
-      console.error('Error adding task:', error);
+  const addCard = async (e) => {
+    if (e.key === 'Enter' && e.target.value.trim() !== '') {
+      try {
+        await axios.post('/tasks', { card: e.target.value.trim() });
+        e.target.value = '';
+      } catch (error) {
+        console.error('Error adding card:', error);
+      }
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-4xl font-bold mb-6 text-center">Hello World App</h1>
-      <div className="max-w-md mx-auto">
+    <div className="container">
+      <h1 className="text-center my-4">Hello World App</h1>
+      <div className="text-center mb-4">
         <input
           type="text"
-          value={task}
-          onChange={(e) => setCard(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addCard()}
+          className="form-control"
           placeholder="Add a card"
-          className="w-full p-2 mb-4 border border-gray-300 rounded"
+          onKeyDown={addCard}
         />
-        <div className="space-y-2">
-            <div key={index} className="p-4 bg-white rounded shadow">
-              {task}
+      </div>
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          {cards.map((card, index) => (
+            <div key={index} className="p-4 bg-white rounded shadow mb-3">
+              {card}
             </div>
           ))}
         </div>
@@ -56,7 +61,4 @@ export default function Home() {
     </div>
   );
 }
-// Trigger Vercel Rebuild
-// Trigger Vercel Rebuild Again
-// Fix: Correct JSX Syntax
-// Fix: Proper JSX Closure
+// Rebuild index.js from scratch
