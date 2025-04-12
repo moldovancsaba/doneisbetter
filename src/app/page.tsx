@@ -1,6 +1,5 @@
 import { getCards, createCard } from './actions';
 import { Suspense } from 'react';
-import { CardInput } from '@/types';
 import Input from '@/components/Input';
 
 // Card component to display each item
@@ -39,7 +38,7 @@ async function CardsList() {
         ))}
       </div>
     );
-  } catch (error) {
+  } catch {
     return (
       <div className="p-4 text-center text-red-500 border border-red-200 rounded-md">
         Error loading items. Please try again.

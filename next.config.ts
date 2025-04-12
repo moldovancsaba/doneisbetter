@@ -9,9 +9,7 @@ const nextConfig: NextConfig = {
   // Ensure we can deploy with environment variables
   env: {
     MONGODB_URI: process.env.MONGODB_URI,
-  },
-  // Enable static optimization where possible
-  swcMinify: true,
+  }
 };
 
 export default nextConfig;

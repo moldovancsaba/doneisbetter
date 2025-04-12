@@ -36,7 +36,7 @@ export async function connectDB() {
 
 // TypeScript global definition
 declare global {
-  var mongoose: {
+  let mongoose: {
     conn: typeof mongoose | null;
     promise: Promise<typeof mongoose> | null;
   };
