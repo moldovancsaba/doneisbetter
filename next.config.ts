@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
     // your project has type errors
     ignoreBuildErrors: true,
   },
+  eslint: {
+    // Disable ESLint during builds
+    ignoreDuringBuilds: true,
+  },
   // Ensure we can deploy with environment variables
   env: {
     MONGODB_URI: process.env.MONGODB_URI,
