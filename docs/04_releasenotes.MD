@@ -1,6 +1,6 @@
 # Release Notes
 
-## v0.8.0 - Working Drag-and-Drop (@hello-pangea/dnd) (2025-04-13)
+## v0.8.0 - Working Drag-and-Drop (@hello-pangea/dnd) (2025-04-13T10:43:42.534Z)
 
 ### Features & Fixes
 - Re-implemented drag-and-drop functionality using `@hello-pangea/dnd` (React 18 compatible fork of `react-beautiful-dnd`).
@@ -14,21 +14,7 @@
 - Refactored `Column.js` to use `<Droppable>`.
 - Refactored `CardItem.js` to use `<Draggable>`.
 
-## v0.7.0 - Persistent Column Reordering (2025-04-13)
-
-### Features
-- Re-implemented drag-and-drop functionality using `@hello-pangea/dnd` (React 18 compatible fork of `react-beautiful-dnd`).
-- Successfully fixed issues preventing drag-and-drop from working in previous versions.
-- Cards can now be reliably dragged between 'Deleted', 'Active', and 'Done' columns, updating their status persistently.
-- Cards can be reliably reordered within the same column, with the order persisting in the database.
-- Uninstalled `@dnd-kit` dependencies.
-
-### Technical Details
-- Refactored `KanbanBoard.js` to use `<DragDropContext>` and its `onDragEnd` handler.
-- Refactored `Column.js` to use `<Droppable>`.
-- Refactored `CardItem.js` to use `<Draggable>`.
-
-## v0.7.0 - Persistent Column Reordering (2025-04-13)
+## v0.7.0 - Persistent Column Reordering (2025-04-13T07:37:00.000Z)
 
 ### Features
 - Implemented persistence for card reordering within columns.
@@ -43,7 +29,7 @@
 - Used negative timestamp (`-Date.now()`) as the default order for new cards to ensure they appear first when sorted ascending by `order`.
 - Employed Mongoose `bulkWrite` for efficient batch updates of card order.
 
-## v0.6.0 - Client-Side Column Reordering (2025-04-13)
+## v0.6.0 - Client-Side Column Reordering (2025-04-13T07:32:00.000Z)
 
 ### Features
 - Added visual reordering of cards within the same column using drag-and-drop.
@@ -53,7 +39,7 @@
 ### Known Issues
 - Reordering is currently client-side only and does not persist in the database. Order resets on page refresh.
 
-## v0.5.0 - Drag-and-Drop Kanban Board (2025-04-13)
+## v0.5.0 - Drag-and-Drop Kanban Board (@dnd-kit Attempt) (2025-04-13T07:23:00.000Z)
 
 ### Features
 - Replaced swipe gestures with drag-and-drop functionality for moving cards between columns.
@@ -71,7 +57,7 @@
 - State management for columns handled within `KanbanBoard.js`.
 - `handleDragEnd` logic determines source/destination columns and triggers server action + optimistic UI update.
 
-## v0.4.0 - Kanban Board Layout (2025-04-13)
+## v0.4.0 - Kanban Board Layout (2025-04-13T07:13:00.000Z)
 
 ### Features
 - Implemented a 3-column Kanban-style layout ('Deleted', 'Active', 'Done').
@@ -86,7 +72,7 @@
 ### Technical Details
 - Client-side state (`useState`, `useEffect` in `KanbanBoard.js`) is used to manage card positions based on status changes initiated by swipes.
 
-## v0.3.0 - Swipe Actions for Cards (2025-04-13)
+## v0.3.0 - Swipe Actions for Cards (2025-04-13T06:57:00.000Z)
 
 ### Features
 - Implemented swipe gestures on cards:
@@ -104,7 +90,7 @@
 - `CardItem.js` uses `useSwipeable` hook and manages swipe state.
 - `CardList.js` manages the local card state for optimistic updates.
 
-## v0.2.0 - Core Functionality (2025-04-13)
+## v0.2.0 - Core Functionality (2025-04-13T06:34:00.000Z)
 
 ### Features
 - Implemented input field for adding new cards.
@@ -119,7 +105,7 @@
 - Developed client-side `components/Input.js` with state management.
 - Updated `app/page.js` to integrate components and fetch/display data.
 
-## v0.1.0 - Initial Release (2025-04-12)
+## v0.1.0 - Initial Release (2025-04-12T08:48:00.000Z)
 
 ### Features
 - Single line input field implementation

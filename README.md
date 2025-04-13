@@ -54,10 +54,7 @@ npm run dev
 - MongoDB storage
 - Newest to oldest display order
 - Drag-and-Drop cards between 'Deleted', 'Active', and 'Done' columns.
-- Drag-and-Drop cards between 'Deleted', 'Active', and 'Done' columns.
 - Reliable persistent reordering of cards within columns.
 - 3-column Kanban layout ('Deleted', 'Active', 'Done').
 
 ## Known Limitations
-
-- Requires MongoDB connection

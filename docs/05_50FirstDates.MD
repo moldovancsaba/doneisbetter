@@ -1,13 +1,21 @@
-# Done Is Better Development Diary - 50 First Dates
+- Installed `@hello-pangea/dnd` (React 18+ compatible fork of `react-beautiful-dnd`).
+- Refactored `KanbanBoard.js`, `Column.js`, and `CardItem.js` to use `DragDropContext`, `Droppable`, and `Draggable` components respectively.
+- Re-implemented the `onDragEnd` logic in `KanbanBoard.js` to handle both inter-column moves (status updates) and intra-column reorders (order updates) using the `react-beautiful-dnd` result structure.
+- Corrected client-side hydration issues by ensuring DND context only renders on the client.
+- Thoroughly tested locally to confirm both moving between columns and reordering within columns works correctly and persists.
+- Successfully debugged and resolved previous client-side exceptions.
+- Deployed the working drag-and-drop implementation (v0.8.0) to Vercel production.
 
-**Current State**: 🟢 Working Drag-and-Drop Kanban with Persistence Implemented.
-**Last Updated**: 2025-04-13
+## Previous Development History
+
+### 2025-04-13T07:37:00.000Z: Persistent Reordering (v0.7.0)
+**Last Updated**: 2025-04-13T10:54:31.773Z
 **Deployment**: https://doneisbetter-gqvjmpqp0-narimato.vercel.app
 **Version**: v0.8.0
 
 ## Latest Development (v0.8.0)
 
-### 2025-04-13: Drag-and-Drop Fix (@hello-pangea/dnd)
+### 2025-04-13T10:43:42.534Z: Drag-and-Drop Fix (@hello-pangea/dnd)
 - Uninstalled previous `@dnd-kit` libraries due to functional issues despite successful builds.
 - Installed `@hello-pangea/dnd` (React 18+ compatible fork of `react-beautiful-dnd`).
 - Refactored `KanbanBoard.js`, `Column.js`, and `CardItem.js` to use `DragDropContext`, `Droppable`, and `Draggable` components respectively.
@@ -19,23 +27,23 @@
 
 ## Latest Development (v0.7.0)
 
-### 2025-04-13: Persistent Reordering
+### 2025-04-13T07:37:00.000Z: Persistent Reordering // Keeping original estimate
+- Added an `order` field to the `Card` schema in `actions.js`.
 - Modified `createCard` to assign a default order (negative timestamp).
-- Updated `getCards` to sort by the `order` field.
 - Created a new server action `updateCardsOrder` that accepts an array of `{id, order}` updates and uses `bulkWrite` for database persistence.
 - Modified the `handleDragEnd` function in `KanbanBoard.js` to call `updateCardsOrder` after successfully reordering items visually within the same column.
 - Added error handling to revert the visual order change if the database update fails.
 - Successfully deployed v0.7.0 to Vercel production.
 ## Latest Development (v0.6.0)
 
-### 2025-04-13: Client-Side Reordering
+
+### 2025-04-13T07:32:00.000Z: Client-Side Reordering // Keeping original estimate
 - Updated `handleDragEnd` in `KanbanBoard.js` to differentiate between inter-column moves and intra-column reorders.
 - Implemented visual reordering within columns using `arrayMove` from `@dnd-kit/sortable` upon dropping an item within the same column.
-- This reordering is currently only visual and does not persist to the backend.
 - Successfully deployed v0.6.0 to Vercel production.
 ## Latest Development (v0.5.0)
 
-### 2025-04-13: Drag-and-Drop Implementation
+### 2025-04-13T07:23:00.000Z: Drag-and-Drop Implementation (@dnd-kit Attempt) // Keeping original estimate
 - Installed `@dnd-kit` core, sortable, and utilities packages.
 - Replaced swipe functionality (`react-swipeable`) with drag-and-drop.
 - Configured `DndContext` in `KanbanBoard.js` with Pointer and Keyboard sensors.
@@ -48,20 +56,20 @@
 - Successfully deployed v0.5.0 to Vercel production.
 ## Latest Development (v0.4.0)
 
-### 2025-04-13: Kanban Board Layout
+
+### 2025-04-13T07:13:00.000Z: Kanban Board Layout // Keeping original estimate
 - Updated `getCards` action to fetch all cards (not just 'active').
 - Created `KanbanBoard.js` client component to manage state for 'Deleted', 'Active', and 'Done' columns.
-- Created `Column.js` client component to render each column.
 - Modified `CardItem.js` to call a new `onStatusUpdate` prop function upon successful swipe action.
 - Updated `page.js` to use `KanbanBoard` instead of `CardList`.
 - Added CSS Grid styles for the 3-column layout.
 - Successfully deployed v0.4.0 to Vercel production.
 ## Latest Development (v0.3.0)
 
-### 2025-04-13: Swipe Actions Implementation
+
+### 2025-04-13T06:57:00.000Z: Swipe Actions Implementation // Keeping original estimate
 - Added `react-swipeable` dependency.
 - Updated `Card` schema in `actions.js` to include a `status` field ('active', 'done', 'deleted').
-- Modified `getCards` action to only fetch 'active' cards.
 - Created `updateCardStatus` server action to set 'done' or 'deleted' status.
 - Refactored card display into client components: `CardList.js` (manages local state) and `CardItem.js` (handles swipe logic).
 - Implemented swipe left (delete) and swipe right (done) gestures using `useSwipeable`.
@@ -70,7 +78,7 @@
 - Successfully deployed v0.3.0 to Vercel production.
 ## Latest Development (v0.2.0)
 
-### 2025-04-13: Input Field and Card Display
+### 2025-04-13T06:34:00.000Z: Input Field and Card Display // Keeping original estimate
 - Installed Mongoose for database interaction.
 - Created MongoDB connection utility (`lib/db.js`).
 - Implemented server actions (`createCard`, `getCards`) with error handling and revalidation.
@@ -80,10 +88,10 @@
 - Successfully deployed v0.2.0 to Vercel production.
 ## Latest Development (v0.1.0)
 
-### 2025-04-12: Initial Implementation
+
+### 2025-04-12T08:48:00.000Z: Initial Implementation // Keeping original estimate
 - Created basic input field functionality
 - Implemented MongoDB integration
-- Added card display functionality
 - Deployed to Vercel
 
 ### Technical Implementation Details
@@ -99,11 +107,11 @@
 - Production deployment
 - Basic CSS styling and dark mode support
 - Swipe left/right to mark cards as deleted/done. (Removed in v0.5.0)
-- Cards move between 'Deleted', 'Active', and 'Done' columns via drag-and-drop.
 - Cards can be reliably reordered within their columns, and the order persists.
 - Optimistic UI updates for drag actions.
 ### Next Steps
 - Add input animations
+- Enable search functionality
 - Enable search functionality
 
 ## Project Status

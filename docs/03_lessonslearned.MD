@@ -19,7 +19,7 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
-## 2025-04-13: Drag-and-Drop Debugging & Library Switch (v0.8.0)
+## 2025-04-13T10:43:42.534Z: Drag-and-Drop Debugging & Library Switch (v0.8.0)
 
 ### Challenge: Non-Functional Drag-and-Drop Despite Successful Builds
 **Issue**: The `@dnd-kit` implementation (v0.5.0-v0.7.0) built successfully locally and deployed, but drag-and-drop did not work functionally in the browser. Client-side exceptions occurred during hydration, and despite fixes, runtime logic errors persisted.
@@ -42,13 +42,9 @@ Must always reference and stay in sync with the following documents:
 
 ---
 
-## 2025-04-13: Persistent Reordering (v0.7.0)
+## 2025-04-13T07:37:00.000Z: Persistent Reordering (v0.7.0)
+
 ### Persisting Order with `bulkWrite`
-**Issue**: Efficiently saving the new order of multiple cards after a drag-and-drop reorder within a column. Updating each card individually would be inefficient.
-**Solution**:
-1.  Added an `order` field (Number) to the Mongoose schema.
-2.  Created a new server action `updateCardsOrder`.
-3.  Inside this action, constructed an array of `updateOne` operations based on the client-provided list of ordered card IDs and their new indices (`order`).
 4.  Used `CardModel.bulkWrite(bulkOps)` to execute all updates in a single database command.
 5.  In `KanbanBoard.js`, after visually reordering using `arrayMove`, mapped the new list to create the `orderUpdates` array (`[{ id, order: index }]`) and called `updateCardsOrder`.
 **Lesson**: For batch updates like saving the order of a list, Mongoose's `bulkWrite` is significantly more performant than multiple individual `findByIdAndUpdate` calls. Map the client-side array to the required `bulkWrite` operation format.
@@ -60,7 +56,7 @@ Must always reference and stay in sync with the following documents:
 
 ---
 
-## 2025-04-13: Client-Side Reordering (v0.6.0)
+## 2025-04-13T07:32:00.000Z: Client-Side Reordering (v0.6.0)
 
 ### Handling Intra-Column Reordering with `@dnd-kit`
 **Issue**: Differentiating between dropping a card into a different column vs. dropping it within the same column to reorder.
@@ -75,7 +71,7 @@ Must always reference and stay in sync with the following documents:
 
 ---
 
-## 2025-04-13: Drag-and-Drop Implementation (v0.5.0)
+## 2025-04-13T07:23:00.000Z: Drag-and-Drop Implementation (@dnd-kit Attempt) (v0.5.0)
 
 ### Library Integration: `@dnd-kit`
 **Observation**: Integrating `@dnd-kit` requires understanding its core concepts: `DndContext` for overall setup, `sensors` for input methods, `useSortable` for individual items, and `useDroppable` for drop targets (columns). `SortableContext` is needed within droppable areas to manage sortable items.
@@ -96,7 +92,7 @@ Must always reference and stay in sync with the following documents:
 
 ---
 
-## 2025-04-13: Kanban Layout Implementation (v0.4.0)
+## 2025-04-13T07:13:00.000Z: Kanban Layout Implementation (v0.4.0)
 
 ### Challenge: Managing Multiple Client-Side States from Server Data
 **Issue**: Needed to display cards in three distinct columns ('Deleted', 'Active', 'Done') based on their status, manage moves between these columns client-side after server actions, using data initially fetched on the server.
@@ -113,7 +109,7 @@ Must always reference and stay in sync with the following documents:
 
 ---
 
-## 2025-04-13: Swipe Action Implementation (v0.3.0)
+## 2025-04-13T06:57:00.000Z: Swipe Action Implementation (v0.3.0)
 
 ### Challenge: Client-Side State Management for Server Data
 **Issue**: Needed to implement swipe gestures and optimistic UI updates (removing a card visually before server confirmation) for data initially fetched on the server.
@@ -135,7 +131,7 @@ Must always reference and stay in sync with the following documents:
 
 ---
 
-## 2025-04-13: Core Functionality Implementation (v0.2.0)
+## 2025-04-13T06:34:00.000Z: Core Functionality Implementation (v0.2.0)
 
 ### Challenge: Server Actions and Client Components
 **Issue**: Managing state updates and error feedback between client components (`Input.js`) and server actions (`createCard`).
@@ -158,7 +154,7 @@ Must always reference and stay in sync with the following documents:
 
 ---
 
-## 2025-04-12: Initial Setup and Deployment
+## 2025-04-12T08:48:00.000Z: Initial Setup and Deployment (v0.1.0)
 
 ### Challenge: Next.js Build Configuration
 **Issue**: Initial Vercel deployment failed due to TypeScript and ESLint configurations.
