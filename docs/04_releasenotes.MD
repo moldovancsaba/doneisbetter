@@ -1,5 +1,23 @@
 # Release Notes
 
+## v0.5.0 - Drag-and-Drop Kanban Board (2025-04-13)
+
+### Features
+- Replaced swipe gestures with drag-and-drop functionality for moving cards between columns.
+- Integrated `@dnd-kit/core`, `@dnd-kit/sortable`, and `@dnd-kit/utilities` libraries.
+- Updated `KanbanBoard.js` to use `DndContext` and handle `onDragEnd` events.
+- Updated `Column.js` to act as a `droppable` area and provide `SortableContext`.
+- Updated `CardItem.js` to use `useSortable` hook, removing swipe logic.
+- Modified `updateCardStatus` server action to allow moving cards back to 'active' or any other valid status.
+- Implemented optimistic updates for drag-and-drop actions (card moves visually immediately).
+- Added basic error handling and visual reversal attempt if server update fails after optimistic move.
+- Added CSS styles for draggable items and dragging state.
+
+### Technical Details
+- Utilized `@dnd-kit` sensors (Pointer, Keyboard) for interaction.
+- State management for columns handled within `KanbanBoard.js`.
+- `handleDragEnd` logic determines source/destination columns and triggers server action + optimistic UI update.
+
 ## v0.4.0 - Kanban Board Layout (2025-04-13)
 
 ### Features

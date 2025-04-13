@@ -19,6 +19,27 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
+## 2025-04-13: Drag-and-Drop Implementation (v0.5.0)
+
+### Library Integration: `@dnd-kit`
+**Observation**: Integrating `@dnd-kit` requires understanding its core concepts: `DndContext` for overall setup, `sensors` for input methods, `useSortable` for individual items, and `useDroppable` for drop targets (columns). `SortableContext` is needed within droppable areas to manage sortable items.
+**Solution**:
+1. Wrapped the entire board in `DndContext` in `KanbanBoard.js`.
+2. Used `useDroppable` in `Column.js` and passed its `id` to both `useDroppable` and `SortableContext`.
+3. Used `useSortable` in `CardItem.js` with `card.id`.
+4. Applied `transform`, `transition`, `listeners`, and `attributes` from `useSortable` to the `CardItem`'s wrapper div.
+**Lesson**: `@dnd-kit` provides powerful primitives, but correct setup involves coordinating context providers (`DndContext`, `SortableContext`) and hooks (`useSortable`, `useDroppable`) across parent and child components. Carefully passing unique IDs is crucial.
+
+### State Management for Drag-and-Drop
+**Issue**: Handling both the optimistic UI update (moving the card visually immediately) and the asynchronous server action call, including potential failures and rollbacks.
+**Solution**:
+1. The `onDragEnd` handler in `KanbanBoard.js` performs the optimistic state update first (removing from the old list, adding to the new list).
+2. It then calls the `updateCardStatus` server action asynchronously.
+3. A basic `handleStatusUpdateReversal` function was added to attempt moving the card back visually if the server call fails (triggered in `.then()` error block or `.catch()`).
+**Lesson**: Optimistic updates with drag-and-drop require careful state management. The client state changes first, then the server is notified. Implementing robust reversal logic for server failures is complex and needs careful consideration to avoid race conditions or inconsistent UI states, especially if items can be reordered within columns (though not implemented here).
+
+---
+
 ## 2025-04-13: Kanban Layout Implementation (v0.4.0)
 
 ### Challenge: Managing Multiple Client-Side States from Server Data

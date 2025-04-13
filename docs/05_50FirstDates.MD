@@ -1,10 +1,23 @@
 # Done Is Better Development Diary - 50 First Dates
 
-**Current State**: 🟢 Kanban Board Layout with Swipe-to-Move Implemented.
+**Current State**: 🟢 Drag-and-Drop Kanban Board Implemented.
 **Last Updated**: 2025-04-13
-**Deployment**: https://doneisbetter-1hcbxr4x7-narimato.vercel.app
-**Version**: v0.4.0
+**Deployment**: https://doneisbetter-kqr4i2fxb-narimato.vercel.app
+**Version**: v0.5.0
 
+## Latest Development (v0.5.0)
+
+### 2025-04-13: Drag-and-Drop Implementation
+- Installed `@dnd-kit` core, sortable, and utilities packages.
+- Replaced swipe functionality (`react-swipeable`) with drag-and-drop.
+- Configured `DndContext` in `KanbanBoard.js` with Pointer and Keyboard sensors.
+- Implemented `handleDragEnd` logic in `KanbanBoard.js` for optimistic state updates and triggering the `updateCardStatus` server action.
+- Modified `updateCardStatus` action to allow moving cards back to 'active' or other statuses.
+- Made `Column.js` a droppable target using `useDroppable` and context provider using `SortableContext`.
+- Made `CardItem.js` draggable using `useSortable`, removing all swipe-related code.
+- Added CSS for visual feedback during drag operations.
+- Implemented basic error handling for failed optimistic updates (attempting to revert visual state).
+- Successfully deployed v0.5.0 to Vercel production.
 ## Latest Development (v0.4.0)
 
 ### 2025-04-13: Kanban Board Layout
@@ -58,7 +71,7 @@
 - Production deployment
 - Basic CSS styling and dark mode support
 - Swipe left/right to mark cards as deleted/done.
-- Cards move between 'Deleted', 'Active', and 'Done' columns based on swipe actions.
+- Cards move between 'Deleted', 'Active', and 'Done' columns via drag-and-drop.
 - Optimistic UI updates for swipe actions.
 ### Next Steps
 - Add input animations
@@ -80,7 +93,7 @@
 ### Known Issues
 - Basic styling only
 - Optimistic updates lack robust error recovery (if server action fails after UI update).
-- Currently no way to move cards back from 'Deleted' or 'Done' columns via UI.
+- Reversal logic for failed optimistic updates is basic and might need refinement.
 - Simple CRUD operations
 
 ### Future Considerations
