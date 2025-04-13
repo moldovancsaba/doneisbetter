@@ -1,10 +1,20 @@
 # Done Is Better Development Diary - 50 First Dates
 
-**Current State**: 🟢 Client-side Reordering in Columns Implemented.
+**Current State**: 🟢 Persistent Reordering in Columns Implemented.
 **Last Updated**: 2025-04-13
-**Deployment**: https://doneisbetter-rfuj3dwjs-narimato.vercel.app
-**Version**: v0.6.0
+**Deployment**: https://doneisbetter-8elimlyoy-narimato.vercel.app
+**Version**: v0.7.0
 
+## Latest Development (v0.7.0)
+
+### 2025-04-13: Persistent Reordering
+- Added an `order` field to the `Card` schema in `actions.js`.
+- Modified `createCard` to assign a default order (negative timestamp).
+- Updated `getCards` to sort by the `order` field.
+- Created a new server action `updateCardsOrder` that accepts an array of `{id, order}` updates and uses `bulkWrite` for database persistence.
+- Modified the `handleDragEnd` function in `KanbanBoard.js` to call `updateCardsOrder` after successfully reordering items visually within the same column.
+- Added error handling to revert the visual order change if the database update fails.
+- Successfully deployed v0.7.0 to Vercel production.
 ## Latest Development (v0.6.0)
 
 ### 2025-04-13: Client-Side Reordering
@@ -77,14 +87,13 @@
 - Newest-to-oldest display
 - Production deployment
 - Basic CSS styling and dark mode support
-- Swipe left/right to mark cards as deleted/done.
+- Swipe left/right to mark cards as deleted/done. (Removed in v0.5.0)
 - Cards move between 'Deleted', 'Active', and 'Done' columns via drag-and-drop.
-- Cards can be visually reordered within their columns (client-side only).
-- Optimistic UI updates for swipe actions.
+- Cards can be reordered within their columns, and the order persists.
+- Optimistic UI updates for drag actions.
 ### Next Steps
 - Add input animations
 - Implement dark mode
-- Add card editing
 - Enable search functionality
 
 ## Project Status
@@ -101,12 +110,10 @@
 ### Known Issues
 - Basic styling only
 - Optimistic updates lack robust error recovery (if server action fails after UI update).
-- Reordering within columns is not persistent.
 - Reversal logic for failed optimistic updates is basic and might need refinement.
 - Simple CRUD operations
 
 ### Future Considerations
-- User authentication
 - User authentication
 - Advanced card features
 - Search functionality
