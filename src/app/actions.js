@@ -11,7 +11,13 @@ if (!mongoose.models.Card) {
       type: String,
       required: [true, 'Card content cannot be empty.'],
       trim: true,
-      maxlength: [500, 'Content cannot exceed 500 characters.'] // Example validation
+      maxlength: [500, 'Content cannot exceed 500 characters.']
+    },
+    // Add status field with default 'active'
+    status: {
+      type: String,
+      enum: ['active', 'done', 'deleted'], // Allowed statuses
+      default: 'active'
     },
     createdAt: {
       type: Date,
@@ -31,8 +37,9 @@ export async function createCard(data) {
 
   try {
     await connectDB();
+    // Status defaults to 'active' via schema
     await CardModel.create({ content: data.content.trim() });
-    revalidatePath('/'); // Trigger data refresh on the page
+    revalidatePath('/'); // Trigger data refresh
     return { success: true };
   } catch (error) {
     console.error('Error creating card:', error);
@@ -50,11 +57,13 @@ export async function createCard(data) {
 export async function getCards() {
   try {
     await connectDB();
-    const cards = await CardModel.find().sort({ createdAt: -1 }).lean(); // Use .lean() for plain JS objects
+    // Filter by status: 'active'
+    const cards = await CardModel.find({ status: 'active' }).sort({ createdAt: -1 }).lean();
     // Convert Mongoose documents to plain objects including converting _id and Date
     return cards.map(card => ({
         id: card._id.toString(),
         content: card.content,
+        status: card.status, // Include status if needed later, though not strictly necessary if filtering
         // Ensure createdAt is serializable (ISO string is safe)
         createdAt: card.createdAt.toISOString()
     }));
@@ -65,3 +74,29 @@ export async function getCards() {
   }
 }
 
+// New Server Action to Update Card Status
+export async function updateCardStatus(cardId, newStatus) {
+  // Validate input
+  if (!cardId || !['done', 'deleted'].includes(newStatus)) {
+    return { success: false, error: 'Invalid input provided.' };
+  }
+
+  try {
+    await connectDB();
+    const updatedCard = await CardModel.findByIdAndUpdate(
+        cardId,
+        { status: newStatus },
+        { new: true } // Return the updated document
+    );
+
+    if (!updatedCard) {
+        return { success: false, error: 'Card not found.' };
+    }
+
+    revalidatePath('/'); // Revalidate to update the list
+    return { success: true };
+  } catch (error) {
+    console.error(`Error updating card status to ${newStatus}:`, error);
+    return { success: false, error: 'Failed to update card status.' };
+  }
+}

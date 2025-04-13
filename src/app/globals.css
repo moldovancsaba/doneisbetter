@@ -151,8 +151,42 @@ h1 {
 
 /* Border utilities */
 .border {
-    border-width: 1px;
+    border-radius: 0.5rem; /* 8px */
 }
+
+/* Add styles for CardItem wrapper and swipe effects */
+.card-item-wrapper {
+  position: relative; /* Needed for positioning effects if added later */
+  overflow: hidden; /* Hide parts of the card sliding out */
+  border-radius: 0.5rem; /* Match card radius for background effect */
+  transition: background-color 0.1s ease-out; /* Smooth background color change */
+}
+
+/* Target the card *inside* the wrapper for visual effects */
+.card-item-wrapper .card {
+  /* Transition for smooth snap-back. No transition during active drag (handled by JS) */
+  transition: transform 0.2s ease-out;
+   /* Ensure original card styles apply */
+   background-color: #ffffff;
+   /* border, padding, shadow etc., are inherited from .card */
+}
+
+/* Dark mode adjustments for the card inside the wrapper */
+@media (prefers-color-scheme: dark) {
+  .card-item-wrapper .card {
+    background-color: #1f2937; /* Adjust if needed */
+  }
+}
+
+
+/* Style for when the card status is being updated */
+.card-item-wrapper.updating .card {
+  opacity: 0.6; /* Make card semi-transparent */
+  cursor: progress; /* Indicate activity */
+}
+
+/* Ensure touch-action allows vertical scrolling on the swipeable element */
+/* Applied inline: style={{ touchAction: 'pan-y' }} */
 .border-dashed {
     border-style: dashed;
 }
