@@ -3,8 +3,9 @@
 A minimalist text card application with MongoDB integration.
 
 **Status**: 🟢 Working Drag-and-Drop Kanban Implemented
-**Version**: v0.8.1
-**Live**: [doneisbetter-gqvjmpqp0-narimato.vercel.app](https://doneisbetter-gqvjmpqp0-narimato.vercel.app)
+**Version**: v0.8.2
+**Live**: [doneisbetter-aeidmp1k2-narimato.vercel.app](https://doneisbetter-aeidmp1k2-narimato.vercel.app)
+
 ## Quick Start
 
 ```bash
@@ -13,20 +14,34 @@ cd doneisbetter
 npm install
 npm run dev
 ```
-- `docs/` - Project documentation
-  - [01_roadmap.MD](docs/01_roadmap.MD) - Project roadmap
-  - [02_development.MD](docs/02_development.MD) - Development details
-  - [03_lessonslearned.MD](docs/03_lessonslearned.MD) - Implementation insights
-  - [04_releasenotes.MD](docs/04_releasenotes.MD) - Version history
-  - [05_50FirstDates.MD](docs/05_50FirstDates.MD) - Development diary
-  - [06_technology.MD](docs/06_technology.MD) - Tech stack details
+
+## Project Structure
+
+- `src/app/`: Next.js application core
+  - `layout.js` - Root layout
+  - `page.js` - Main application entry point
+  - `actions.js` - Server Actions for database operations
+  - `globals.css` - Global styles
+- `src/components/`: React components
+    - `KanbanBoard.js` - Main board logic (Client)
+    - `Column.js` - Column rendering (Client)
+    - `CardItem.js` - Individual card item (Client)
+    - `Input.js` - New card input (Client)
+- `src/lib/`: Utility functions
+    - `db.js` - MongoDB connection helper
+- `docs/`: Project documentation (Roadmap, Dev Diary, Release Notes, etc.)
+- `public/`: Static assets
+- `package.json`: Dependencies and scripts
+- `next.config.js`: Next.js configuration
+- `postcss.config.js`: PostCSS configuration
 
 ## Tech Stack
 
-- Next.js 15.3.0
+- Next.js 15.3.0 (App Router)
 - React 19
-- MongoDB
-- CSS Modules
+- MongoDB with Mongoose
+- `@hello-pangea/dnd` for Drag-and-Drop
+- CSS Modules / Global CSS
 - Vercel Deployment
 - Git Version Control
 
@@ -45,15 +60,104 @@ npm run dev
 - [Autopilot Consent](docs/09_Autopilot_Consent_Project_Access.MD)
 - [AI Knowledge Rules](docs/10_AI_Knowledge_Rules.MD)
 - [AI Truthfulness](docs/11_AI_Truthfulness_and_Verification.MD)
+- [Execution Protocol](docs/12_AI_Execution_Protocol.MD)
+
 ## Features
 
-- Single line input field with focus states
-- Click or Escape to cancel input
-- Enter to submit new cards
-- MongoDB storage
-- Newest to oldest display order
-- Drag-and-Drop cards between 'Deleted', 'Active', and 'Done' columns.
-- Reliable persistent reordering of cards within columns.
+- Single line input field with focus states.
+- Enter to submit new cards.
+- Cards stored persistently in MongoDB.
 - 3-column Kanban layout ('Deleted', 'Active', 'Done').
+- Drag-and-Drop cards between columns (updates status persistently).
+- Drag-and-Drop cards within columns to reorder (updates order persistently).
+- Timestamps displayed in UTC ISO 8601 format (`YYYY-MM-DDTHH:mm:ss.sssZ`).
+- Basic Dark Mode support.
 
 ## Known Limitations
+
+- Requires MongoDB connection string in `.env.local` or Vercel environment variables.
+- Basic styling (functional, not heavily designed).
+- Reversal logic for failed optimistic updates is basic.
+- Order persistence is not updated when moving cards *between* columns (only status is updated).
+
+# Done Is Better ✍️
+
+A minimalist text card application with MongoDB integration.
+
+**Status**: 🟢 Working Drag-and-Drop Kanban Implemented
+**Version**: v0.8.2
+**Live**: [doneisbetter-aeidmp1k2-narimato.vercel.app](https://doneisbetter-aeidmp1k2-narimato.vercel.app)
+
+## Quick Start
+
+```bash
+git clone https://github.com/moldovancsaba/doneisbetter.git
+cd doneisbetter
+npm install
+npm run dev
+```
+
+## Project Structure
+
+- `src/app/`: Next.js application core
+  - `layout.js` - Root layout
+  - `page.js` - Main application entry point
+  - `actions.js` - Server Actions for database operations
+  - `globals.css` - Global styles
+- `src/components/`: React components
+    - `KanbanBoard.js` - Main board logic (Client)
+    - `Column.js` - Column rendering (Client)
+    - `CardItem.js` - Individual card item (Client)
+    - `Input.js` - New card input (Client)
+- `src/lib/`: Utility functions
+    - `db.js` - MongoDB connection helper
+- `docs/`: Project documentation (Roadmap, Dev Diary, Release Notes, etc.)
+- `public/`: Static assets
+- `package.json`: Dependencies and scripts
+- `next.config.js`: Next.js configuration
+- `postcss.config.js`: PostCSS configuration
+
+## Tech Stack
+
+- Next.js 15.3.0 (App Router)
+- React 19
+- MongoDB with Mongoose
+- `@hello-pangea/dnd` for Drag-and-Drop
+- CSS Modules / Global CSS
+- Vercel Deployment
+- Git Version Control
+
+## Documentation
+
+### Project Documentation
+- [Development Timeline](docs/05_50FirstDates.MD)
+- [Release History](docs/04_releasenotes.MD)
+- [Implementation Insights](docs/03_lessonslearned.MD)
+- [Project Roadmap](docs/01_roadmap.MD)
+- [Technical Details](docs/06_technology.MD)
+
+### AI Development Guidelines
+- [Definition of Done](docs/07_Definition_of_Done_AI_Warp.MD)
+- [One Function Rule](docs/08_One_Function_At_A_Time_Rule.MD)
+- [Autopilot Consent](docs/09_Autopilot_Consent_Project_Access.MD)
+- [AI Knowledge Rules](docs/10_AI_Knowledge_Rules.MD)
+- [AI Truthfulness](docs/11_AI_Truthfulness_and_Verification.MD)
+- [Execution Protocol](docs/12_AI_Execution_Protocol.MD)
+
+## Features
+
+- Single line input field with focus states.
+- Enter to submit new cards.
+- Cards stored persistently in MongoDB.
+- 3-column Kanban layout ('Deleted', 'Active', 'Done').
+- Drag-and-Drop cards between columns (updates status persistently).
+- Drag-and-Drop cards within columns to reorder (updates order persistently).
+- Timestamps displayed in UTC ISO 8601 format (`YYYY-MM-DDTHH:mm:ss.sssZ`).
+- Basic Dark Mode support.
+
+## Known Limitations
+
+- Requires MongoDB connection string in `.env.local` or Vercel environment variables.
+- Basic styling (functional, not heavily designed).
+- Reversal logic for failed optimistic updates is basic.
+- Order persistence is not updated when moving cards *between* columns (only status is updated).

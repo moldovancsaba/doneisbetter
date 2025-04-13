@@ -1,79 +1,164 @@
 # Done Is Better Development Diary - 50 First Dates
 
-**Current State**: 🟢 Working Drag-and-Drop Kanban with Persistence Implemented.
-**Last Updated**: 2025-04-13T11:03:23.917Z
-**Deployment**: https://doneisbetter-gqvjmpqp0-narimato.vercel.app
-**Version**: v0.8.1
+**Current State**: 🟢 Working Drag-and-Drop Kanban with Correct Timestamp Display.
+**Last Updated**: 2025-04-13T11:07:00.000Z
+**Deployment**: https://doneisbetter-aeidmp1k2-narimato.vercel.app
+**Version**: v0.8.2
 
-## Latest Development (v0.8.1)
+## Latest Development (v0.8.2)
 
-### 2025-04-13T11:03:23.917Z: Timestamp Format Verification
-- Verified that `createdAt` timestamps on cards are displayed in UTC ISO 8601 format with milliseconds, matching backend output.
-- Updated all documentation timestamps (Release Notes, Dev Diary, Lessons Learned) to use the consistent ISO 8601 format.
-- Confirmed `CardItem.js` correctly displays the ISO string provided by `actions.js`.
+### 2025-04-13T11:07:00.000Z: Fix Card Timestamp Display
+- Debugged and corrected structural errors in `CardItem.js` that were causing timestamps to display incorrectly (showing locale format instead of the intended raw ISO string).
+- Confirmed the component now correctly renders the full UTC ISO 8601 string (`YYYY-MM-DDTHH:mm:ss.sssZ`).
+- Finalized documentation updates with correct ISO 8601 timestamps.
 
 ## Previous Development History
 
+### 2025-04-13T10:43:42.534Z: Drag-and-Drop Fix (@hello-pangea/dnd) (v0.8.0)
+- Switched from non-functional `@dnd-kit` implementation to `@hello-pangea/dnd`.
+- Refactored `KanbanBoard`, `Column`, `CardItem` components for the new library.
+- Implemented `onDragEnd` logic for inter-column moves (status updates) and intra-column reorders (order updates).
+- Corrected client-side hydration errors.
+- Tested locally and deployed working DnD functionality.
+
 ### 2025-04-13T07:37:00.000Z: Persistent Reordering (v0.7.0)
-**Last Updated**: 2025-04-13T10:54:31.773Z
-**Deployment**: https://doneisbetter-gqvjmpqp0-narimato.vercel.app
-**Version**: v0.8.0
+- Added `order` field to `Card` schema.
+- Updated `createCard` for default order, `getCards` to sort by order.
+- Created `updateCardsOrder` action using `bulkWrite`.
+- Integrated persistence call into `@dnd-kit` `handleDragEnd`.
 
-## Latest Development (v0.8.0)
+### 2025-04-13T07:32:00.000Z: Client-Side Reordering (v0.6.0)
+- Implemented visual-only reordering within columns using `arrayMove` (@dnd-kit).
 
-### 2025-04-13T10:43:42.534Z: Drag-and-Drop Fix (@hello-pangea/dnd)
-- Uninstalled previous `@dnd-kit` libraries due to functional issues despite successful builds.
-- Installed `@hello-pangea/dnd` (React 18+ compatible fork of `react-beautiful-dnd`).
-- Refactored `KanbanBoard.js`, `Column.js`, and `CardItem.js` to use `DragDropContext`, `Droppable`, and `Draggable` components respectively.
-- Re-implemented the `onDragEnd` logic in `KanbanBoard.js` to handle both inter-column moves (status updates) and intra-column reorders (order updates) using the `react-beautiful-dnd` result structure.
-- Corrected client-side hydration issues by ensuring DND context only renders on the client.
-- Thoroughly tested locally to confirm both moving between columns and reordering within columns works correctly and persists.
-- Successfully debugged and resolved previous client-side exceptions.
-- Deployed the working drag-and-drop implementation (v0.8.0) to Vercel production.
+### 2025-04-13T07:23:00.000Z: Drag-and-Drop Implementation (@dnd-kit Attempt) (v0.5.0)
+- Attempted first DnD implementation using `@dnd-kit`. Encountered functional issues and client-side errors.
 
-## Latest Development (v0.7.0)
+### 2025-04-13T07:13:00.000Z: Kanban Board Layout (v0.4.0)
+- Implemented 3-column layout.
+- Refactored card display using `KanbanBoard` and `Column` components.
+- Modified `getCards` to fetch all cards for client-side sorting into columns.
 
-### 2025-04-13T07:37:00.000Z: Persistent Reordering // Keeping original estimate
-- Added an `order` field to the `Card` schema in `actions.js`.
-- Modified `createCard` to assign a default order (negative timestamp).
-- Created a new server action `updateCardsOrder` that accepts an array of `{id, order}` updates and uses `bulkWrite` for database persistence.
-- Modified the `handleDragEnd` function in `KanbanBoard.js` to call `updateCardsOrder` after successfully reordering items visually within the same column.
-- Added error handling to revert the visual order change if the database update fails.
-- Successfully deployed v0.7.0 to Vercel production.
-## Latest Development (v0.6.0)
+### 2025-04-13T06:57:00.000Z: Swipe Actions Implementation (v0.3.0)
+- Added `react-swipeable` for swipe-to-delete/done functionality.
+- Added `status` field to schema and `updateCardStatus` action.
+- Implemented optimistic UI updates.
 
+### 2025-04-13T06:34:00.000Z: Input Field and Card Display (v0.2.0)
+- Implemented core feature: Add card via input, save to DB, display list.
+- Added Mongoose, DB connection utility, `createCard`/`getCards` actions.
 
-### 2025-04-13T07:32:00.000Z: Client-Side Reordering // Keeping original estimate
-- Updated `handleDragEnd` in `KanbanBoard.js` to differentiate between inter-column moves and intra-column reorders.
-- Implemented visual reordering within columns using `arrayMove` from `@dnd-kit/sortable` upon dropping an item within the same column.
-- Successfully deployed v0.6.0 to Vercel production.
-## Latest Development (v0.5.0)
+### 2025-04-12T08:48:00.000Z: Initial Implementation & Setup (v0.1.0)
+- Set up Next.js project (JavaScript, App Router).
+- Resolved initial build/deployment challenges.
+- Established core documentation structure.
 
-### 2025-04-13T07:23:00.000Z: Drag-and-Drop Implementation (@dnd-kit Attempt) // Keeping original estimate
-- Installed `@dnd-kit` core, sortable, and utilities packages.
-- Replaced swipe functionality (`react-swipeable`) with drag-and-drop.
-- Configured `DndContext` in `KanbanBoard.js` with Pointer and Keyboard sensors.
-- Implemented `handleDragEnd` logic in `KanbanBoard.js` for optimistic state updates and triggering the `updateCardStatus` server action.
-- Modified `updateCardStatus` action to allow moving cards back to 'active' or other statuses.
-- Made `Column.js` a droppable target using `useDroppable` and context provider using `SortableContext`.
-- Made `CardItem.js` draggable using `useSortable`, removing all swipe-related code.
-- Added CSS for visual feedback during drag operations.
-- Implemented basic error handling for failed optimistic updates (attempting to revert visual state).
-- Successfully deployed v0.5.0 to Vercel production.
-## Latest Development (v0.4.0)
+## Project Status (as of v0.8.2)
+- Core features (Add, View, Move via DnD, Reorder via DnD) implemented and persistent.
+- Timestamps displayed in correct ISO 8601 format.
+- Basic testing performed locally.
+- Core documentation structure in place and updated.
+- CI/CD via Vercel working.
 
+### Current Architecture
+- Next.js 15.3.0 (App Router)
+- React 19
+- MongoDB / Mongoose
+- `@hello-pangea/dnd`
+- CSS Modules / Global CSS
 
-### 2025-04-13T07:13:00.000Z: Kanban Board Layout // Keeping original estimate
-- Updated `getCards` action to fetch all cards (not just 'active').
-- Created `KanbanBoard.js` client component to manage state for 'Deleted', 'Active', and 'Done' columns.
-- Modified `CardItem.js` to call a new `onStatusUpdate` prop function upon successful swipe action.
-- Updated `page.js` to use `KanbanBoard` instead of `CardList`.
-- Added CSS Grid styles for the 3-column layout.
-- Successfully deployed v0.4.0 to Vercel production.
-## Latest Development (v0.3.0)
+### Known Issues
+- Basic styling only.
+- Optimistic update reversal logic is basic.
+- Order persistence is not updated when moving cards *between* columns (only status is updated).
 
+### Future Considerations
+- User authentication.
+- Card editing functionality.
+- Search/filtering.
+- More robust error handling/feedback.
+- UI/UX refinements.
+- Address order update on inter-column moves.
 
-### 2025-04-13T06:57:00.000Z: Swipe Actions Implementation // Keeping original estimate
+# Done Is Better Development Diary - 50 First Dates
+
+**Current State**: 🟢 Working Drag-and-Drop Kanban with Correct Timestamp Display.
+**Last Updated**: 2025-04-13T11:07:00.000Z
+**Deployment**: https://doneisbetter-aeidmp1k2-narimato.vercel.app
+**Version**: v0.8.2
+
+## Latest Development (v0.8.2)
+
+### 2025-04-13T11:07:00.000Z: Fix Card Timestamp Display
+- Debugged and corrected structural errors in `CardItem.js` that were causing timestamps to display incorrectly (showing locale format instead of the intended raw ISO string).
+- Confirmed the component now correctly renders the full UTC ISO 8601 string (`YYYY-MM-DDTHH:mm:ss.sssZ`).
+- Updated documentation timestamps throughout project files to ISO 8601 format.
+
+## Previous Development History
+
+### 2025-04-13T10:43:42.534Z: Drag-and-Drop Fix (@hello-pangea/dnd) (v0.8.0)
+- Switched from non-functional `@dnd-kit` implementation to `@hello-pangea/dnd`.
+- Refactored `KanbanBoard`, `Column`, `CardItem` components for the new library.
+- Implemented `onDragEnd` logic for inter-column moves (status updates) and intra-column reorders (order updates).
+- Corrected client-side hydration errors.
+- Tested locally and deployed working DnD functionality.
+
+### 2025-04-13T07:37:00.000Z: Persistent Reordering (v0.7.0)
+- Added `order` field to `Card` schema.
+- Updated `createCard` for default order, `getCards` to sort by order.
+- Created `updateCardsOrder` action using `bulkWrite`.
+- Integrated persistence call into `@dnd-kit` `handleDragEnd`.
+
+### 2025-04-13T07:32:00.000Z: Client-Side Reordering (v0.6.0)
+- Implemented visual-only reordering within columns using `arrayMove` (@dnd-kit).
+
+### 2025-04-13T07:23:00.000Z: Drag-and-Drop Implementation (@dnd-kit Attempt) (v0.5.0)
+- Attempted first DnD implementation using `@dnd-kit`. Encountered functional issues and client-side errors.
+
+### 2025-04-13T07:13:00.000Z: Kanban Board Layout (v0.4.0)
+- Implemented 3-column layout.
+- Refactored card display using `KanbanBoard` and `Column` components.
+- Modified `getCards` to fetch all cards for client-side sorting into columns.
+
+### 2025-04-13T06:57:00.000Z: Swipe Actions Implementation (v0.3.0)
+- Added `react-swipeable` for swipe-to-delete/done functionality.
+- Added `status` field to schema and `updateCardStatus` action.
+- Implemented optimistic UI updates.
+
+### 2025-04-13T06:34:00.000Z: Input Field and Card Display (v0.2.0)
+- Implemented core feature: Add card via input, save to DB, display list.
+- Added Mongoose, DB connection utility, `createCard`/`getCards` actions.
+
+### 2025-04-12T08:48:00.000Z: Initial Implementation & Setup (v0.1.0)
+- Set up Next.js project (JavaScript, App Router).
+- Resolved initial build/deployment challenges.
+- Established core documentation structure.
+
+## Project Status (as of v0.8.2)
+- Core features (Add, View, Move via DnD, Reorder via DnD) implemented and persistent.
+- Timestamps displayed in correct ISO 8601 format.
+- Basic testing performed locally.
+- Core documentation structure in place and updated.
+- CI/CD via Vercel working.
+
+### Current Architecture
+- Next.js 15.3.0 (App Router)
+- React 19
+- MongoDB / Mongoose
+- `@hello-pangea/dnd`
+- CSS Modules / Global CSS
+
+### Known Issues
+- Basic styling only.
+- Optimistic update reversal logic is basic.
+- Order persistence is not updated when moving cards *between* columns (only status is updated).
+
+### Future Considerations
+- User authentication.
+- Card editing functionality.
+- Search/filtering.
+- More robust error handling/feedback.
+- UI/UX refinements.
+- Address order update on inter-column moves.
 - Added `react-swipeable` dependency.
 - Updated `Card` schema in `actions.js` to include a `status` field ('active', 'done', 'deleted').
 - Created `updateCardStatus` server action to set 'done' or 'deleted' status.
@@ -118,8 +203,8 @@
 ### Next Steps
 - Add input animations
 - Enable search functionality
-- Enable search functionality
 
+## Project Status
 ## Project Status
 - Core features implemented
 - Basic testing in place

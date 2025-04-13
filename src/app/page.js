@@ -1,42 +1,39 @@
+// src/app/page.js
 import Input from '@/components/Input';
-// MODIFIED: Import KanbanBoard instead of CardList
 import KanbanBoard from '@/components/KanbanBoard';
 import { createCard, getCards } from '@/app/actions';
-import { Suspense } from 'react'; // Keep Suspense if KanbanBoard itself might be heavy initially
 
 export default async function Home() {
   // Fetch ALL cards now on the server
-  // Add basic error handling for the initial fetch
   let allCards = [];
   try {
       allCards = await getCards();
   } catch(error) {
       console.error("Failed to fetch initial cards:", error);
-      // Optionally render an error message on the page
+      // You could potentially pass an error state to KanbanBoard or display a message here
   }
 
-
   return (
+    // Single main container
     <main className="main-container">
-      {/* Content wrapper might need adjustment for 3 columns */}
-      <div className="content-wrapper-kanban"> {/* Using a new class potentially */}
-        <h1 className="text-2xl font-bold text-center mb-6">Done Is Better</h1>
+      {/* Single content wrapper */}
+      <div className="content-wrapper-kanban">
 
-        {/* Input component remains the same */}
-        <Input onSubmit={createCard} />
+        {/* Title using custom CSS classes */}
+        <h1 className="page-title">
+           <span className="title-bold">#DONE</span>
+           <span className="title-light">ISBETTER</span>
+        </h1>
 
-        {/* MODIFIED: Render KanbanBoard, passing all fetched cards */}
-        {/* Add margin top for separation */}
-        <div className="mt-8">
-           {/* Wrap KanbanBoard in Suspense if it might suspend during initial render */}
-           <Suspense fallback={<div className="text-center">Loading board...</div>}>
-              <KanbanBoard initialCards={allCards} />
-           </Suspense>
+        {/* Input Area using custom CSS class */}
+        <div className="input-wrapper">
+            <Input onSubmit={createCard} />
         </div>
+        <KanbanBoard initialCards={allCards} />
 
+      {/* Close content wrapper */}
       </div>
+    {/* Close main container */}
     </main>
-  );
-}
-
-// The CardItem and direct rendering logic have been moved to CardList.js and CardItem.js
+  ); // End of return statement
+} // End of Home component function
