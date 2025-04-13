@@ -57,13 +57,13 @@ export async function createCard(data) {
 export async function getCards() {
   try {
     await connectDB();
-    // Filter by status: 'active'
-    const cards = await CardModel.find({ status: 'active' }).sort({ createdAt: -1 }).lean();
+    // Remove the { status: 'active' } filter - Fetch all cards
+    const cards = await CardModel.find({}).sort({ createdAt: -1 }).lean(); // Fetch all
     // Convert Mongoose documents to plain objects including converting _id and Date
     return cards.map(card => ({
         id: card._id.toString(),
         content: card.content,
-        status: card.status, // Include status if needed later, though not strictly necessary if filtering
+        status: card.status, // Now status is important for client-side filtering
         // Ensure createdAt is serializable (ISO string is safe)
         createdAt: card.createdAt.toISOString()
     }));

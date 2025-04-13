@@ -1,35 +1,38 @@
-// Remove Card rendering logic from here, import CardList instead
 import Input from '@/components/Input';
-import CardList from '@/components/CardList'; // Import the new client component
+// MODIFIED: Import KanbanBoard instead of CardList
+import KanbanBoard from '@/components/KanbanBoard';
 import { createCard, getCards } from '@/app/actions';
-import { Suspense } from 'react';
+import { Suspense } from 'react'; // Keep Suspense if KanbanBoard itself might be heavy initially
 
 export default async function Home() {
-  // Fetch initial 'active' cards on the server when the page loads
-  // Note: Error handling for getCards could be added here if needed
-  const initialCards = await getCards();
+  // Fetch ALL cards now on the server
+  // Add basic error handling for the initial fetch
+  let allCards = [];
+  try {
+      allCards = await getCards();
+  } catch(error) {
+      console.error("Failed to fetch initial cards:", error);
+      // Optionally render an error message on the page
+  }
+
 
   return (
     <main className="main-container">
-      <div className="content-wrapper">
+      {/* Content wrapper might need adjustment for 3 columns */}
+      <div className="content-wrapper-kanban"> {/* Using a new class potentially */}
         <h1 className="text-2xl font-bold text-center mb-6">Done Is Better</h1>
 
-        {/* Input component for adding new cards */}
+        {/* Input component remains the same */}
         <Input onSubmit={createCard} />
 
-        {/* CardList is now a client component managing its state */}
-        {/* We pass initialCards fetched on the server */}
-        {/* Suspense isn't strictly necessary here anymore as CardList handles its own state,
-            but can be kept for initial load indication if desired or removed.
-            Let's keep it simple and remove it for now as CardList handles empty state.
-         */}
-         {/*
-         <Suspense fallback={<div className="text-center mt-8">Loading cards...</div>}>
-         */}
-           <CardList initialCards={initialCards} />
-         {/*
-         </Suspense>
-         */}
+        {/* MODIFIED: Render KanbanBoard, passing all fetched cards */}
+        {/* Add margin top for separation */}
+        <div className="mt-8">
+           {/* Wrap KanbanBoard in Suspense if it might suspend during initial render */}
+           <Suspense fallback={<div className="text-center">Loading board...</div>}>
+              <KanbanBoard initialCards={allCards} />
+           </Suspense>
+        </div>
 
       </div>
     </main>

@@ -8,8 +8,8 @@ import { updateCardStatus } from '@/app/actions'; // Adjust path if necessary
 const SWIPE_THRESHOLD = 50; // Minimum horizontal distance in pixels to trigger an action
 const MAX_OPACITY = 0.7;    // Maximum background opacity during swipe visual feedback
 
-export default function CardItem({ card, onSwipeComplete }) {
-  // State to track the visual swipe effect (distance, direction, opacity)
+// MODIFIED: Rename prop from onSwipeComplete to onStatusUpdate
+export default function CardItem({ card, onStatusUpdate }) {
   const [swipeState, setSwipeState] = useState({ x: 0, dir: null, opacity: 0 });
   // State to track if the update server action is in progress
   const [isUpdating, setIsUpdating] = useState(false);
@@ -33,10 +33,11 @@ export default function CardItem({ card, onSwipeComplete }) {
       // If the server action confirms success
       if (result.success) {
         console.log(`Successfully updated card ${card.id} to ${newStatus}`);
-        onSwipeComplete(card.id); // Notify the parent component to remove the card from the list
-        // No need to reset isUpdating here, as the component will unmount
+        // MODIFIED: Call onStatusUpdate with cardId and the new status
+        onStatusUpdate(card.id, newStatus);
+        // If the action was successful, the KanbanBoard will handle removing/moving the item.
+        // No need to reset state here as the component might unmount or be moved.
       } else {
-        // If the server action returns an error
         console.error(`Failed to update card ${card.id}:`, result.error);
         setError(result.error || 'Failed to update status.'); // Show error message
         setSwipeState({ x: 0, dir: null, opacity: 0 }); // Reset visual swipe state on error
