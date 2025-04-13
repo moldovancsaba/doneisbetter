@@ -2,10 +2,9 @@
 
 A minimalist text card application with MongoDB integration.
 
-**Status**: 🟢 Foundation Complete  
-**Version**: v0.1.0  
-**Live**: [doneisbetter-6o3vm7ng0-narimato.vercel.app](https://doneisbetter-6o3vm7ng0-narimato.vercel.app)
-
+**Status**: 🟢 Core Functionality Complete
+**Version**: v0.2.0
+**Live**: [doneisbetter-n77pwfkpk-narimato.vercel.app](https://doneisbetter-n77pwfkpk-narimato.vercel.app)
 ## Quick Start
 
 ```bash

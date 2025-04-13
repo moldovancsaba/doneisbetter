@@ -19,6 +19,29 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
+## 2025-04-13: Core Functionality Implementation (v0.2.0)
+
+### Challenge: Server Actions and Client Components
+**Issue**: Managing state updates and error feedback between client components (`Input.js`) and server actions (`createCard`).
+**Solution**:
+1.  Server action (`createCard`) returns a serializable object `{ success: boolean, error?: string }`.
+2.  Client component (`Input.js`) uses `await` to call the server action and checks the `result` object.
+3.  Client component sets local state (`error`, `isLoading`) based on the server action's response.
+4.  Used `revalidatePath('/')` in the server action to trigger data refresh on the page after successful creation.
+**Lesson**: Server actions should return clear, serializable status/error information for client components to act upon. `revalidatePath` is crucial for updating server-rendered data after mutations.
+
+### Challenge: MongoDB Connection Management
+**Issue**: Ensuring the database connection is established reliably without redundant connections in a serverless context.
+**Solution**: Implemented a connection utility (`lib/db.js`) that checks `mongoose.connection.readyState` before attempting a new connection. Included basic error handling and logging.
+**Lesson**: A shared connection utility with state checking is essential for database interactions in serverless functions/actions.
+
+### Best Practice: Data Serialization
+**Observation**: Data fetched directly from Mongoose (`getCards`) needs to be serialized before being passed from server components/actions to client components. Dates and ObjectIds are common issues.
+**Solution**: Used `.lean()` in the Mongoose query and explicitly converted `_id` to string and `createdAt` to ISO string format before returning from `getCards`.
+**Lesson**: Always ensure data passed between server and client boundaries is serializable (plain objects, strings, numbers, etc.). Convert complex types like ObjectIds and Dates appropriately.
+
+---
+
 ## 2025-04-12: Initial Setup and Deployment
 
 ### Challenge: Next.js Build Configuration

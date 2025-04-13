@@ -1,5 +1,20 @@
 # Release Notes
 
+## v0.2.0 - Core Functionality (2025-04-13)
+
+### Features
+- Implemented input field for adding new cards.
+- Added functionality to save cards to MongoDB via server actions.
+- Display saved cards below the input, sorted newest first.
+- Included basic styling and dark mode support via CSS.
+- Added error handling for database operations and form submission.
+
+### Technical Details
+- Created `lib/db.js` for reusable MongoDB connection.
+- Implemented `createCard` and `getCards` server actions in `app/actions.js`.
+- Developed client-side `components/Input.js` with state management.
+- Updated `app/page.js` to integrate components and fetch/display data.
+
 ## v0.1.0 - Initial Release (2025-04-12)
 
 ### Features
@@ -31,5 +46,5 @@
 
 ### Deployment
 - Platform: Vercel
-- URL: doneisbetter-6o3vm7ng0-narimato.vercel.app
+- URL: https://doneisbetter-n77pwfkpk-narimato.vercel.app
 
