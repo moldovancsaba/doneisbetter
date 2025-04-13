@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// Correct import
 import { DragDropContext } from '@hello-pangea/dnd';
 import Column from './Column';
 import { updateCardStatus, updateCardsOrder } from '@/app/actions';
@@ -33,7 +32,6 @@ export default function KanbanBoard({ initialCards }) {
   };
 
   // Finds the current column ID ('Active', 'Done', 'Deleted') for a card
-  // Note: This relies on the current state, which might be outdated if reversal happens rapidly
   const findColumnId = (cardId) => {
     if (activeCards.some(c => c.id === cardId)) return 'Active';
     if (doneCards.some(c => c.id === cardId)) return 'Done';
@@ -45,13 +43,13 @@ export default function KanbanBoard({ initialCards }) {
   const handleStateReversal = (cardId, originalColumnId, sourceListBeforeMove, destListBeforeMove) => {
      console.log(`Attempting state reversal for ${cardId} back to ${originalColumnId}`);
      const { setter: setSourceList } = getListInfo(originalColumnId);
-     // Find where it might have ended up optimistically
+     // Find the current (incorrect) destination column ID based on *current state*
      const currentDestColId = findColumnId(cardId);
      const { setter: setDestList } = getListInfo(currentDestColId);
 
       // Reset both lists to their state *before* the optimistic update attempt
      setSourceList(sourceListBeforeMove);
-     // Only reset destList if it's different from sourceList
+     // Only reset destList if it's actually different from sourceList
      if(currentDestColId && originalColumnId !== currentDestColId) {
        setDestList(destListBeforeMove);
      }
@@ -75,7 +73,7 @@ export default function KanbanBoard({ initialCards }) {
   }, [initialCards]); // Rerun if initialCards changes
 
 
-  // --- Drag End Handler (for @hello-pangea/dnd) ---
+  // --- Drag End Handler ---
   const onDragEnd = (result) => {
     const { source, destination, draggableId } = result;
 
@@ -117,7 +115,7 @@ export default function KanbanBoard({ initialCards }) {
         console.log(`INTRA-column reorder`);
         // Insert into new position in the *modified* source list
         newSourceList.splice(destIndex, 0, cardToMove);
-        setSourceList(newSourceList); // Update state optimistically
+        setSourceList(newSourceList); // Update state
 
         // Persist Order
         const orderUpdates = newSourceList.map((card, index) => ({ id: card.id, order: index }));
@@ -125,12 +123,12 @@ export default function KanbanBoard({ initialCards }) {
         updateCardsOrder(orderUpdates).then(res => {
             if (!res.success) {
                 console.error("Failed order save:", res.error);
-                // Revert using original list states
+                // Use original list state for reversal
                 handleStateReversal(cardId, sourceColId, sourceListBeforeMove, destListBeforeMove); // Pass original states
             } else { console.log("Order save success."); }
         }).catch(err => {
             console.error("Network error saving order:", err);
-            // Revert using original list states
+             // Use original list state for reversal
             handleStateReversal(cardId, sourceColId, sourceListBeforeMove, destListBeforeMove); // Pass original states
         });
     // --- CASE B: DIFFERENT COLUMN MOVE ---
@@ -151,12 +149,12 @@ export default function KanbanBoard({ initialCards }) {
         updateCardStatus(cardId, newStatus).then(res => {
             if (!res.success) {
                 console.error("Failed status save:", res.error);
-                // Use the reversal logic, passing original list states
+                // Use the dedicated reversal logic, passing original list states
                 handleStateReversal(cardId, sourceColId, sourceListBeforeMove, destListBeforeMove);
             } else { console.log("Status save success."); }
         }).catch(err => {
             console.error("Network error saving status:", err);
-             // Use the reversal logic, passing original list states
+             // Use the dedicated reversal logic, passing original list states
             handleStateReversal(cardId, sourceColId, sourceListBeforeMove, destListBeforeMove);
         });
         // Note: Order persistence for destination column is NOT handled here.
@@ -172,9 +170,9 @@ export default function KanbanBoard({ initialCards }) {
     console.log("KanbanBoard: Rendering placeholder (not client yet).");
     return (
         <div className="kanban-board" aria-busy="true">
-             <div className="kanban-column"><h2 className="column-title">Deleted (Loading...)</h2></div>
-             <div className="kanban-column"><h2 className="column-title">Active (Loading...)</h2></div>
-             <div className="kanban-column"><h2 className="column-title">Done (Loading...)</h2></div>
+             <div className="kanban-column"><h2 className="column-title">DELETED (Loading...)</h2></div>
+             <div className="kanban-column"><h2 className="column-title">DO (Loading...)</h2></div>
+             <div className="kanban-column"><h2 className="column-title">DONE (Loading...)</h2></div>
         </div>
     );
   }
@@ -184,11 +182,12 @@ export default function KanbanBoard({ initialCards }) {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="kanban-board">
-        <Column droppableId="Deleted" title="Deleted" cards={deletedCards} />
-        <Column droppableId="Active" title="Active" cards={activeCards} />
-        <Column droppableId="Done" title="Done" cards={doneCards} />
+        {/* CORRECTED: Only one set of columns */}
+        <Column droppableId="Deleted" title="DELETED" cards={deletedCards} />
+        <Column droppableId="Active" title="DO" cards={activeCards} />
+        <Column droppableId="Done" title="DONE" cards={doneCards} />
       </div>
     </DragDropContext>
   );
   // --- End Render Logic ---
-}
+} // End KanbanBoard component function

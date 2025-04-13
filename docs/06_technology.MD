@@ -3,11 +3,12 @@
 ## Core Technologies
 
 ### Frontend
-- **Framework:** Next.js 15.3.0
+- **Framework:** Next.js 15.3.0 (App Router)
 - **UI Library:** React 19
-- **Styling:** Native CSS Modules
+- **Styling:** Standard Global CSS (`globals.css`)
+- **Font Loading:** `next/font/google` (Urbanist)
 - **JavaScript:** ES6+
-- **State Management:** React Hooks
+- **State Management:** React Hooks (`useState`, `useEffect`)
 
 ### Backend
 - **Database:** MongoDB

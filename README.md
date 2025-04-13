@@ -2,10 +2,9 @@
 
 A minimalist text card application with MongoDB integration.
 
-**Status**: 🟢 Working Drag-and-Drop Kanban Implemented
-**Version**: v0.8.2
-**Live**: [doneisbetter-aeidmp1k2-narimato.vercel.app](https://doneisbetter-aeidmp1k2-narimato.vercel.app)
-
+**Status**: 🟢 Urbanist Font Integrated
+**Version**: v0.9.0
+**Live**: [doneisbetter-7yqr97f90-narimato.vercel.app](https://doneisbetter-7yqr97f90-narimato.vercel.app)
 ## Quick Start
 
 ```bash
@@ -38,10 +37,9 @@ npm run dev
 ## Tech Stack
 
 - Next.js 15.3.0 (App Router)
-- React 19
 - MongoDB with Mongoose
 - `@hello-pangea/dnd` for Drag-and-Drop
-- CSS Modules / Global CSS
+- Standard CSS / `next/font/google` (Urbanist)
 - Vercel Deployment
 - Git Version Control
 
@@ -68,9 +66,9 @@ npm run dev
 - Enter to submit new cards.
 - Cards stored persistently in MongoDB.
 - 3-column Kanban layout ('Deleted', 'Active', 'Done').
-- Drag-and-Drop cards between columns (updates status persistently).
 - Drag-and-Drop cards within columns to reorder (updates order persistently).
 - Timestamps displayed in UTC ISO 8601 format (`YYYY-MM-DDTHH:mm:ss.sssZ`).
+- Urbanist font applied (Light 300, ExtraBold 800).
 - Basic Dark Mode support.
 
 ## Known Limitations

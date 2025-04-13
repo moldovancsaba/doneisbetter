@@ -6,24 +6,25 @@ body {
   font-family: var(--font-urbanist), system-ui, sans-serif; /* Use variable */
   font-weight: 300; /* Default Light */
   margin: 0;
-  background-color: #f9fafb;
-  color: #1f2937;
+  background-color: #f9fafb; /* gray-50 */
+  color: #111827; /* gray-900 - Darker default text */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Dark Mode */
 @media (prefers-color-scheme: dark) {
-  body { background-color: #111827; color: #d1d5db; }
+  body { background-color: #030712; color: #f9fafb; } /* Near black bg, near white text */
   .card { background-color: #1f2937; border-color: #374151; }
-  .input-base { background-color: #1f2937; border-color: #374151; color: #d1d5db; }
+  .input-base { background-color: #1f2937; border-color: #374151; color: #f9fafb; } /* Lighter input text */
   .input-active { border-color: #3b82f6; }
   .input-error { border-color: #ef4444; }
   .card-list-in-column.dragging-over { background-color: rgba(59, 130, 246, 0.2); }
-  .column-title { border-bottom-color: #374151; color: #e5e7eb; } /* Brighter title */
+  .column-title { border-bottom-color: #374151; color: #d1d5db; } /* Adjusted dark title color */
+  .column-title-count { color: #9ca3af; } /* Dark mode count color */
   .empty-column-message { color: #4b5563; }
-  .card-time { color: #9ca3af; }
-   .page-title .title-light { color: #d1d5db; } /* Ensure light part visible */
+  .card-time { color: #6b7280; }
+   .page-title .title-light { color: #e5e7eb; } /* Ensure light part visible */
    .page-title .title-bold { color: #ffffff; } /* Ensure bold part visible */
 }
 
@@ -59,15 +60,23 @@ h1, h2, h3, h4, h5, h6, strong, b {
 .loading-indicator { font-size: 0.875rem; color: #6b7280; margin-left: 0.5rem; } /* Note: SVG is used in Input.js now */
 .kanban-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
 .kanban-column { display: flex; flex-direction: column; min-width: 0; padding: 0.5rem; background-color: rgba(243, 244, 246, 0.5); border-radius: 0.5rem; }
-.column-title { font-size: 1.125rem; font-weight: bold; /* Kept bold for column titles */ margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb; text-align: center; color: #4b5563;}
-.card-list-in-column { display: flex; flex-direction: column; gap: 1rem; min-height: 100px; padding: 0.5rem; border-radius: 0.25rem; transition: background-color 0.2s ease; flex-grow: 1;}
+.column-title { font-size: 1.125rem; /* Base size */ margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb; text-align: center; color: #4b5563;}
+.column-title-text {
+  font-weight: 800; /* Explicit ExtraBold for title text */
+}
+.column-title-count {
+  font-weight: 300; /* Explicit Light for count */
+  margin-left: 0.25rem; /* Add a small space */
+  color: #6b7280; /* Slightly lighter count color */
+}
+.card-list-in-column { display: flex; flex-direction: column; gap: 1rem; min-height: 100px; padding: 0.5rem 0.25rem; border-radius: 0.25rem; transition: background-color 0.2s ease; flex-grow: 1;}
 .card-list-in-column.dragging-over { background-color: rgba(59, 130, 246, 0.1); }
 .empty-column-message { text-align: center; color: #9ca3af; font-style: italic; margin-top: 1rem; padding: 1rem; }
 .card-item-draggable { user-select: none; }
 .card-item-draggable.dragging .card { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); cursor: grabbing; }
-.card { padding: 1rem; background-color: #ffffff; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06); border: 1px solid #e5e7eb; cursor: grab; }
-.card p { margin: 0; word-wrap: break-word; font-weight: 300; /* Ensure light */}
-.card-time { display: block; margin-top: 0.5rem; font-size: 0.75rem; color: #6b7280; font-weight: 300; /* Ensure light */}
+.card { padding: 1rem; background-color: #ffffff; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb; cursor: grab; }
+.card p { margin: 0; word-wrap: break-word; font-weight: 300; /* Ensure light */ color: #111827; /* gray-900 - explicit contrast */}
+.card-time { display: block; margin-top: 0.5rem; font-size: 0.75rem; color: #4b5563; /* gray-600 - slightly darker time */ font-weight: 300; /* Ensure light */}
 
 /* Simple text align utility */
 .text-center { text-align: center; }

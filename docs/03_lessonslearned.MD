@@ -19,6 +19,24 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
+## 2025-04-13T14:05:00.000Z: Font Integration & PostCSS/Tailwind Build Issues (v0.9.0)
+
+### Challenge: Persistent PostCSS/Tailwind Configuration Errors
+**Issue**: Integrating `next/font/google` with Tailwind CSS resulted in persistent and contradictory build errors. Errors included demands for `@tailwindcss/postcss`, complaints about using `tailwindcss` directly, failure to recognize utility classes (`font-light`), and syntax errors related to PostCSS config formats (`require` vs object keys). Multiple attempts to fix `postcss.config.js` and re-install dependencies failed. `npx tailwindcss init -p` also failed repeatedly.
+**Solution (Workaround)**:
+1.  Removed `@tailwind` directives from `globals.css`.
+2.  Kept minimal `tailwind.config.js` (for `content` scanning) and `postcss.config.js` (with `tailwindcss: {}`, `autoprefixer: {}`). Although Tailwind isn't processing via `@tailwind`, having the configs might be implicitly needed by Next.js's build pipeline.
+3.  Imported the font using `next/font/google` in `layout.js` and applied the generated CSS variable (`--font-urbanist`) to the `<html>` tag.
+4.  Applied base font styles (`font-family: var(--font-urbanist)`, `font-weight: 300`) directly to `body` in `globals.css`.
+5.  Applied specific weights (`font-weight: 800`) to headings/bold elements using standard CSS selectors (`h1`, `h2`, `.title-bold`, etc.) in `globals.css`.
+**Lesson**: When encountering intractable build tool configuration errors (especially with CSS tooling chains like PostCSS/Tailwind), simplifying the approach can be a necessary workaround. Bypassing the problematic layer (in this case, Tailwind's `@apply` or utility class processing for fonts) and using more direct methods (CSS variables + standard CSS selectors) can achieve the desired visual outcome while resolving build blockers. Documenting the workaround and the original issue is crucial. The root cause of the PostCSS conflict remains unclear but likely involves specific version interactions or environment issues.
+
+### Best Practice: `next/font/google` with CSS Variables
+**Observation**: Using the `variable` option with `next/font/google` provides a flexible way to apply the font globally via CSS, decoupling it slightly from direct framework class names and allowing standard CSS rules to manage weights and styles.
+**Lesson**: The CSS variable approach with `next/font` is robust and recommended, especially if not relying heavily on Tailwind utility classes for font management.
+
+---
+
 ## 2025-04-13T10:43:42.534Z: Drag-and-Drop Debugging & Library Switch (v0.8.0)
 
 ### Challenge: Non-Functional Drag-and-Drop Despite Successful Builds

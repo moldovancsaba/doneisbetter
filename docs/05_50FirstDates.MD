@@ -1,13 +1,22 @@
 # Done Is Better Development Diary - 50 First Dates
 
-**Current State**: 🟢 Working Drag-and-Drop Kanban with Correct Timestamp Display.
-**Last Updated**: 2025-04-13T11:07:00.000Z
-**Deployment**: https://doneisbetter-aeidmp1k2-narimato.vercel.app
-**Version**: v0.8.2
+**Current State**: 🟢 Urbanist Font Integrated (via Standard CSS).
+**Last Updated**: 2025-04-13T14:05:00.000Z
+**Deployment**: https://doneisbetter-7yqr97f90-narimato.vercel.app
+**Version**: v0.9.0
 
-## Latest Development (v0.8.2)
+## Latest Development (v0.9.0)
 
-### 2025-04-13T11:07:00.000Z: Fix Card Timestamp Display
+### 2025-04-13T14:05:00.000Z: Urbanist Font Integration & Build Fixes
+- Integrated Urbanist Google Font (Light 300, ExtraBold 800) using `next/font/google` and CSS variables.
+- Styled main title `#DONEISBETTER` with specified weights.
+- Encountered persistent, conflicting PostCSS/Tailwind build errors related to plugin configuration and utility class recognition (`font-light`).
+- Resolved build errors by removing `@tailwind` directives from `globals.css` and applying font weights and styles via standard CSS selectors, effectively bypassing the problematic Tailwind processing layer for this feature. Manually created config files after `npx init` failed.
+- Successfully built and deployed the application with the new font applied via standard CSS.
+
+## Previous Development History
+
+### 2025-04-13T11:07:00.000Z: Fix Card Timestamp Display (v0.8.2)
 - Debugged and corrected structural errors in `CardItem.js` that were causing timestamps to display incorrectly (showing locale format instead of the intended raw ISO string).
 - Confirmed the component now correctly renders the full UTC ISO 8601 string (`YYYY-MM-DDTHH:mm:ss.sssZ`).
 - Finalized documentation updates with correct ISO 8601 timestamps.
@@ -139,14 +148,15 @@
 - Basic testing performed locally.
 - Core documentation structure in place and updated.
 - CI/CD via Vercel working.
-
 ### Current Architecture
 - Next.js 15.3.0 (App Router)
 - React 19
 - MongoDB / Mongoose
 - `@hello-pangea/dnd`
-- CSS Modules / Global CSS
+- Standard Global CSS (No active Tailwind processing via `@tailwind` directives)
+- Google Fonts via `next/font/google` (Urbanist)
 
+### Known Issues
 ### Known Issues
 - Basic styling only.
 - Optimistic update reversal logic is basic.

@@ -1,5 +1,17 @@
 # Release Notes
 
+## v0.9.0 - Urbanist Font Integration (2025-04-13T14:05:00.000Z)
+
+### Features & Fixes
+- Integrated 'Urbanist' Google Font using `next/font/google`.
+- Applied font weights: Light 300 for body text, ExtraBold 800 for headings/bold text.
+- Implemented two-weight style for the main page title (`#DONEISBETTER`).
+- Bypassed persistent PostCSS/Tailwind build errors by removing Tailwind directives (`@tailwind`) from `globals.css` and applying font styles using standard CSS classes and the `next/font` CSS variable (`--font-urbanist`).
+- Manually created compatible `tailwind.config.js` and `postcss.config.js` after `npx init` failures.
+### Deployment
+- Platform: Vercel
+- URL: https://doneisbetter-7yqr97f90-narimato.vercel.app
+
 ## v0.8.2 - Fix Card Timestamp Display (2025-04-13T11:07:00.000Z)
 
 ### Fixes

@@ -1,29 +1,37 @@
 'use client';
 
-// CORRECTED: Import ONLY from @hello-pangea/dnd
+// Import ONLY from @hello-pangea/dnd
 import { Droppable } from '@hello-pangea/dnd';
 import CardItem from './CardItem';
 
-// MODIFIED: Accept 'droppableId' prop instead of 'id' to match Droppable component
 export default function Column({ droppableId, title, cards }) {
-  // Ensure cards is always an array
+  // Ensure cards is always an array for safe mapping
   const safeCards = Array.isArray(cards) ? cards : [];
 
   return (
+    // REMOVED ref={setNodeRef} from this div
     <div className="kanban-column">
-      <h2 className="column-title">{title} ({safeCards.length})</h2>
-      {/* Use Droppable from @hello-pangea/dnd */}
+      <h2 className="column-title">
+         <span className="column-title-text">{title}</span>
+         {/* CORRECTED: Use safeCards.length */}
+         <span className="column-title-count">({safeCards.length})</span>
+      </h2>
+
+      {/* Use Droppable component */}
       <Droppable droppableId={droppableId}>
         {(provided, snapshot) => (
-          // Apply the ref and props from the Droppable render prop
+          // Apply ref and props to the list container div
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={`card-list-in-column ${snapshot.isDraggingOver ? 'dragging-over' : ''}`}
           >
+            {/* REMOVED Commented out/incorrect code block */}
+
             {/* Show message if no cards AND not dragging over */}
             {safeCards.length === 0 && !snapshot.isDraggingOver && <p className="empty-column-message">Empty</p>}
-            {/* Map cards to Draggable CardItems */}
+
+            {/* Map over safeCards */}
             {safeCards.map((card, index) => (
               <CardItem
                 key={card.id}
@@ -33,10 +41,9 @@ export default function Column({ droppableId, title, cards }) {
             ))}
             {/* Placeholder adds space when dragging */}
             {provided.placeholder}
-          </div>
+          </div> // End div for droppable area
         )}
-      </Droppable>
-    </div>
+      </Droppable> // End Droppable component
+    </div> // End main column div
   );
 }
-

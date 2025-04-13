@@ -1,14 +1,12 @@
 // src/app/layout.js
 import './globals.css'
-// Re-import Urbanist font
 import { Urbanist } from 'next/font/google'
 
-// Configure font object with variable
 const urbanist = Urbanist({
   subsets: ['latin'],
-  weight: ['300', '800'], // Request needed weights
+  weight: ['300', '800'],
   display: 'swap',
-  variable: '--font-urbanist' // Define CSS variable
+  variable: '--font-urbanist'
 })
 
 export const metadata = {
@@ -18,9 +16,15 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    // Apply font variable to html tag
     <html lang="en" className={urbanist.variable}>
-      <body>{children}</body>
+      {/* Correct Head Structure */}
+      <head>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+      </head>
+      {/* Correct Body Structure */}
+      <body>
+        {children}
+      </body>
     </html>
   )
 }
