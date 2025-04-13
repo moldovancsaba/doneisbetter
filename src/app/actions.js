@@ -74,11 +74,11 @@ export async function getCards() {
   }
 }
 
-// New Server Action to Update Card Status
+// Update Card Status Action - MODIFIED to accept any valid status
 export async function updateCardStatus(cardId, newStatus) {
-  // Validate input
-  if (!cardId || !['done', 'deleted'].includes(newStatus)) {
-    return { success: false, error: 'Invalid input provided.' };
+  // Validate input - Allow 'active', 'done', 'deleted'
+  if (!cardId || !['active', 'done', 'deleted'].includes(newStatus)) {
+    return { success: false, error: 'Invalid status provided.' };
   }
 
   try {
@@ -93,8 +93,9 @@ export async function updateCardStatus(cardId, newStatus) {
         return { success: false, error: 'Card not found.' };
     }
 
-    revalidatePath('/'); // Revalidate to update the list
-    return { success: true };
+    revalidatePath('/'); // Revalidate to update the list on hard refresh/navigation
+    // Return the updated status along with success
+    return { success: true, updatedStatus: newStatus };
   } catch (error) {
     console.error(`Error updating card status to ${newStatus}:`, error);
     return { success: false, error: 'Failed to update card status.' };

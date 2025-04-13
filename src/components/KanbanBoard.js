@@ -1,72 +1,192 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Column from './Column'; // We will create this next
+import {
+  DndContext,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  closestCorners // Or closestCenter based on preference
+} from '@dnd-kit/core';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import Column from './Column';
+import { updateCardStatus } from '@/app/actions'; // Server action
+
+// Helper function to map column ID to status
+const mapIdToStatus = (id) => {
+    if (id === 'Deleted') return 'deleted';
+    if (id === 'Done') return 'done';
+    return 'active'; // Default to 'active' (for 'Active' column or unexpected IDs)
+}
 
 export default function KanbanBoard({ initialCards }) {
-  // State for each column, initialized as empty arrays
+  // State for each column
   const [activeCards, setActiveCards] = useState([]);
   const [doneCards, setDoneCards] = useState([]);
   const [deletedCards, setDeletedCards] = useState([]);
+  const [isClient, setIsClient] = useState(false); // Prevent hydration mismatch
 
-  // Effect runs when initialCards prop changes (e.g., on page load or after adding a new card)
+  // Initialize columns on mount and when initialCards changes
   useEffect(() => {
-    // Filter the initial cards into their respective columns based on status
+    setIsClient(true); // Indicate client-side rendering is active
+    // Filter cards into columns based on their status
     setActiveCards((initialCards || []).filter(card => card.status === 'active'));
     setDoneCards((initialCards || []).filter(card => card.status === 'done'));
     setDeletedCards((initialCards || []).filter(card => card.status === 'deleted'));
-  }, [initialCards]); // Dependency array ensures this runs when initialCards updates
+  }, [initialCards]); // Rerun when initial cards data updates
 
-  // Handler called by CardItem after a successful status update via server action
-  const handleStatusUpdate = (cardId, newStatus) => {
-    let cardToMove = null;
+  // Configure sensors for drag detection (pointer and keyboard)
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-    // Find the card in *any* of the current state lists and remove it
-    // This ensures we find the card regardless of its previous state (though usually it's 'active')
-    const findAndRemove = (setter) => {
-        setter(current => {
-            const cardIndex = current.findIndex(c => c.id === cardId);
+  // Helper function to find which column a card currently resides in
+  const findColumn = (cardId) => {
+    if (activeCards.some(c => c.id === cardId)) return 'Active';
+    if (doneCards.some(c => c.id === cardId)) return 'Done';
+    if (deletedCards.some(c => c.id === cardId)) return 'Deleted';
+    return null; // Card not found (shouldn't normally happen)
+  };
+
+  // Function triggered when a drag operation completes
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    // If dropped outside a valid column (droppable area), do nothing
+    if (!over) return;
+
+    const activeId = active.id; // ID of the card being dragged
+    const overId = over.id;     // ID of the column dropped onto
+
+    const activeColumnId = findColumn(activeId); // Find original column ID
+    const overColumnId = overId; // Destination column ID
+
+    // Only perform updates if the card was dropped into a *different* column
+    if (activeColumnId && activeColumnId !== overColumnId) {
+      console.log(`Moving card ${activeId} from ${activeColumnId} to ${overColumnId}`);
+
+      const newStatus = mapIdToStatus(overColumnId); // Determine new status from column ID
+      let cardToMove = null;
+
+      // --- Optimistic Update ---
+      // 1. Find and remove the card from its original list state
+      const removeFromList = (setter) => {
+         setter(current => {
+            const cardIndex = current.findIndex(c => c.id === activeId);
             if (cardIndex > -1) {
-                cardToMove = current[cardIndex]; // Store the card to move
-                // Return a new array without the found card
+                cardToMove = current[cardIndex]; // Store the found card
+                // Return new array excluding the moved card
                 return [...current.slice(0, cardIndex), ...current.slice(cardIndex + 1)];
             }
-            return current; // Return unchanged if not found
+            return current; // Return original array if card not found
         });
-    };
+      };
 
-    findAndRemove(setActiveCards);
-    findAndRemove(setDoneCards);
-    findAndRemove(setDeletedCards);
+      // Call remove function based on the original column
+       if (activeColumnId === 'Active') removeFromList(setActiveCards);
+       else if (activeColumnId === 'Done') removeFromList(setDoneCards);
+       else if (activeColumnId === 'Deleted') removeFromList(setDeletedCards);
 
-    // If the card was found and removed from a list
-    if (cardToMove) {
-        cardToMove.status = newStatus; // Update the card's status locally
+      // 2. If the card was successfully found and removed
+      if (cardToMove) {
+         cardToMove.status = newStatus; // Update the card object's status locally
 
-        // Add the card to the beginning of the appropriate new list based on newStatus
-        if (newStatus === 'done') {
-            setDoneCards(current => [cardToMove, ...current]);
-        } else if (newStatus === 'deleted') {
-            setDeletedCards(current => [cardToMove, ...current]);
-        } else if (newStatus === 'active') { // Handle case if a card could be moved back to active
-             setActiveCards(current => [cardToMove, ...current]);
-        }
+         // 3. Add the card to the beginning of the new column's list state
+         const addToList = (setter) => setter(current => [cardToMove, ...current]);
+
+         if (overColumnId === 'Active') addToList(setActiveCards);
+         else if (overColumnId === 'Done') addToList(setDoneCards);
+         else if (overColumnId === 'Deleted') addToList(setDeletedCards);
+
+         // --- Server Action Call (Fire and Forget) ---
+         // Call the server action asynchronously to update the database
+         updateCardStatus(activeId, newStatus).then(result => {
+           if (!result.success) {
+             // If the server update fails: Log error, show alert, attempt reversal
+             console.error(`Server failed to update card ${activeId} to ${newStatus}:`, result.error);
+             alert(`Error saving change for card "${cardToMove.content}": ${result.error}`);
+             handleStatusUpdateReversal(activeId, activeColumnId); // Attempt to move card back visually
+           } else {
+             // Log success if needed
+             console.log(`Server confirmed update for card ${activeId} to ${newStatus}`);
+           }
+         }).catch(err => {
+             // If there's a network error calling the server action
+             console.error(`Network error updating card ${activeId} to ${newStatus}:`, err);
+             alert(`Network error saving change for card "${cardToMove.content}".`);
+             handleStatusUpdateReversal(activeId, activeColumnId); // Attempt to move card back visually
+         });
+
+      } else {
+           // Log warning if the card wasn't found where expected
+           console.warn(`Card ${activeId} not found in expected column ${activeColumnId}`);
+      }
     } else {
-        // Log a warning if the card wasn't found - might indicate a state inconsistency
-        console.warn(`Card with ID ${cardId} not found in any list during status update to ${newStatus}.`);
-        // Consider fetching all cards again to resync state if this happens frequently
-        // getCards().then(setAllCards); // Example refetch
+      // Log if dropped in the same column or invalid area
+      console.log(`Card ${activeId} dropped in same column or invalid area.`);
     }
   };
 
-  return (
-    // Render the three columns using a CSS grid layout
-    <div className="kanban-board">
-      {/* Pass title, card list, and the update handler to each Column */}
-      <Column title="Deleted" cards={deletedCards} onStatusUpdate={handleStatusUpdate} />
-      <Column title="Active" cards={activeCards} onStatusUpdate={handleStatusUpdate} />
-      <Column title="Done" cards={doneCards} onStatusUpdate={handleStatusUpdate} />
-    </div>
-  );
-}
+  // Basic reversal function for optimistic update failures
+    const handleStatusUpdateReversal = (cardId, originalColumnId) => {
+        // This is tricky because the card might have been moved *again*
+        // For simplicity, we just try to move it back based on the original state known during the failed action
+        const originalStatus = mapIdToStatus(originalColumnId);
+        let cardToMoveBack = null;
 
+        // Find and remove from potentially incorrect *new* list
+        const findAndRemoveFromNew = (setter) => {
+            setter(current => {
+                const cardIndex = current.findIndex(c => c.id === cardId);
+                if (cardIndex > -1) {
+                    cardToMoveBack = current[cardIndex];
+                    return [...current.slice(0, cardIndex), ...current.slice(cardIndex + 1)];
+                }
+                return current;
+            });
+        };
+        findAndRemoveFromNew(setActiveCards);
+        findAndRemoveFromNew(setDoneCards);
+        findAndRemoveFromNew(setDeletedCards);
+
+        // Add back to the *original* list
+        if (cardToMoveBack) {
+             cardToMoveBack.status = originalStatus; // Reset status
+             const addBackToList = (setter) => setter(current => [cardToMoveBack, ...current]);
+             if (originalColumnId === 'Active') addBackToList(setActiveCards);
+             else if (originalColumnId === 'Done') addBackToList(setDoneCards);
+             else if (originalColumnId === 'Deleted') addBackToList(setDeletedCards);
+             console.log(`Attempted to visually revert card ${cardId} back to ${originalColumnId}`);
+        } else {
+             console.warn(`Could not find card ${cardId} to revert.`);
+             // Consider a full data refresh in this case
+        }
+   };
+
+
+    // Prevent rendering DndContext on the server to avoid hydration errors
+  if (!isClient) {
+    // Render a simple placeholder or skeleton during server render / initial hydration
+    return <div className="text-center p-10">Loading Board...</div>;
+  }
+
+  return (
+    // DndContext wrapper providing drag-and-drop context
+    <DndContext
+      sensors={sensors} // Use configured sensors
+      collisionDetection={closestCorners} // Strategy for determining drop target
+      onDragEnd={handleDragEnd} // Callback function when drag ends
+    >
+      <div className="kanban-board">
+        {/* Render each column, passing its ID, title, and current cards */}
+        <Column id="Deleted" title="Deleted" cards={deletedCards} />
+        <Column id="Active" title="Active" cards={activeCards} />
+        <Column id="Done" title="Done" cards={doneCards} />
+      </div>
+    </DndContext>
+  );
+} // <-- Added missing closing brace

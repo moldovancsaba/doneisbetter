@@ -236,39 +236,54 @@ h1 {
   margin: 2.5rem auto;
 }
 
-/* Add styles for CardItem wrapper and swipe effects */
-.card-item-wrapper {
-  position: relative; /* Needed for positioning effects if added later */
-  overflow: hidden; /* Hide parts of the card sliding out */
-  border-radius: 0.5rem; /* Match card radius for background effect */
-  transition: background-color 0.1s ease-out; /* Smooth background color change */
+/* REMOVE or COMMENT OUT Swipe Styles */
+/*
+.card-item-wrapper { ... }
+.card-item-wrapper .card { ... }
+.card-item-wrapper.updating .card { ... }
+*/
+
+/* ADD Drag-and-Drop Styles */
+
+/* Style for the draggable item container provided by CardItem */
+.card-item-draggable {
+  touch-action: none; /* Prevents scrolling issues on touch devices during drag */
+  /* Base styles if needed, but most are applied inline by useSortable */
+  position: relative; /* Ensure z-index works */
 }
 
-/* Target the card *inside* the wrapper for visual effects */
-.card-item-wrapper .card {
-  /* Transition for smooth snap-back. No transition during active drag (handled by JS) */
-  transition: transform 0.2s ease-out;
-   /* Ensure original card styles apply */
-   background-color: #ffffff;
-   /* border, padding, shadow etc., are inherited from .card */
+/* Style applied when an item is being actively dragged */
+.card-item-draggable.dragging {
+  z-index: 10; /* Bring dragged item to the front */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Enhanced shadow */
+  cursor: grabbing; /* Change cursor during drag */
 }
 
-/* Dark mode adjustments for the card inside the wrapper */
+/* Optional: Style for columns when an item is dragged over them */
+/* Requires state management in DndContext's onDragOver */
+/*
+.kanban-column.over {
+  background-color: rgba(59, 130, 246, 0.1); // Example blue tint
+}
+*/
+
+/* Ensure the nested .card element retains its appearance */
+/* It should NOT have conflicting transitions */
+.card-item-draggable .card {
+   transition: none !important; /* Important to override potential inherited transitions */
+   background-color: #ffffff; /* Ensure background is reset */
+}
+
 @media (prefers-color-scheme: dark) {
-  .card-item-wrapper .card {
-    background-color: #1f2937; /* Adjust if needed */
-  }
+    .card-item-draggable .card {
+       background-color: #1f2937; /* Dark mode background */
+   }
+    /*
+    .kanban-column.over {
+       background-color: rgba(59, 130, 246, 0.2); // Darker blue tint
+   }
+   */
 }
-
-
-/* Style for when the card status is being updated */
-.card-item-wrapper.updating .card {
-  opacity: 0.6; /* Make card semi-transparent */
-  cursor: progress; /* Indicate activity */
-}
-
-/* Ensure touch-action allows vertical scrolling on the swipeable element */
-/* Applied inline: style={{ touchAction: 'pan-y' }} */
 .border-dashed {
     border-style: dashed;
 }
