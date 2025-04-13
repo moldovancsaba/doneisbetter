@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "autoprefixer": "^10.4.21",
+    "mongoose": "^8.13.2",
     "next": "^15.3.0",
     "postcss": "^8.5.3",
     "postcss-preset-env": "^10.1.5",
