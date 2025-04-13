@@ -1,5 +1,20 @@
 # Release Notes
 
+## v0.4.0 - Kanban Board Layout (2025-04-13)
+
+### Features
+- Implemented a 3-column Kanban-style layout ('Deleted', 'Active', 'Done').
+- Cards now move between columns based on swipe actions (Left for 'Deleted', Right for 'Done').
+- Modified `getCards` server action to fetch all cards, regardless of status.
+- Introduced `KanbanBoard.js` client component to manage the state of cards across the three columns.
+- Introduced `Column.js` client component to render each column and its cards.
+- Updated `CardItem.js` to trigger a status update callback passed down from `KanbanBoard.js`.
+- Refactored `page.js` to use `KanbanBoard.js`.
+- Added CSS Grid styles for the 3-column layout.
+
+### Technical Details
+- Client-side state (`useState`, `useEffect` in `KanbanBoard.js`) is used to manage card positions based on status changes initiated by swipes.
+
 ## v0.3.0 - Swipe Actions for Cards (2025-04-13)
 
 ### Features

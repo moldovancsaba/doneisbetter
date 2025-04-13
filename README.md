@@ -2,10 +2,9 @@
 
 A minimalist text card application with MongoDB integration.
 
-**Status**: 🟢 Swipe Actions Implemented
-**Version**: v0.3.0
-**Live**: [doneisbetter-k4i92tiif-narimato.vercel.app](https://doneisbetter-k4i92tiif-narimato.vercel.app)
-
+**Status**: 🟢 Kanban Layout Implemented
+**Version**: v0.4.0
+**Live**: [doneisbetter-1hcbxr4x7-narimato.vercel.app](https://doneisbetter-1hcbxr4x7-narimato.vercel.app)
 ## Quick Start
 
 ```bash
@@ -61,6 +60,7 @@ npm run dev
 - Newest to oldest display order
 - Swipe Left: Mark card as 'deleted' (hides from list)
 - Swipe Right: Mark card as 'done' (hides from list)
+- 3-column Kanban layout ('Deleted', 'Active', 'Done').
 
 ## Known Limitations
 

@@ -19,6 +19,23 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
+## 2025-04-13: Kanban Layout Implementation (v0.4.0)
+
+### Challenge: Managing Multiple Client-Side States from Server Data
+**Issue**: Needed to display cards in three distinct columns ('Deleted', 'Active', 'Done') based on their status, manage moves between these columns client-side after server actions, using data initially fetched on the server.
+**Solution**:
+1.  Created a parent client component (`KanbanBoard.js`) responsible for managing the state of all three columns (`deletedCards`, `activeCards`, `doneCards`).
+2.  Used `useEffect` within `KanbanBoard.js` to filter the `initialCards` prop (fetched server-side in `page.js`) into the appropriate column state arrays. This effect re-runs if `initialCards` changes (e.g., after adding a new card and the page revalidates).
+3.  Implemented a handler function (`handleStatusUpdate`) in `KanbanBoard.js` that finds the card in any list, removes it, and adds it to the correct new list based on the `newStatus` received from `CardItem.js`.
+**Lesson**: For complex UIs derived from server data but requiring interactive client-side state manipulation (like moving items between lists), a dedicated parent client component acting as a state manager is effective. It centralizes the logic for distributing and updating items based on actions triggered in child components.
+
+### Refactoring for Reusability
+**Observation**: The structure for displaying a list of cards within a column was repetitive.
+**Solution**: Created a `Column.js` component that takes `title` and `cards` as props and renders the column structure, including mapping `cards` to `CardItem.js`. This simplified `KanbanBoard.js`.
+**Lesson**: Identify repeating UI structures and extract them into reusable components to keep parent components cleaner and more focused on state management or layout orchestration.
+
+---
+
 ## 2025-04-13: Swipe Action Implementation (v0.3.0)
 
 ### Challenge: Client-Side State Management for Server Data

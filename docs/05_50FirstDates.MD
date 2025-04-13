@@ -1,10 +1,20 @@
 # Done Is Better Development Diary - 50 First Dates
 
-**Current State**: 🟢 Swipe actions (done/delete) implemented.
+**Current State**: 🟢 Kanban Board Layout with Swipe-to-Move Implemented.
 **Last Updated**: 2025-04-13
-**Deployment**: https://doneisbetter-k4i92tiif-narimato.vercel.app
-**Version**: v0.3.0
+**Deployment**: https://doneisbetter-1hcbxr4x7-narimato.vercel.app
+**Version**: v0.4.0
 
+## Latest Development (v0.4.0)
+
+### 2025-04-13: Kanban Board Layout
+- Updated `getCards` action to fetch all cards (not just 'active').
+- Created `KanbanBoard.js` client component to manage state for 'Deleted', 'Active', and 'Done' columns.
+- Created `Column.js` client component to render each column.
+- Modified `CardItem.js` to call a new `onStatusUpdate` prop function upon successful swipe action.
+- Updated `page.js` to use `KanbanBoard` instead of `CardList`.
+- Added CSS Grid styles for the 3-column layout.
+- Successfully deployed v0.4.0 to Vercel production.
 ## Latest Development (v0.3.0)
 
 ### 2025-04-13: Swipe Actions Implementation
@@ -48,6 +58,7 @@
 - Production deployment
 - Basic CSS styling and dark mode support
 - Swipe left/right to mark cards as deleted/done.
+- Cards move between 'Deleted', 'Active', and 'Done' columns based on swipe actions.
 - Optimistic UI updates for swipe actions.
 ### Next Steps
 - Add input animations
@@ -69,9 +80,11 @@
 ### Known Issues
 - Basic styling only
 - Optimistic updates lack robust error recovery (if server action fails after UI update).
+- Currently no way to move cards back from 'Deleted' or 'Done' columns via UI.
 - Simple CRUD operations
 
 ### Future Considerations
+- User authentication
 - User authentication
 - Advanced card features
 - Search functionality
