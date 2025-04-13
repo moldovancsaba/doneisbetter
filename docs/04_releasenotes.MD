@@ -1,5 +1,33 @@
 # Release Notes
 
+## v0.8.0 - Working Drag-and-Drop (@hello-pangea/dnd) (2025-04-13)
+
+### Features & Fixes
+- Re-implemented drag-and-drop functionality using `@hello-pangea/dnd` (React 18 compatible fork of `react-beautiful-dnd`).
+- Successfully fixed issues preventing drag-and-drop from working in previous versions (v0.5.0-v0.7.0).
+- Cards can now be reliably dragged between 'Deleted', 'Active', and 'Done' columns, updating their status persistently.
+- Cards can be reliably reordered within the same column, with the order persisting in the database.
+- Uninstalled `@dnd-kit` dependencies.
+
+### Technical Details
+- Refactored `KanbanBoard.js` to use `<DragDropContext>` and its `onDragEnd` handler.
+- Refactored `Column.js` to use `<Droppable>`.
+- Refactored `CardItem.js` to use `<Draggable>`.
+
+## v0.7.0 - Persistent Column Reordering (2025-04-13)
+
+### Features
+- Re-implemented drag-and-drop functionality using `@hello-pangea/dnd` (React 18 compatible fork of `react-beautiful-dnd`).
+- Successfully fixed issues preventing drag-and-drop from working in previous versions.
+- Cards can now be reliably dragged between 'Deleted', 'Active', and 'Done' columns, updating their status persistently.
+- Cards can be reliably reordered within the same column, with the order persisting in the database.
+- Uninstalled `@dnd-kit` dependencies.
+
+### Technical Details
+- Refactored `KanbanBoard.js` to use `<DragDropContext>` and its `onDragEnd` handler.
+- Refactored `Column.js` to use `<Droppable>`.
+- Refactored `CardItem.js` to use `<Draggable>`.
+
 ## v0.7.0 - Persistent Column Reordering (2025-04-13)
 
 ### Features
@@ -123,3 +151,5 @@
 ### Deployment
 - Platform: Vercel
 - URL: https://doneisbetter-rfuj3dwjs-narimato.vercel.app
+- Platform: Vercel
+- URL: https://doneisbetter-8elimlyoy-narimato.vercel.app

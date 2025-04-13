@@ -2,20 +2,18 @@
 
 A minimalist text card application with MongoDB integration.
 
-**Status**: 🟢 Persistent Reordering Implemented
-**Version**: v0.7.0
-**Live**: [doneisbetter-8elimlyoy-narimato.vercel.app](https://doneisbetter-8elimlyoy-narimato.vercel.app)
+**Status**: 🟢 Working Drag-and-Drop Kanban Implemented
+**Version**: v0.8.0
+**Live**: [doneisbetter-gqvjmpqp0-narimato.vercel.app](https://doneisbetter-gqvjmpqp0-narimato.vercel.app)
+
+## Quick Start
+
+```bash
 git clone https://github.com/moldovancsaba/doneisbetter.git
 cd doneisbetter
 npm install
 npm run dev
 ```
-
-## Project Structure
-
-- `app/` - Next.js application core
-  - `layout.js` - Root layout with theme configuration
-  - `page.js` - Main application entry point
 - `docs/` - Project documentation
   - [01_roadmap.MD](docs/01_roadmap.MD) - Project roadmap
   - [02_development.MD](docs/02_development.MD) - Development details
@@ -56,9 +54,10 @@ npm run dev
 - MongoDB storage
 - Newest to oldest display order
 - Drag-and-Drop cards between 'Deleted', 'Active', and 'Done' columns.
-- Persistent reordering of cards within columns.
+- Drag-and-Drop cards between 'Deleted', 'Active', and 'Done' columns.
+- Reliable persistent reordering of cards within columns.
 - 3-column Kanban layout ('Deleted', 'Active', 'Done').
 
+## Known Limitations
+
 - Requires MongoDB connection
-- Basic styling (no Tailwind)
-- Simple input/display functionality

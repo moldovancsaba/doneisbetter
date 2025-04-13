@@ -1,14 +1,25 @@
 # Done Is Better Development Diary - 50 First Dates
 
-**Current State**: 🟢 Persistent Reordering in Columns Implemented.
+**Current State**: 🟢 Working Drag-and-Drop Kanban with Persistence Implemented.
 **Last Updated**: 2025-04-13
-**Deployment**: https://doneisbetter-8elimlyoy-narimato.vercel.app
-**Version**: v0.7.0
+**Deployment**: https://doneisbetter-gqvjmpqp0-narimato.vercel.app
+**Version**: v0.8.0
+
+## Latest Development (v0.8.0)
+
+### 2025-04-13: Drag-and-Drop Fix (@hello-pangea/dnd)
+- Uninstalled previous `@dnd-kit` libraries due to functional issues despite successful builds.
+- Installed `@hello-pangea/dnd` (React 18+ compatible fork of `react-beautiful-dnd`).
+- Refactored `KanbanBoard.js`, `Column.js`, and `CardItem.js` to use `DragDropContext`, `Droppable`, and `Draggable` components respectively.
+- Re-implemented the `onDragEnd` logic in `KanbanBoard.js` to handle both inter-column moves (status updates) and intra-column reorders (order updates) using the `react-beautiful-dnd` result structure.
+- Corrected client-side hydration issues by ensuring DND context only renders on the client.
+- Thoroughly tested locally to confirm both moving between columns and reordering within columns works correctly and persists.
+- Successfully debugged and resolved previous client-side exceptions.
+- Deployed the working drag-and-drop implementation (v0.8.0) to Vercel production.
 
 ## Latest Development (v0.7.0)
 
 ### 2025-04-13: Persistent Reordering
-- Added an `order` field to the `Card` schema in `actions.js`.
 - Modified `createCard` to assign a default order (negative timestamp).
 - Updated `getCards` to sort by the `order` field.
 - Created a new server action `updateCardsOrder` that accepts an array of `{id, order}` updates and uses `bulkWrite` for database persistence.
@@ -89,11 +100,10 @@
 - Basic CSS styling and dark mode support
 - Swipe left/right to mark cards as deleted/done. (Removed in v0.5.0)
 - Cards move between 'Deleted', 'Active', and 'Done' columns via drag-and-drop.
-- Cards can be reordered within their columns, and the order persists.
+- Cards can be reliably reordered within their columns, and the order persists.
 - Optimistic UI updates for drag actions.
 ### Next Steps
 - Add input animations
-- Implement dark mode
 - Enable search functionality
 
 ## Project Status
@@ -112,6 +122,7 @@
 - Optimistic updates lack robust error recovery (if server action fails after UI update).
 - Reversal logic for failed optimistic updates is basic and might need refinement.
 - Simple CRUD operations
+- Order persistence is not updated when moving cards *between* columns (only status is updated).
 
 ### Future Considerations
 - User authentication

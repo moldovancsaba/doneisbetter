@@ -19,8 +19,30 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
-## 2025-04-13: Persistent Reordering (v0.7.0)
+## 2025-04-13: Drag-and-Drop Debugging & Library Switch (v0.8.0)
 
+### Challenge: Non-Functional Drag-and-Drop Despite Successful Builds
+**Issue**: The `@dnd-kit` implementation (v0.5.0-v0.7.0) built successfully locally and deployed, but drag-and-drop did not work functionally in the browser. Client-side exceptions occurred during hydration, and despite fixes, runtime logic errors persisted.
+**Debugging Steps**:
+1. Added extensive console logging to `handleDragEnd` to trace event data and logic flow with `@dnd-kit`.
+2. Attempted to fix potential client/server rendering mismatches by strictly rendering `DndContext` only after `useEffect` confirmed client-side mounting (`isClient` state).
+3. Encountered repeated syntax errors and structural problems during refactoring attempts with `@dnd-kit`.
+**Solution**: Switched library from `@dnd-kit` to `@hello-pangea/dnd` (a `react-beautiful-dnd` fork compatible with React 18+).
+**Lesson**: Successful builds do not guarantee correct runtime behavior, especially with complex client-side interactions and libraries sensitive to the rendering environment (SSR vs Client). When extensive debugging with one library fails or becomes overly complex (especially if multiple AI interventions introduce structural errors), switching to a different, potentially more established or straightforward library for the specific use case can be a valid solution. `react-beautiful-dnd` (and its forks) often have a more constrained API but proved simpler and more reliable for this standard list/board reordering task. Rigorous local testing *after* a successful build is crucial.
+
+### Implementation with `@hello-pangea/dnd`
+**Observation**: `react-beautiful-dnd` uses a different component structure (`DragDropContext`, `Droppable`, `Draggable`) and `onDragEnd` result format compared to `@dnd-kit`.
+**Solution**:
+1. Refactored `KanbanBoard` to use `DragDropContext` and handle the `onDragEnd(result)` callback.
+2. Refactored `Column` to use `Droppable`, providing a `droppableId`.
+3. Refactored `CardItem` to use `Draggable`, providing `draggableId` and `index`.
+4. Adjusted the `onDragEnd` logic in `KanbanBoard` to parse the `result` object (source/destination droppableId and index) and correctly update state for both same-column reorders and different-column moves, including calling the appropriate server actions (`updateCardsOrder`, `updateCardStatus`).
+5. Ensured `DragDropContext` only renders client-side using the `isClient` state pattern.
+**Lesson**: When switching libraries, carefully adapt the component structure and event handler logic to match the new library's API and data structures. Pay close attention to the props required by each component (`droppableId`, `draggableId`, `index`) and the structure of the event result object (`onDragEnd`'s `result`). Client-only rendering remains important for DOM-heavy libraries.
+
+---
+
+## 2025-04-13: Persistent Reordering (v0.7.0)
 ### Persisting Order with `bulkWrite`
 **Issue**: Efficiently saving the new order of multiple cards after a drag-and-drop reorder within a column. Updating each card individually would be inefficient.
 **Solution**:
