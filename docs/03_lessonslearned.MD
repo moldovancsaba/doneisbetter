@@ -19,6 +19,25 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
+## 2025-04-13: Persistent Reordering (v0.7.0)
+
+### Persisting Order with `bulkWrite`
+**Issue**: Efficiently saving the new order of multiple cards after a drag-and-drop reorder within a column. Updating each card individually would be inefficient.
+**Solution**:
+1.  Added an `order` field (Number) to the Mongoose schema.
+2.  Created a new server action `updateCardsOrder`.
+3.  Inside this action, constructed an array of `updateOne` operations based on the client-provided list of ordered card IDs and their new indices (`order`).
+4.  Used `CardModel.bulkWrite(bulkOps)` to execute all updates in a single database command.
+5.  In `KanbanBoard.js`, after visually reordering using `arrayMove`, mapped the new list to create the `orderUpdates` array (`[{ id, order: index }]`) and called `updateCardsOrder`.
+**Lesson**: For batch updates like saving the order of a list, Mongoose's `bulkWrite` is significantly more performant than multiple individual `findByIdAndUpdate` calls. Map the client-side array to the required `bulkWrite` operation format.
+
+### Default Ordering Strategy
+**Observation**: Newly created cards need a default order value that places them appropriately (e.g., at the top) when sorting by the `order` field (ascending).
+**Solution**: Assigned `order: -Date.now()` in the `createCard` action. Since `Date.now()` increases over time, its negative value decreases, ensuring newer cards have smaller `order` values and appear first when sorting ascending.
+**Lesson**: Using timestamps (or their negative) can be a simple way to establish a default chronological or reverse-chronological order for items when an explicit order field is introduced. Ensure the sorting direction (`asc` or `desc`) matches the desired outcome based on the timestamp strategy.
+
+---
+
 ## 2025-04-13: Client-Side Reordering (v0.6.0)
 
 ### Handling Intra-Column Reordering with `@dnd-kit`

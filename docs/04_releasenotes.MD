@@ -1,5 +1,20 @@
 # Release Notes
 
+## v0.7.0 - Persistent Column Reordering (2025-04-13)
+
+### Features
+- Implemented persistence for card reordering within columns.
+- Added `order` field (Number) to the MongoDB `Card` schema.
+- Updated `createCard` action to set a default order based on timestamp.
+- Updated `getCards` action to sort fetched cards by the `order` field.
+- Created `updateCardsOrder` server action using `bulkWrite` to efficiently update the order of multiple cards in the database.
+- Updated `KanbanBoard.js` `handleDragEnd` logic to call `updateCardsOrder` after a successful intra-column visual reorder.
+- Included error handling and visual state reversal attempt in `KanbanBoard.js` if the `updateCardsOrder` action fails.
+
+### Technical Details
+- Used negative timestamp (`-Date.now()`) as the default order for new cards to ensure they appear first when sorted ascending by `order`.
+- Employed Mongoose `bulkWrite` for efficient batch updates of card order.
+
 ## v0.6.0 - Client-Side Column Reordering (2025-04-13)
 
 ### Features
@@ -107,4 +122,4 @@
 
 ### Deployment
 - Platform: Vercel
-- URL: https://doneisbetter-kqr4i2fxb-narimato.vercel.app
+- URL: https://doneisbetter-rfuj3dwjs-narimato.vercel.app

@@ -70,53 +70,41 @@ export async function createCard(data) {
 // Server action to get all cards, sorted by newest
 export async function getCards() {
   try {
-    await connectDB(); // CORRECTED: Removed duplicate connectDB call
+    await connectDB(); // Ensure connection before query
     const cards = await CardModel.find({})
-        .sort({ order: 1 })
-        .sort({ order: 1 }) // Sort by the new order field
+        .sort({ order: 1 }) // Single sort by order
         .lean();
-    // Convert Mongoose documents to plain objects including converting _id and Date
+    // Map to serializable plain objects
     return cards.map(card => ({
-        id: card._id.toString(), // CORRECTED: Added missing id field
+        id: card._id.toString(), // Ensure ID is included and stringified
         content: card.content,
-        status: card.status, // CORRECTED: Removed duplicate status field
+        status: card.status,
         order: card.order,
-        createdAt: card.createdAt.toISOString()
+        createdAt: card.createdAt.toISOString() // Serialize Date
     }));
-  // CORRECTED: Moved catch block to encompass the main logic
+  // Catch block correctly placed
   } catch (error) {
     console.error('Error fetching cards:', error);
-    return [];
+    return []; // Return empty array on error
   }
 }
 
-// Update Card Status Action - MODIFIED to accept any valid status
+// updateCardStatus (with corrected structure and await connectDB)
 export async function updateCardStatus(cardId, newStatus) {
-  // Validate input - Allow 'active', 'done', 'deleted'
-  if (!cardId || !['active', 'done', 'deleted'].includes(newStatus)) {
-    return { success: false, error: 'Invalid status provided.' };
-  }
-
-  try {
-    await connectDB();
-    const updatedCard = await CardModel.findByIdAndUpdate(
-        cardId,
-        { status: newStatus },
-        { new: true } // Return the updated document
-    );
-
-    if (!updatedCard) {
-        return { success: false, error: 'Card not found.' };
-    }
-
-    revalidatePath('/'); // Revalidate to update the list on hard refresh/navigation
-    // Return the updated status along with success
-    return { success: true, updatedStatus: newStatus };
-  } catch (error) {
-    console.error(`Error updating card status to ${newStatus}:`, error);
-    return { success: false, error: 'Failed to update card status.' };
-  }
-}
+   if (!cardId || !['active', 'done', 'deleted'].includes(newStatus)) {
+     return { success: false, error: 'Invalid status provided.' };
+   }
+   try {
+     await connectDB(); // Ensure connection
+     const updatedCard = await CardModel.findByIdAndUpdate(cardId, { status: newStatus }, { new: true });
+     if (!updatedCard) { return { success: false, error: 'Card not found.' }; }
+     revalidatePath('/');
+     return { success: true, updatedStatus: newStatus };
+   } catch (error) {
+     console.error(`Error updating card status to ${newStatus}:`, error);
+     return { success: false, error: 'Failed to update card status.' };
+   }
+} // CORRECTED: Correct closing brace for the function
 
 // ADDED: New Server Action to Update Card Order
 export async function updateCardsOrder(orderedUpdates) {
