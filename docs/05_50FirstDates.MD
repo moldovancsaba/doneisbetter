@@ -1,10 +1,16 @@
-- Installed `@hello-pangea/dnd` (React 18+ compatible fork of `react-beautiful-dnd`).
-- Refactored `KanbanBoard.js`, `Column.js`, and `CardItem.js` to use `DragDropContext`, `Droppable`, and `Draggable` components respectively.
-- Re-implemented the `onDragEnd` logic in `KanbanBoard.js` to handle both inter-column moves (status updates) and intra-column reorders (order updates) using the `react-beautiful-dnd` result structure.
-- Corrected client-side hydration issues by ensuring DND context only renders on the client.
-- Thoroughly tested locally to confirm both moving between columns and reordering within columns works correctly and persists.
-- Successfully debugged and resolved previous client-side exceptions.
-- Deployed the working drag-and-drop implementation (v0.8.0) to Vercel production.
+# Done Is Better Development Diary - 50 First Dates
+
+**Current State**: 🟢 Working Drag-and-Drop Kanban with Persistence Implemented.
+**Last Updated**: 2025-04-13T11:03:23.917Z
+**Deployment**: https://doneisbetter-gqvjmpqp0-narimato.vercel.app
+**Version**: v0.8.1
+
+## Latest Development (v0.8.1)
+
+### 2025-04-13T11:03:23.917Z: Timestamp Format Verification
+- Verified that `createdAt` timestamps on cards are displayed in UTC ISO 8601 format with milliseconds, matching backend output.
+- Updated all documentation timestamps (Release Notes, Dev Diary, Lessons Learned) to use the consistent ISO 8601 format.
+- Confirmed `CardItem.js` correctly displays the ISO string provided by `actions.js`.
 
 ## Previous Development History
 

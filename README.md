@@ -3,9 +3,8 @@
 A minimalist text card application with MongoDB integration.
 
 **Status**: 🟢 Working Drag-and-Drop Kanban Implemented
-**Version**: v0.8.0
+**Version**: v0.8.1
 **Live**: [doneisbetter-gqvjmpqp0-narimato.vercel.app](https://doneisbetter-gqvjmpqp0-narimato.vercel.app)
-
 ## Quick Start
 
 ```bash
