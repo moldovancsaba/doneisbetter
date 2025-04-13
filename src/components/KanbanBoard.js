@@ -7,11 +7,11 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
-  closestCorners // Or closestCenter based on preference
+  closestCorners
 } from '@dnd-kit/core';
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+// Import arrayMove utility
+import { sortableKeyboardCoordinates, arrayMove } from '@dnd-kit/sortable';
 import Column from './Column';
-import { updateCardStatus } from '@/app/actions'; // Server action
 
 // Helper function to map column ID to status
 const mapIdToStatus = (id) => {
@@ -125,11 +125,44 @@ export default function KanbanBoard({ initialCards }) {
            // Log warning if the card wasn't found where expected
            console.warn(`Card ${activeId} not found in expected column ${activeColumnId}`);
       }
-    } else {
-      // Log if dropped in the same column or invalid area
-      console.log(`Card ${activeId} dropped in same column or invalid area.`);
-    }
-  };
+    // --- Case 2: Reordering card WITHIN the SAME column ---
+    } else { // This correctly handles activeColumnId === overColumnId
+        console.log(`Reordering card ${activeId} within ${activeColumnId}`);
+        const getListAndSetter = () => {
+          if (activeColumnId === 'Active') return [activeCards, setActiveCards];
+          if (activeColumnId === 'Done') return [doneCards, setDoneCards];
+          if (activeColumnId === 'Deleted') return [deletedCards, setDeletedCards];
+          return [null, null];
+        };
+
+        const [currentList, setList] = getListAndSetter();
+
+        if (currentList && setList) {
+           const activeIndex = currentList.findIndex(c => c.id === activeId);
+           // Check if dropped over a card or the column itself
+           const isOverCard = currentList.some(c => c.id === overItemId);
+           let overIndex = -1;
+           if (isOverCard) {
+              overIndex = currentList.findIndex(c => c.id === overItemId);
+           } else if (overItemId === activeColumnId) {
+              // Dropped onto the column, move to the end
+              overIndex = currentList.length - 1;
+              console.log(`Card ${activeId} dropped onto column background, moving to end (index ${overIndex})`);
+           }
+
+
+           if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+             setList((items) => arrayMove(items, activeIndex, overIndex));
+             console.log(`Moved card ${activeId} from index ${activeIndex} to ${overIndex} within ${activeColumnId}`);
+             // ** Persistence To-Do:** If persistence is needed, call a new server action here
+             // const newOrderedIds = arrayMove(currentList, activeIndex, overIndex).map(c => c.id);
+             // updateCardOrder(activeColumnId, newOrderedIds);
+           } else {
+                console.log(`No reorder needed for card ${activeId} within ${activeColumnId}. Conditions not met (activeIndex=${activeIndex}, overIndex=${overIndex}).`);
+           }
+        }
+    } // End of main else block
+  }; // End of handleDragEnd
 
   // Basic reversal function for optimistic update failures
     const handleStatusUpdateReversal = (cardId, originalColumnId) => {
