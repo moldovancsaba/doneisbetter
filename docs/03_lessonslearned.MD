@@ -19,6 +19,21 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
+## 2025-04-13: Client-Side Reordering (v0.6.0)
+
+### Handling Intra-Column Reordering with `@dnd-kit`
+**Issue**: Differentiating between dropping a card into a different column vs. dropping it within the same column to reorder.
+**Solution**:
+1.  In `handleDragEnd`, compare the `activeColumnId` (derived from `findColumn(active.id)`) with the `overColumnId` (derived reliably from `over.data?.current?.sortable?.containerId || over.id`).
+2.  If they are different, execute the inter-column move logic (update status, call server action).
+3.  If they are the same, execute the intra-column reorder logic:
+    *   Get the correct state array and setter (`getListAndSetter`).
+    *   Find the `activeIndex` and `overIndex` using `findIndex` on the state array.
+    *   Use `arrayMove` utility from `@dnd-kit/sortable` to update the local state array visually.
+**Lesson**: The `onDragEnd` event provides `active` (dragged item) and `over` (drop target) information. To distinguish between moving columns and reordering within, check if the original container ID of the `active` item matches the final container ID derived from `over`. The `arrayMove` utility simplifies the state update for visual reordering. Note that persistence requires a separate step/action.
+
+---
+
 ## 2025-04-13: Drag-and-Drop Implementation (v0.5.0)
 
 ### Library Integration: `@dnd-kit`

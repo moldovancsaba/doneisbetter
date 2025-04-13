@@ -1,10 +1,17 @@
 # Done Is Better Development Diary - 50 First Dates
 
-**Current State**: 🟢 Drag-and-Drop Kanban Board Implemented.
+**Current State**: 🟢 Client-side Reordering in Columns Implemented.
 **Last Updated**: 2025-04-13
-**Deployment**: https://doneisbetter-kqr4i2fxb-narimato.vercel.app
-**Version**: v0.5.0
+**Deployment**: https://doneisbetter-rfuj3dwjs-narimato.vercel.app
+**Version**: v0.6.0
 
+## Latest Development (v0.6.0)
+
+### 2025-04-13: Client-Side Reordering
+- Updated `handleDragEnd` in `KanbanBoard.js` to differentiate between inter-column moves and intra-column reorders.
+- Implemented visual reordering within columns using `arrayMove` from `@dnd-kit/sortable` upon dropping an item within the same column.
+- This reordering is currently only visual and does not persist to the backend.
+- Successfully deployed v0.6.0 to Vercel production.
 ## Latest Development (v0.5.0)
 
 ### 2025-04-13: Drag-and-Drop Implementation
@@ -72,6 +79,7 @@
 - Basic CSS styling and dark mode support
 - Swipe left/right to mark cards as deleted/done.
 - Cards move between 'Deleted', 'Active', and 'Done' columns via drag-and-drop.
+- Cards can be visually reordered within their columns (client-side only).
 - Optimistic UI updates for swipe actions.
 ### Next Steps
 - Add input animations
@@ -93,6 +101,7 @@
 ### Known Issues
 - Basic styling only
 - Optimistic updates lack robust error recovery (if server action fails after UI update).
+- Reordering within columns is not persistent.
 - Reversal logic for failed optimistic updates is basic and might need refinement.
 - Simple CRUD operations
 

@@ -150,13 +150,35 @@ export default function KanbanBoard({ initialCards }) {
               console.log(`Card ${activeId} dropped onto column background, moving to end (index ${overIndex})`);
            }
 
-
+           // CORRECTED: Moved arrayMove and updateCardsOrder INSIDE this block
            if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
-             setList((items) => arrayMove(items, activeIndex, overIndex));
-             console.log(`Moved card ${activeId} from index ${activeIndex} to ${overIndex} within ${activeColumnId}`);
-             // ** Persistence To-Do:** If persistence is needed, call a new server action here
-             // const newOrderedIds = arrayMove(currentList, activeIndex, overIndex).map(c => c.id);
-             // updateCardOrder(activeColumnId, newOrderedIds);
+             // Move item optimistically
+             const newOrderedList = arrayMove(currentList, activeIndex, overIndex);
+             setList(newOrderedList);
+             console.log(`Visually moved card ${activeId} from index ${activeIndex} to ${overIndex} within ${activeColumnId}`);
+
+             // Call server action to persist order
+             const orderUpdates = newOrderedList.map((card, index) => ({
+               id: card.id,
+               order: index // Use simple index as order
+             }));
+
+             console.log("Calling updateCardsOrder with:", orderUpdates);
+             updateCardsOrder(orderUpdates).then(result => {
+               if (!result.success) {
+                 console.error(`Server failed to update order:`, result.error);
+                 alert(`Error saving new order: ${result.error}. Reverting visual change.`);
+                 // Revert optimistic update on failure
+                 setList(currentList); // Set back to the list before arrayMove
+               } else {
+                 console.log("Server confirmed new order saved.");
+               }
+             }).catch(err => {
+                 console.error(`Network error saving order:`, err);
+                 alert('Network error saving new order. Reverting visual change.');
+                 // Revert optimistic update on network failure
+                 setList(currentList); // Set back to the list before arrayMove
+             });
            } else {
                 console.log(`No reorder needed for card ${activeId} within ${activeColumnId}. Conditions not met (activeIndex=${activeIndex}, overIndex=${overIndex}).`);
            }

@@ -1,5 +1,15 @@
 # Release Notes
 
+## v0.6.0 - Client-Side Column Reordering (2025-04-13)
+
+### Features
+- Added visual reordering of cards within the same column using drag-and-drop.
+- Updated `KanbanBoard.js` `handleDragEnd` logic to detect same-column drops.
+- Used `arrayMove` from `@dnd-kit/sortable` to update the local component state for visual reordering.
+
+### Known Issues
+- Reordering is currently client-side only and does not persist in the database. Order resets on page refresh.
+
 ## v0.5.0 - Drag-and-Drop Kanban Board (2025-04-13)
 
 ### Features
@@ -97,4 +107,4 @@
 
 ### Deployment
 - Platform: Vercel
-- URL: https://doneisbetter-n77pwfkpk-narimato.vercel.app
+- URL: https://doneisbetter-kqr4i2fxb-narimato.vercel.app

@@ -19,11 +19,21 @@ if (!mongoose.models.Card) {
       enum: ['active', 'done', 'deleted'], // Allowed statuses
       default: 'active'
     },
+    // ADDED: Order field
+    order: {
+      type: Number,
+      required: true,
+      default: 0 // Default will be overridden on create
+    },
     createdAt: {
       type: Date,
       default: Date.now
     }
   });
+
+  // Optional: Add index for sorting performance
+  cardSchema.index({ status: 1, order: 1 });
+
   mongoose.model('Card', cardSchema);
 }
 
@@ -37,9 +47,13 @@ export async function createCard(data) {
 
   try {
     await connectDB();
-    // Status defaults to 'active' via schema
-    await CardModel.create({ content: data.content.trim() });
-    revalidatePath('/'); // Trigger data refresh
+    // Use negative timestamp for default order (newest first visually if sorted ascending)
+    const defaultOrder = -Date.now();
+    await CardModel.create({
+        content: data.content.trim(),
+        order: defaultOrder // Set the order field
+    });
+    revalidatePath('/');
     return { success: true };
   } catch (error) {
     console.error('Error creating card:', error);
@@ -56,21 +70,23 @@ export async function createCard(data) {
 // Server action to get all cards, sorted by newest
 export async function getCards() {
   try {
-    await connectDB();
-    // Remove the { status: 'active' } filter - Fetch all cards
-    const cards = await CardModel.find({}).sort({ createdAt: -1 }).lean(); // Fetch all
+    await connectDB(); // CORRECTED: Removed duplicate connectDB call
+    const cards = await CardModel.find({})
+        .sort({ order: 1 })
+        .sort({ order: 1 }) // Sort by the new order field
+        .lean();
     // Convert Mongoose documents to plain objects including converting _id and Date
     return cards.map(card => ({
-        id: card._id.toString(),
+        id: card._id.toString(), // CORRECTED: Added missing id field
         content: card.content,
-        status: card.status, // Now status is important for client-side filtering
-        // Ensure createdAt is serializable (ISO string is safe)
+        status: card.status, // CORRECTED: Removed duplicate status field
+        order: card.order,
         createdAt: card.createdAt.toISOString()
     }));
+  // CORRECTED: Moved catch block to encompass the main logic
   } catch (error) {
     console.error('Error fetching cards:', error);
-    // In a real app, you might want to throw or handle this more gracefully
-    return []; // Return empty array on error
+    return [];
   }
 }
 
@@ -99,5 +115,45 @@ export async function updateCardStatus(cardId, newStatus) {
   } catch (error) {
     console.error(`Error updating card status to ${newStatus}:`, error);
     return { success: false, error: 'Failed to update card status.' };
+  }
+}
+
+// ADDED: New Server Action to Update Card Order
+export async function updateCardsOrder(orderedUpdates) {
+  // orderedUpdates = [{ id: 'cardId1', order: 0 }, { id: 'cardId2', order: 1 }, ...]
+  if (!Array.isArray(orderedUpdates) || orderedUpdates.length === 0) {
+    return { success: false, error: 'Invalid order data provided.' };
+  }
+
+  try {
+    await connectDB();
+
+    // Prepare bulk operations
+    const bulkOps = orderedUpdates.map(update => ({
+      updateOne: {
+        filter: { _id: update.id },
+        // Update only the order field
+        update: { $set: { order: update.order } }
+      }
+    }));
+
+    // Execute bulk write
+    const result = await CardModel.bulkWrite(bulkOps);
+
+    console.log('Bulk update result:', result);
+
+    // Check bulk write result (optional but good practice)
+    if (result.ok) {
+      // No need to revalidate path as order changes are primarily visual client-side first
+      // revalidatePath('/'); // Uncomment if server-fetched order needs immediate refresh elsewhere
+      return { success: true };
+    } else {
+      console.error('Bulk update failed:', result);
+      return { success: false, error: 'Some order updates may have failed.' };
+    }
+
+  } catch (error) {
+    console.error('Error updating card order:', error);
+    return { success: false, error: 'Failed to save new card order.' };
   }
 }
