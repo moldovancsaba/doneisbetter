@@ -1,5 +1,23 @@
 # Release Notes
 
+## v0.3.0 - Swipe Actions for Cards (2025-04-13)
+
+### Features
+- Implemented swipe gestures on cards:
+  - Swipe Left: Mark card as 'deleted' (hides from list).
+  - Swipe Right: Mark card as 'done' (hides from list).
+- Added `react-swipeable` library for gesture detection.
+- Updated MongoDB schema (`status` field: 'active', 'done', 'deleted').
+- Created `updateCardStatus` server action.
+- Refactored card list rendering into client components (`CardList.js`, `CardItem.js`) to handle state and interactions.
+- Implemented optimistic UI updates (card removed immediately on swipe).
+- Added visual feedback during swipe (background color change).
+
+### Technical Details
+- `getCards` action now filters for `status: 'active'`.
+- `CardItem.js` uses `useSwipeable` hook and manages swipe state.
+- `CardList.js` manages the local card state for optimistic updates.
+
 ## v0.2.0 - Core Functionality (2025-04-13)
 
 ### Features
@@ -47,4 +65,3 @@
 ### Deployment
 - Platform: Vercel
 - URL: https://doneisbetter-n77pwfkpk-narimato.vercel.app
-

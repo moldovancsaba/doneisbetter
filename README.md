@@ -2,9 +2,10 @@
 
 A minimalist text card application with MongoDB integration.
 
-**Status**: 🟢 Core Functionality Complete
-**Version**: v0.2.0
-**Live**: [doneisbetter-n77pwfkpk-narimato.vercel.app](https://doneisbetter-n77pwfkpk-narimato.vercel.app)
+**Status**: 🟢 Swipe Actions Implemented
+**Version**: v0.3.0
+**Live**: [doneisbetter-k4i92tiif-narimato.vercel.app](https://doneisbetter-k4i92tiif-narimato.vercel.app)
+
 ## Quick Start
 
 ```bash
@@ -58,6 +59,8 @@ npm run dev
 - Enter to submit new cards
 - MongoDB storage
 - Newest to oldest display order
+- Swipe Left: Mark card as 'deleted' (hides from list)
+- Swipe Right: Mark card as 'done' (hides from list)
 
 ## Known Limitations
 

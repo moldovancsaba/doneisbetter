@@ -1,10 +1,22 @@
 # Done Is Better Development Diary - 50 First Dates
 
-**Current State**: 🟢 Core input, save, and display functionality complete.
+**Current State**: 🟢 Swipe actions (done/delete) implemented.
 **Last Updated**: 2025-04-13
-**Deployment**: https://doneisbetter-n77pwfkpk-narimato.vercel.app
-**Version**: v0.2.0
+**Deployment**: https://doneisbetter-k4i92tiif-narimato.vercel.app
+**Version**: v0.3.0
 
+## Latest Development (v0.3.0)
+
+### 2025-04-13: Swipe Actions Implementation
+- Added `react-swipeable` dependency.
+- Updated `Card` schema in `actions.js` to include a `status` field ('active', 'done', 'deleted').
+- Modified `getCards` action to only fetch 'active' cards.
+- Created `updateCardStatus` server action to set 'done' or 'deleted' status.
+- Refactored card display into client components: `CardList.js` (manages local state) and `CardItem.js` (handles swipe logic).
+- Implemented swipe left (delete) and swipe right (done) gestures using `useSwipeable`.
+- Added optimistic UI update: card is removed from the list immediately on swipe completion.
+- Added visual feedback (background color change) during swipe.
+- Successfully deployed v0.3.0 to Vercel production.
 ## Latest Development (v0.2.0)
 
 ### 2025-04-13: Input Field and Card Display
@@ -35,6 +47,8 @@
 - Newest-to-oldest display
 - Production deployment
 - Basic CSS styling and dark mode support
+- Swipe left/right to mark cards as deleted/done.
+- Optimistic UI updates for swipe actions.
 ### Next Steps
 - Add input animations
 - Implement dark mode
@@ -54,8 +68,9 @@
 
 ### Known Issues
 - Basic styling only
-- Limited error handling (though improved in v0.2.0)
+- Optimistic updates lack robust error recovery (if server action fails after UI update).
 - Simple CRUD operations
+
 ### Future Considerations
 - User authentication
 - Advanced card features

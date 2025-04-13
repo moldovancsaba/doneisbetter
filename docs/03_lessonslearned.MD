@@ -19,6 +19,28 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
+## 2025-04-13: Swipe Action Implementation (v0.3.0)
+
+### Challenge: Client-Side State Management for Server Data
+**Issue**: Needed to implement swipe gestures and optimistic UI updates (removing a card visually before server confirmation) for data initially fetched on the server.
+**Solution**:
+1.  Refactored the card display logic from the server component (`page.js`) into client components (`CardList.js`, `CardItem.js`).
+2.  Passed the initial server-fetched data (`initialCards`) as a prop to `CardList.js`.
+3.  `CardList.js` initializes its own state (`cards`) with `initialCards` and manages this state for optimistic updates.
+4.  `CardItem.js` receives a callback (`onSwipeComplete`) from `CardList.js` to notify it when a server action succeeds, allowing `CardList.js` to update its local `cards` state.
+**Lesson**: For interactive lists with optimistic updates based on server data, fetch initial data server-side but manage the list's state client-side, passing the initial data as a prop.
+
+### Best Practice: Optimistic UI Updates
+**Observation**: Removing the card immediately from the UI upon swipe completion provides a much smoother user experience than waiting for the server action to complete.
+**Solution**: The `onSwipeComplete` callback in `CardItem` triggers `setCards` in `CardList` *immediately* after the `updateCardStatus` server action promise resolves successfully.
+**Lesson**: Implement optimistic UI updates for actions like deletion or status changes to improve perceived performance. Acknowledge the need for potential error recovery logic if the server action fails post-update.
+
+### Tool Integration: `react-swipeable`
+**Observation**: The `react-swipeable` library provided a straightforward way to implement swipe detection with necessary configurations (threshold, mouse tracking, scroll prevention).
+**Lesson**: Leverage well-maintained libraries for common interaction patterns like swipe gestures to save development time and ensure robustness. Pay attention to configuration options like `preventScrollOnSwipe` and `touchAction` CSS for good mobile behavior.
+
+---
+
 ## 2025-04-13: Core Functionality Implementation (v0.2.0)
 
 ### Challenge: Server Actions and Client Components
