@@ -323,3 +323,26 @@ Must always reference and stay in sync with the following documents:
    - Verify environment variables
    - Monitor deployment logs
 
+
+---
+
+### 2025-04-17T13:41 - Resolved Persistent 401 Auth Errors
+- **Symptom:** All deployments under the `narimato` scope returned 401 Unauthorized with `_vercel_sso_nonce` cookie, even after confirming Vercel Team authentication settings were disabled.
+- **Diagnosis:** Suspected stale or conflicting local project linking information stored in the `.vercel` directory.
+- **Solution:**
+    1. Removed the local `.vercel` directory (`rm -rf .vercel`).
+    2. Explicitly relinked the local project to the correct Vercel project (`vercel link --scope narimato --project doneisbetter --yes`).
+    3. Deployed a fresh build (`vercel deploy --prod --yes`).
+- **Result:** The subsequent deployment was publicly accessible (200 OK), confirming the local configuration was the root cause.
+- **Lesson:** When Vercel CLI deployment behavior contradicts dashboard settings (especially regarding authentication), clearing local Vercel configuration (`.vercel` directory) and relinking can resolve inconsistencies.
+
+---
+
+### 2025-04-17T14:48 - Persistent Extraneous Package Investigation
+- **Package:** `@emnapi/runtime@1.4.3` consistently appears via `npm list --depth=0 | grep extraneous`.
+- **Attempts to Remove:**
+    - `npm prune`
+    - `npm cache clean --force`, `sudo rm -rf node_modules package-lock.json`, `npm install --force --legacy-peer-deps`
+- **Result:** Package persists despite all standard cleaning methods.
+- **Hypothesis:** Might be linked via build tooling, global packages, or non-standard npm resolution, not directly by `package.json`.
+- **Decision:** As `npm audit` shows 0 vulnerabilities and the package doesn't prevent successful builds, ignoring its presence for stability (Rule 07). Further investigation deferred unless it causes runtime issues. Build successfully completed after ignoring.

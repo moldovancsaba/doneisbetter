@@ -1,10 +1,12 @@
 /* src/app/globals.css */
-/* REMOVED ALL @tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Base styles using CSS variable and weights */
+/* Base styles using system font stack */
 body {
-  font-family: var(--font-urbanist), system-ui, sans-serif; /* Use variable */
-  font-weight: 300; /* Default Light */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; /* Standard system stack */
+  font-weight: 400; /* Default normal weight */
   margin: 0;
   background-color: #f9fafb; /* gray-50 */
   color: #111827; /* gray-900 - Darker default text */
@@ -31,23 +33,17 @@ body {
 
 /* Headings and Bold */
 h1, h2, h3, h4, h5, h6, strong, b {
-  font-weight: 800; /* Default ExtraBold */
+  font-weight: 700; /* Standard bold */
 }
 
-/* Custom Title Styles */
+/* Custom Title Styles removed as they relied on specific font weights */
 .page-title {
     font-size: 2rem; /* Adjust as needed */
     text-align: center;
     margin-bottom: 2rem;
-    /* Base weight handled by spans now */
+    font-weight: 700; /* Make title bold */
 }
-.title-bold {
-    font-weight: 800; /* Explicit ExtraBold */
-}
-.title-light {
-    font-weight: 300; /* Explicit Light */
-}
-
+/* .title-bold and .title-light classes are removed */
 
 /* Keep other necessary plain CSS rules for layout, input, kanban, card */
 .main-container { min-height: 100vh; padding: 1rem; }
@@ -62,10 +58,10 @@ h1, h2, h3, h4, h5, h6, strong, b {
 .kanban-column { display: flex; flex-direction: column; min-width: 0; padding: 0.5rem; background-color: rgba(243, 244, 246, 0.5); border-radius: 0.5rem; }
 .column-title { font-size: 1.125rem; /* Base size */ margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb; text-align: center; color: #4b5563;}
 .column-title-text {
-  font-weight: 800; /* Explicit ExtraBold for title text */
+  font-weight: 700; /* Standard bold for title text */
 }
 .column-title-count {
-  font-weight: 300; /* Explicit Light for count */
+  font-weight: 400; /* Standard normal weight for count */
   margin-left: 0.25rem; /* Add a small space */
   color: #6b7280; /* Slightly lighter count color */
 }
@@ -75,8 +71,8 @@ h1, h2, h3, h4, h5, h6, strong, b {
 .card-item-draggable { user-select: none; }
 .card-item-draggable.dragging .card { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); cursor: grabbing; }
 .card { padding: 1rem; background-color: #ffffff; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb; cursor: grab; }
-.card p { margin: 0; word-wrap: break-word; font-weight: 300; /* Ensure light */ color: #111827; /* gray-900 - explicit contrast */}
-.card-time { display: block; margin-top: 0.5rem; font-size: 0.75rem; color: #4b5563; /* gray-600 - slightly darker time */ font-weight: 300; /* Ensure light */}
+p { margin: 0; word-wrap: break-word; font-weight: 400; /* Standard normal weight */ color: #111827; /* gray-900 - explicit contrast */}
+.card-time { display: block; margin-top: 0.5rem; font-size: 0.75rem; color: #4b5563; /* gray-600 - slightly darker time */ font-weight: 400; /* Standard normal weight */}
 
 /* Simple text align utility */
 .text-center { text-align: center; }

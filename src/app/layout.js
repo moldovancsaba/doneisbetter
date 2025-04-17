@@ -1,13 +1,8 @@
 // src/app/layout.js
 import './globals.css'
-import { Urbanist } from 'next/font/google'
+// Removed Urbanist font import
 
-const urbanist = Urbanist({
-  subsets: ['latin'],
-  weight: ['300', '800'],
-  display: 'swap',
-  variable: '--font-urbanist'
-})
+// Removed Urbanist font config object
 
 export const metadata = {
   title: '#DONEISBETTER',
@@ -16,10 +11,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={urbanist.variable}>
+    // Use basic Tailwind font-sans or define in globals.css
+    <html lang="en" className="font-sans">
       {/* Correct Head Structure */}
       <head>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        {/* Removed Material Symbols link */}
       </head>
       {/* Correct Body Structure */}
       <body>
