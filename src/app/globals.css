@@ -1,0 +1,87 @@
+/* src/app/globals.css */
+/* REMOVED ALL @tailwind directives */
+
+/* Base styles using CSS variable and weights */
+body {
+  font-family: var(--font-urbanist), system-ui, sans-serif; /* Use variable */
+  font-weight: 300; /* Default Light */
+  margin: 0;
+  background-color: #f9fafb; /* gray-50 */
+  color: #111827; /* gray-900 - Darker default text */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  body { background-color: #030712; color: #f9fafb; } /* Near black bg, near white text */
+  .card { background-color: #1f2937; border-color: #374151; }
+  .input-base { background-color: #1f2937; border-color: #374151; color: #f9fafb; } /* Lighter input text */
+  .input-active { border-color: #3b82f6; }
+  .input-error { border-color: #ef4444; }
+  .card-list-in-column.dragging-over { background-color: rgba(59, 130, 246, 0.2); }
+  .column-title { border-bottom-color: #374151; color: #d1d5db; } /* Adjusted dark title color */
+  .column-title-count { color: #9ca3af; } /* Dark mode count color */
+  .empty-column-message { color: #4b5563; }
+  .card-time { color: #6b7280; }
+   .page-title .title-light { color: #e5e7eb; } /* Ensure light part visible */
+   .page-title .title-bold { color: #ffffff; } /* Ensure bold part visible */
+}
+
+
+/* Headings and Bold */
+h1, h2, h3, h4, h5, h6, strong, b {
+  font-weight: 800; /* Default ExtraBold */
+}
+
+/* Custom Title Styles */
+.page-title {
+    font-size: 2rem; /* Adjust as needed */
+    text-align: center;
+    margin-bottom: 2rem;
+    /* Base weight handled by spans now */
+}
+.title-bold {
+    font-weight: 800; /* Explicit ExtraBold */
+}
+.title-light {
+    font-weight: 300; /* Explicit Light */
+}
+
+
+/* Keep other necessary plain CSS rules for layout, input, kanban, card */
+.main-container { min-height: 100vh; padding: 1rem; }
+.content-wrapper-kanban { max-width: 1024px; margin: 2.5rem auto; }
+.input-wrapper { margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+.input-base { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; transition: border-color 0.2s, box-shadow 0.2s; outline: none;}
+.input-active { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
+.input-error { border-color: #ef4444; }
+.error-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; }
+.loading-indicator { font-size: 0.875rem; color: #6b7280; margin-left: 0.5rem; } /* Note: SVG is used in Input.js now */
+.kanban-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.kanban-column { display: flex; flex-direction: column; min-width: 0; padding: 0.5rem; background-color: rgba(243, 244, 246, 0.5); border-radius: 0.5rem; }
+.column-title { font-size: 1.125rem; /* Base size */ margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb; text-align: center; color: #4b5563;}
+.column-title-text {
+  font-weight: 800; /* Explicit ExtraBold for title text */
+}
+.column-title-count {
+  font-weight: 300; /* Explicit Light for count */
+  margin-left: 0.25rem; /* Add a small space */
+  color: #6b7280; /* Slightly lighter count color */
+}
+.card-list-in-column { display: flex; flex-direction: column; gap: 1rem; min-height: 100px; padding: 0.5rem 0.25rem; border-radius: 0.25rem; transition: background-color 0.2s ease; flex-grow: 1;}
+.card-list-in-column.dragging-over { background-color: rgba(59, 130, 246, 0.1); }
+.empty-column-message { text-align: center; color: #9ca3af; font-style: italic; margin-top: 1rem; padding: 1rem; }
+.card-item-draggable { user-select: none; }
+.card-item-draggable.dragging .card { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); cursor: grabbing; }
+.card { padding: 1rem; background-color: #ffffff; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb; cursor: grab; }
+.card p { margin: 0; word-wrap: break-word; font-weight: 300; /* Ensure light */ color: #111827; /* gray-900 - explicit contrast */}
+.card-time { display: block; margin-top: 0.5rem; font-size: 0.75rem; color: #4b5563; /* gray-600 - slightly darker time */ font-weight: 300; /* Ensure light */}
+
+/* Simple text align utility */
+.text-center { text-align: center; }
+/* Simple margin utilities */
+.mb-8 { margin-bottom: 2rem; } /* Increased from 1.5rem */
+.mt-8 { margin-top: 2rem; }
+/* Removed max-w-xl as container class handles it */
+.mx-auto { margin-left: auto; margin-right: auto; }
