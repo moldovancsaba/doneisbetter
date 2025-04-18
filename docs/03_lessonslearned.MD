@@ -19,22 +19,32 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
-## 2025-04-18T13:17:21.935618+02:00: Git Case Sensitivity Handling (v1.1.1)
+## Authentication Implementation Challenges (2025-04-18)
+
+### Key Lessons
+
+1. **Next.js 15 Compatibility**: 
+   - Current @auth0/nextjs-auth0 (v4.4.2) doesn't fully support Next.js 15.3.0
+   - Errors occurred with handlers export pattern
+
+2. **Middleware Issues**:
+   - Edge runtime conflicts with some OIDC dependencies
+   - Better to implement page-level protection initially
+
+3. **Rollback Procedure**:
+   - Verify clean working directory first
+   - Use explicit commit hash (`git reset --hard 9375766`)
+   - Full cleanup of node_modules and .next required
+
+4. **Recommendations for Future**:
+   - Consider Auth.js (next-auth v5 beta) for better Next.js 15 support  
+   - Always test in isolated branch before merging
+   - Verify build works locally before deployment
+
+## 2025-04-18T13:25:00.000Z: Auth0 Implementation (v1.2.0)
 
 ### Challenge: Inconsistent File Casing in Git
 **Issue**: The project had two versions of the same file (`10_AI_Knowledge_Rules.md` and `docs/10_AI_Knowledge_Rules.MD`) due to case sensitivity on Unix systems. Git was tracking both as separate files.
-
-**Solution**:
-1. Added proper case-sensitive naming to all documentation files
-2. Moved the file to the docs/ directory
-3. Committed the deletion of the old file and addition of the new one in a single atomic commit
-
-**Lesson**: On Unix systems, Git is case-sensitive. Always use consistent casing for filenames and prefer lowercase_with_underscores or kebab-case for maximum compatibility. Moving files to organized directories early prevents these issues.
-
-## 2025-04-13T14:05:00.000Z: Font Integration & PostCSS/Tailwind Build Issues (v0.9.0)
-
-### Challenge: Persistent PostCSS/Tailwind Configuration Errors
-**Issue**: Integrating `next/font/google` with Tailwind CSS resulted in persistent and contradictory build errors. Errors included demands for `@tailwindcss/postcss`, complaints about using `tailwindcss` directly, failure to recognize utility classes (`font-light`), and syntax errors related to PostCSS config formats (`require` vs object keys). Multiple attempts to fix `postcss.config.js` and re-install dependencies failed. `npx tailwindcss init -p` also failed repeatedly.
 **Solution (Workaround)**:
 1.  Removed `@tailwind` directives from `globals.css`.
 2.  Kept minimal `tailwind.config.js` (for `content` scanning) and `postcss.config.js` (with `tailwindcss: {}`, `autoprefixer: {}`). Although Tailwind isn't processing via `@tailwind`, having the configs might be implicitly needed by Next.js's build pipeline.

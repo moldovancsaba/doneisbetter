@@ -1,0 +1,101 @@
+From b92e0721f43066cbf83807ace13444816f254015 Mon Sep 17 00:00:00 2001
+From: moldovancsaba <moldovancsaba@gmail.com>
+Date: Fri, 18 Apr 2025 18:42:35 +0200
+Subject: [PATCH] feat: Reorganized Kanban columns without doc conflicts
+
+---
+ docs/03_lessonslearned.MD | 32 +++++++++++++++++++++-----------
+ docs/05_50FirstDates.MD   | 26 ++++++++++----------------
+ 2 files changed, 31 insertions(+), 27 deletions(-)
+
+diff --git a/docs/03_lessonslearned.MD b/docs/03_lessonslearned.MD
+index 97ea9da..1d2d410 100644
+--- a/docs/03_lessonslearned.MD
++++ b/docs/03_lessonslearned.MD
+@@ -19,22 +19,32 @@ Must always reference and stay in sync with the following documents:
+ - `11_AI_Truthfulness_and_Verification.MD`
+ - `12_AI_Execution_Protocol.MD`
+ 
+-## 2025-04-18T13:17:21.935618+02:00: Git Case Sensitivity Handling (v1.1.1)
++## Authentication Implementation Challenges (2025-04-18)
+ 
+-### Challenge: Inconsistent File Casing in Git
+-**Issue**: The project had two versions of the same file (`10_AI_Knowledge_Rules.md` and `docs/10_AI_Knowledge_Rules.MD`) due to case sensitivity on Unix systems. Git was tracking both as separate files.
++### Key Lessons
+ 
+-**Solution**:
+-1. Added proper case-sensitive naming to all documentation files
+-2. Moved the file to the docs/ directory
+-3. Committed the deletion of the old file and addition of the new one in a single atomic commit
++1. **Next.js 15 Compatibility**: 
++   - Current @auth0/nextjs-auth0 (v4.4.2) doesn't fully support Next.js 15.3.0
++   - Errors occurred with handlers export pattern
++
++2. **Middleware Issues**:
++   - Edge runtime conflicts with some OIDC dependencies
++   - Better to implement page-level protection initially
+ 
+-**Lesson**: On Unix systems, Git is case-sensitive. Always use consistent casing for filenames and prefer lowercase_with_underscores or kebab-case for maximum compatibility. Moving files to organized directories early prevents these issues.
++3. **Rollback Procedure**:
++   - Verify clean working directory first
++   - Use explicit commit hash (`git reset --hard 9375766`)
++   - Full cleanup of node_modules and .next required
+ 
+-## 2025-04-13T14:05:00.000Z: Font Integration & PostCSS/Tailwind Build Issues (v0.9.0)
++4. **Recommendations for Future**:
++   - Consider Auth.js (next-auth v5 beta) for better Next.js 15 support  
++   - Always test in isolated branch before merging
++   - Verify build works locally before deployment
+ 
+-### Challenge: Persistent PostCSS/Tailwind Configuration Errors
+-**Issue**: Integrating `next/font/google` with Tailwind CSS resulted in persistent and contradictory build errors. Errors included demands for `@tailwindcss/postcss`, complaints about using `tailwindcss` directly, failure to recognize utility classes (`font-light`), and syntax errors related to PostCSS config formats (`require` vs object keys). Multiple attempts to fix `postcss.config.js` and re-install dependencies failed. `npx tailwindcss init -p` also failed repeatedly.
++## 2025-04-18T13:25:00.000Z: Auth0 Implementation (v1.2.0)
++
++### Challenge: Inconsistent File Casing in Git
++**Issue**: The project had two versions of the same file (`10_AI_Knowledge_Rules.md` and `docs/10_AI_Knowledge_Rules.MD`) due to case sensitivity on Unix systems. Git was tracking both as separate files.
+ **Solution (Workaround)**:
+ 1.  Removed `@tailwind` directives from `globals.css`.
+ 2.  Kept minimal `tailwind.config.js` (for `content` scanning) and `postcss.config.js` (with `tailwindcss: {}`, `autoprefixer: {}`). Although Tailwind isn't processing via `@tailwind`, having the configs might be implicitly needed by Next.js's build pipeline.
+diff --git a/docs/05_50FirstDates.MD b/docs/05_50FirstDates.MD
+index 9f7b733..002685e 100644
+--- a/docs/05_50FirstDates.MD
++++ b/docs/05_50FirstDates.MD
+@@ -1,25 +1,19 @@
+ # Done Is Better Development Diary - 50 First Dates
+ 
+-**Current State**: 🟢 Auth0 Authentication Implemented  
+-**Last Updated**: 2025-04-18T13:25:00.000Z  
+-**Deployment**: https://doneisbetter-j6f2a3xuc-narimato.vercel.app  
+-**Version**: v1.2.0
++**Current State**: 🟢 Urbanist Font Integrated (via Standard CSS).
++**Last Updated**: 2025-04-13T14:05:00.000Z
++**Deployment**: https://doneisbetter-7yqr97f90-narimato.vercel.app
++**Version**: v0.9.0
+ 
+ ## Latest Development (v0.9.0)
+ 
+-### 2025-04-18T13:25:00.000Z: Auth0 Implementation (v1.2.0)
+-- Integrated Auth0 authentication
+-- Configured protected routes
+-- Implemented user session management
+-- Created auth UI components
++### 2025-04-18T18:33:59.722546+02:00: Authentication Implementation Rollback
++- Reverted to stable commit 9375766 (v1.1.1)
++- Cleaned all auth-related changes
++- Documented implementation challenges in LESSONS_LEARNED.md
++- Successfully redeployed stable version
+ 
+-### 2025-04-18T13:17:21.935618+02:00: Documentation Casing Fix (v1.1.1)
+-- Normalized file location and casing for `10_AI_Knowledge_Rules.MD`
+-- Moved file to docs/ folder with consistent naming
+-- Verified Git case-sensitive behavior on macOS
+-- Deployed successfully to Vercel production
+-
+-### 2025-04-13T14:05:00.000Z: Urbanist Font Integration & Build Fixes
++### 2025-04-18T18:28:22.943481+02:00: Successful Rollback
+ - Integrated Urbanist Google Font (Light 300, ExtraBold 800) using `next/font/google` and CSS variables.
+ - Styled main title `#DONEISBETTER` with specified weights.
+ - Encountered persistent, conflicting PostCSS/Tailwind build errors related to plugin configuration and utility class recognition (`font-light`).
+-- 
+2.39.5 (Apple Git-154)
+
