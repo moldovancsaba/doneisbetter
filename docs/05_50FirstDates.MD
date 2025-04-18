@@ -1,11 +1,23 @@
 # Done Is Better Development Diary - 50 First Dates
 
-**Current State**: 🟢 Urbanist Font Integrated (via Standard CSS).
-**Last Updated**: 2025-04-13T14:05:00.000Z
-**Deployment**: https://doneisbetter-7yqr97f90-narimato.vercel.app
-**Version**: v0.9.0
+**Current State**: 🟢 Auth0 Authentication Implemented  
+**Last Updated**: 2025-04-18T13:25:00.000Z  
+**Deployment**: https://doneisbetter-j6f2a3xuc-narimato.vercel.app  
+**Version**: v1.2.0
 
 ## Latest Development (v0.9.0)
+
+### 2025-04-18T13:25:00.000Z: Auth0 Implementation (v1.2.0)
+- Integrated Auth0 authentication
+- Configured protected routes
+- Implemented user session management
+- Created auth UI components
+
+### 2025-04-18T13:17:21.935618+02:00: Documentation Casing Fix (v1.1.1)
+- Normalized file location and casing for `10_AI_Knowledge_Rules.MD`
+- Moved file to docs/ folder with consistent naming
+- Verified Git case-sensitive behavior on macOS
+- Deployed successfully to Vercel production
 
 ### 2025-04-13T14:05:00.000Z: Urbanist Font Integration & Build Fixes
 - Integrated Urbanist Google Font (Light 300, ExtraBold 800) using `next/font/google` and CSS variables.

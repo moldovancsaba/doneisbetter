@@ -19,6 +19,18 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
+## 2025-04-18T13:17:21.935618+02:00: Git Case Sensitivity Handling (v1.1.1)
+
+### Challenge: Inconsistent File Casing in Git
+**Issue**: The project had two versions of the same file (`10_AI_Knowledge_Rules.md` and `docs/10_AI_Knowledge_Rules.MD`) due to case sensitivity on Unix systems. Git was tracking both as separate files.
+
+**Solution**:
+1. Added proper case-sensitive naming to all documentation files
+2. Moved the file to the docs/ directory
+3. Committed the deletion of the old file and addition of the new one in a single atomic commit
+
+**Lesson**: On Unix systems, Git is case-sensitive. Always use consistent casing for filenames and prefer lowercase_with_underscores or kebab-case for maximum compatibility. Moving files to organized directories early prevents these issues.
+
 ## 2025-04-13T14:05:00.000Z: Font Integration & PostCSS/Tailwind Build Issues (v0.9.0)
 
 ### Challenge: Persistent PostCSS/Tailwind Configuration Errors

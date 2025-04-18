@@ -1,5 +1,33 @@
 # Release Notes
 
+## v1.2.0 - Auth0 Integration (2025-04-18)
+
+### Features
+- Added Auth0 authentication
+- Protected all routes with middleware
+- Implemented user profile display
+- Added login/logout controls
+
+### Technical Notes
+- Uses @auth0/nextjs-auth0 SDK
+- Session management via HTTP-only cookies
+- Type-safe user data
+
+## v1.1.1 - File Casing Normalization (2025-04-18T13:17:21.935618+02:00)
+### Fixes
+- Normalized file casing for AI knowledge rules documentation
+- Moved `10_AI_Knowledge_Rules.MD` to `docs/` folder
+- Fixed potential case sensitivity issues in Git tracking
+
+### Technical Notes
+- Deleted old file `10_AI_Knowledge_Rules.md`
+- Kept and committed new file `docs/10_AI_Knowledge_Rules.MD`
+- Verified case sensitivity handling in git
+
+### Deployment
+- Platform: Vercel
+- URL: https://doneisbetter-j6f2a3xuc-narimato.vercel.app
+
 ## ✅ Build Fix & Redeployment (2025-04-17T14:05)
 - **Status:** Production deployment successful after resolving build errors.
 - **Fixes:**
