@@ -19,9 +19,9 @@ export default async function Home() {
       {/* Single content wrapper */}
       <div className="content-wrapper-kanban">
 
-        {/* Title using custom CSS classes */}
+        {/* Title using custom CSS classes with emoji */}
         <h1 className="page-title">
-           <span className="title-bold">#DONE</span>
+           <span className="title-bold">#️⃣DONE</span>
            <span className="title-light">ISBETTER</span>
         </h1>
 

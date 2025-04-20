@@ -242,9 +242,79 @@ h1, h2, h3, h4, h5, h6, strong, b {
   cursor: grab;
   min-height: 80px; /* Minimum height to ensure consistent card appearance */
   word-break: break-word; /* Prevent overflow of long words */
+  position: relative; /* For absolute positioning of the delete button */
+  padding-bottom: 2rem; /* Extra space at bottom for the delete button */
 }
 p { margin: 0; word-wrap: break-word; font-weight: 400; /* Standard normal weight */ color: #111827; /* gray-900 - explicit contrast */}
 .card-time { display: block; margin-top: 0.5rem; font-size: 0.75rem; color: #4b5563; /* gray-600 - slightly darker time */ font-weight: 400; /* Standard normal weight */}
+
+/* Delete Button Styles */
+.delete-button {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+  z-index: 5; /* Ensure it's above other card content */
+}
+
+.delete-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  background-color: rgba(239, 68, 68, 0.1); /* Light red background on hover */
+}
+
+.delete-button:focus {
+  outline: 2px solid rgba(239, 68, 68, 0.5);
+  outline-offset: 2px;
+}
+
+.delete-button:active {
+  transform: scale(0.95);
+}
+
+.delete-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* Error message styling */
+.delete-error {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444; /* Red-500 */
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .delete-button {
+    color: #e5e7eb; /* Gray-200 */
+  }
+  
+  .delete-button:hover {
+    background-color: rgba(239, 68, 68, 0.2); /* Darker red in dark mode */
+  }
+  
+  .delete-error {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #fca5a5; /* Red-300 - lighter for dark mode */
+  }
+}
+
+/* Simple text align utility */
 
 /* Simple text align utility */
 .text-center { text-align: center; }

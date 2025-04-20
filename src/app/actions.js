@@ -145,3 +145,36 @@ export async function updateCardsOrder(orderedUpdates) {
     return { success: false, error: 'Failed to save new card order.' };
   }
 }
+
+// Server action to permanently delete a card
+export async function deleteCard(cardId) {
+  if (!cardId) {
+    return { success: false, error: 'Invalid card ID provided.' };
+  }
+
+  try {
+    await connectDB(); // Ensure connection
+    
+    // Find and delete the card by ID
+    const result = await CardModel.findByIdAndDelete(cardId);
+    
+    // Check if the card was found and deleted
+    if (!result) {
+      return { success: false, error: 'Card not found.' };
+    }
+    
+    // Revalidate the path to update the UI
+    revalidatePath('/');
+    
+    return { 
+      success: true, 
+      message: 'Card permanently deleted.'
+    };
+  } catch (error) {
+    console.error(`Error deleting card ${cardId}:`, error);
+    return { 
+      success: false, 
+      error: 'Failed to delete card due to a server error.' 
+    };
+  }
+}
