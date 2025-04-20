@@ -1,5 +1,34 @@
 # Release Notes
 
+## v1.2.0 - Eisenhower Matrix Layout (2025-04-20T15:16:00.000Z)
+
+### Features
+- **Layout:** Implemented Eisenhower Matrix 2x2 grid layout
+- **Columns:** Added 4th column (DECIDE) alongside the existing 3 columns
+- **Schema:** Updated database schema to include 'decide' status type
+- **Organization:**
+  - Top Row: "DO" and "DECIDE" columns
+  - Bottom Row: "DELEGATE" (renamed from "DELETED") and "DELETE" (renamed from "DONE")
+- **Responsive:** Mobile-friendly adaptive layout
+
+### Deployment
+- **Platform:** Vercel
+- **URL:** https://doneisbetter-1ye8pikh5-narimato.vercel.app
+- **Deployment Date:** 2025-04-20T15:16:00.000Z
+
+## v1.1.1 - Stable Deployment (2025-04-20T15:07:00.000Z)
+
+### Status
+- **Version:** v1.1.1 tag deployed to production
+- **Changes:** File organization normalization
+- **Fix:** Normalized file casing for 10_AI_Knowledge_Rules.MD by moving to docs/
+
+### Deployment
+- **Platform:** Vercel
+- **URL:** https://doneisbetter-9t1zout6s-narimato.vercel.app
+- **Commit:** 9375766 (tagged as v1.1.1)
+- **Deployment Date:** 2025-04-20
+
 ## ✅ Build Fix & Redeployment (2025-04-17T14:05)
 - **Status:** Production deployment successful after resolving build errors.
 - **Fixes:**
