@@ -1,17 +1,42 @@
 # Release Notes
 
-## v1.2.0 - Auth0 Integration (2025-04-18)
+## v1.2.1 - UI Refinements (2025-04-20T15:29:00.000Z)
 
-### Features
-- Added Auth0 authentication
-- Protected all routes with middleware
-- Implemented user profile display
-- Added login/logout controls
+### Improvements
+- **Viewport Utilization:** Optimized layout to maximize screen real estate
+- **Full-Height Design:** Eliminated unnecessary scrolling with full viewport design
+- **Equal Column Layout:** Ensured columns maintain equal proportions
+- **Scrolling Improvements:**
+  - Individual column scrolling for overflow content
+  - Custom scrollbar styling for better UX
+- **Responsive Behavior:** Improved mobile layout with appropriate height constraints
 
 ### Technical Notes
-- Uses @auth0/nextjs-auth0 SDK
-- Session management via HTTP-only cookies
-- Type-safe user data
+- Used CSS Flexbox for dynamic height distribution
+- Applied viewport-based sizing for grid elements
+- Optimized padding and spacing for denser information display
+- Removed unused auth-related components and dependencies
+
+### Deployment
+- **Platform:** Vercel
+- **URL:** https://doneisbetter-lhv9tfqm8-narimato.vercel.app
+- **Deployment Date:** 2025-04-20T15:29:00.000Z
+
+## v1.2.0 - Eisenhower Matrix Layout (2025-04-20T15:16:00.000Z)
+
+### Features
+- **Layout:** Implemented Eisenhower Matrix 2x2 grid layout
+- **Columns:** Added 4th column (DECIDE) alongside the existing 3 columns
+- **Schema:** Updated database schema to include 'decide' status type
+- **Organization:**
+  - Top Row: "DO" and "DECIDE" columns
+  - Bottom Row: "DELEGATE" (renamed from "DELETED") and "DELETE" (renamed from "DONE")
+- **Responsive:** Mobile-friendly adaptive layout
+
+### Deployment
+- **Platform:** Vercel
+- **URL:** https://doneisbetter-1ye8pikh5-narimato.vercel.app
+- **Deployment Date:** 2025-04-20T15:16:00.000Z
 
 ## v1.1.1 - File Casing Normalization (2025-04-18T13:17:21.935618+02:00)
 ### Fixes
