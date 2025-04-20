@@ -284,6 +284,42 @@ p { margin: 0; word-wrap: break-word; font-weight: 400; /* Standard normal weigh
   opacity: 0.4;
 }
 
+/* Drag Handle Styles */
+.drag-handle {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: grab;
+  font-size: 1rem;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+  z-index: 5; /* Ensure it's above other card content */
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  background-color: rgba(59, 130, 246, 0.1); /* Light blue background on hover */
+}
+
+.drag-handle:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+.dragging .drag-handle {
+  cursor: grabbing;
+}
+
+/* Adjust card padding to accommodate the handle */
+.card {
+  padding-top: 1.75rem; /* Extra space at top for the drag handle */
+}
+
 /* Error message styling */
 .delete-error {
   position: absolute;
@@ -311,6 +347,14 @@ p { margin: 0; word-wrap: break-word; font-weight: 400; /* Standard normal weigh
   .delete-error {
     background-color: rgba(239, 68, 68, 0.2);
     color: #fca5a5; /* Red-300 - lighter for dark mode */
+  }
+  
+  .drag-handle {
+    color: #e5e7eb; /* Gray-200 */
+  }
+  
+  .drag-handle:hover {
+    background-color: rgba(59, 130, 246, 0.2); /* Darker blue in dark mode */
   }
 }
 

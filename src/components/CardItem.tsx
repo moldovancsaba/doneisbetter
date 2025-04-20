@@ -58,15 +58,25 @@ export default function CardItem({ card, index }: CardItemProps) {
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          {...provided.dragHandleProps}
           className={`card-item-draggable ${snapshot.isDragging ? 'dragging' : ''}`}
           style={{
             ...provided.draggableProps.style,
-            position: 'relative', // Enable absolute positioning of the delete button
+            position: 'relative', // Enable absolute positioning of buttons
           }}
           aria-roledescription="Draggable item"
         >
           <div className="card">
+            {/* Drag handle button */}
+            <button
+              {...provided.dragHandleProps}
+              className="drag-handle"
+              aria-label="Drag to reorder card"
+              title="Drag to reorder"
+              type="button"
+            >
+              🔃
+            </button>
+            
             <p>{card.content}</p>
             
             <time 
