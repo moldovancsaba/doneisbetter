@@ -16,7 +16,7 @@ if (!mongoose.models.Card) {
     // Add status field with default 'active'
     status: {
       type: String,
-      enum: ['active', 'done', 'deleted'], // Allowed statuses
+      enum: ['active', 'done', 'deleted', 'decide'], // Allowed statuses
       default: 'active'
     },
     // ADDED: Order field
@@ -91,7 +91,7 @@ export async function getCards() {
 
 // updateCardStatus (with corrected structure and await connectDB)
 export async function updateCardStatus(cardId, newStatus) {
-   if (!cardId || !['active', 'done', 'deleted'].includes(newStatus)) {
+   if (!cardId || !['active', 'done', 'deleted', 'decide'].includes(newStatus)) {
      return { success: false, error: 'Invalid status provided.' };
    }
    try {
