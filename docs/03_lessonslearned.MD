@@ -19,6 +19,107 @@ Must always reference and stay in sync with the following documents:
 - `11_AI_Truthfulness_and_Verification.MD`
 - `12_AI_Execution_Protocol.MD`
 
+
+## Feature Dependencies and Clean Removal (2025-04-20)
+
+### Challenge: Removing Auth0 Integration and Understanding Feature Dependencies
+
+**Issue**: Removing the Auth0 authentication feature required understanding all dependent components and touchpoints across the codebase. The auth integration had created implicit dependencies in multiple files that were not immediately obvious, causing build failures after partial removal.
+
+**Affected Files**:
+- `src/app/auth-provider.tsx` - Auth0 context provider
+- `src/app/dashboard/page.tsx` - Protected route component
+- `src/app/layout.tsx` - Imported and wrapped content with AuthProvider
+- `src/middleware.ts` - Auth0 middleware for route protection
+- `auth.config.ts` - Auth0 configuration file
+- `src/components/auth/` - Directory with auth-specific components
+- `next.config.js` - Contained redirect from root to dashboard
+
+**Debugging Process**:
+1. Initial removal of primary auth-related files caused cascading build errors
+2. Each build error revealed another dependency
+3. Needed to systematically track down and remove all auth-related code
+4. Discovered implicit redirect in `next.config.js` that wasn't obvious
+
+**Solution Steps**:
+1. Created comprehensive inventory of all auth-related files
+2. Removed auth components directory completely
+3. Updated layout to remove auth provider wrapper
+4. Removed middleware file
+5. Removed auth configuration
+6. Updated next.config.js to remove redirects
+
+**Key Lessons**:
+
+1. **Dependency Mapping**: When implementing a feature, document ALL touch points in the codebase:
+   - Component dependencies
+   - Configuration changes
+   - Middleware additions
+   - Layout modifications
+   - Navigation/routing changes
+
+2. **Feature Registry**: Create a "Feature Registry" document that maps each major feature to:
+   - All files directly implementing the feature
+   - All files that depend on or reference the feature
+   - Configuration changes required by the feature
+   - Environment variables used by the feature
+
+3. **Clean Feature Boundaries**: Design features with clear boundaries and minimal coupling:
+   - Use interface abstractions between features
+   - Isolate feature-specific code in dedicated directories
+   - Avoid embedding feature dependencies in shared components
+   - Use feature flags for conditional rendering
+
+4. **Removal Checklist Template**: For each major feature, create a removal checklist that includes:
+   - Primary feature files to remove
+   - Configuration settings to revert
+   - Environment variables to unset
+   - Dependent features to update
+   - Build verification steps
+
+### Best Practices for Future Feature Implementation
+
+1. **Pre-Implementation Planning**:
+   - Document all anticipated file changes
+   - Create dependency graph showing impacted areas
+   - List all configuration changes required
+
+2. **Implementation Documentation**:
+   - Update feature registry with actual files modified
+   - Note any unexpected dependencies discovered
+   - Document all configuration changes made
+
+3. **Post-Implementation Audit**:
+   - Verify all touch points are documented
+   - Create feature removal guide if needed
+   - Update architecture diagrams to show new feature relationships
+
+4. **Code Organization**:
+   - Group feature-specific files in dedicated directories
+   - Use clear naming conventions that indicate feature relationships
+   - Minimize cross-feature dependencies through abstraction
+   - Consider feature-based code splitting
+
+### Architectural Recommendations
+
+1. **Feature Modules**: Organize code into feature modules with clear boundaries
+2. **Provider Pattern**: Use context providers with composition over direct imports
+3. **Configuration Isolation**: Keep feature-specific configuration isolated
+4. **Dependency Injection**: Use dependency injection to make feature dependencies explicit
+5. **Feature Flags**: Implement feature flags for easier enabling/disabling
+
+### Case Study: Auth0 Integration Removal
+
+The Auth0 integration removal revealed several architectural issues:
+
+1. **Hidden Redirects**: The root redirect in `next.config.js` was not obviously related to auth
+2. **Layout Coupling**: Auth provider was deeply integrated in the main layout
+3. **Implicit Dependencies**: Several files imported from auth components without clear indication
+4. **Configuration Spreading**: Auth-related configuration spread across multiple files
+5. **No Removal Documentation**: No guide existed for clean removal of the auth feature
+
+This case study demonstrates the importance of maintaining a "Feature Registry" that explicitly documents all components, configurations, and dependencies associated with each major feature.
+
 ## Authentication Implementation Challenges (2025-04-18)
 
 ### Key Lessons

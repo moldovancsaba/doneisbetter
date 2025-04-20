@@ -41,6 +41,7 @@ html {
   .card-time { color: #6b7280; }
   .kanban-column { background-color: rgba(31, 41, 55, 0.5); } /* Dark mode column background */
   .grid-row { border-color: #374151; }
+  .card { background-color: rgba(31, 41, 55, 0.8); border-color: #374151; } /* Dark mode card background */
    .page-title .title-light { color: #e5e7eb; } /* Ensure light part visible */
    .page-title .title-bold { color: #ffffff; } /* Ensure bold part visible */
 }
@@ -124,6 +125,18 @@ h1, h2, h3, h4, h5, h6, strong, b {
     height: auto;
     overflow-y: auto;
   }
+  
+  /* Return to single column layout on mobile */
+  .card-list-in-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  /* Reset card sizing for mobile */
+  .card {
+    font-size: 1rem;
+  }
 }
 
 /* For medium screens: 2x2 grid */
@@ -187,11 +200,49 @@ h1, h2, h3, h4, h5, h6, strong, b {
   overflow-y: auto; /* Allow scrolling within columns */
   scrollbar-width: thin; /* Firefox */
 }
+
+/* Two-column card grid layout (desktop only) */
+@media (min-width: 641px) {
+  .card-list-in-column {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 equal columns */
+    gap: 0.5rem;
+    align-content: start; /* Start from the top */
+  }
+  
+  /* Make cards equally sized within the grid */
+  .card-item-draggable {
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Ensure card content fits properly */
+  .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem; /* Slightly smaller font for dense layout */
+  }
+}
 .card-list-in-column.dragging-over { background-color: rgba(59, 130, 246, 0.1); }
 .empty-column-message { text-align: center; color: #9ca3af; font-style: italic; margin-top: 1rem; padding: 1rem; }
 .card-item-draggable { user-select: none; }
-.card-item-draggable.dragging .card { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); cursor: grabbing; }
-.card { padding: 1rem; background-color: #ffffff; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb; cursor: grab; }
+.card-item-draggable.dragging .card { 
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+  cursor: grabbing; 
+  z-index: 10; /* Ensure dragged card appears above others */
+}
+
+.card { 
+  padding: 0.75rem; /* Slightly reduced padding for denser layout */
+  background-color: #ffffff; 
+  border-radius: 0.5rem; 
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); 
+  border: 1px solid #e5e7eb; 
+  cursor: grab;
+  min-height: 80px; /* Minimum height to ensure consistent card appearance */
+  word-break: break-word; /* Prevent overflow of long words */
+}
 p { margin: 0; word-wrap: break-word; font-weight: 400; /* Standard normal weight */ color: #111827; /* gray-900 - explicit contrast */}
 .card-time { display: block; margin-top: 0.5rem; font-size: 0.75rem; color: #4b5563; /* gray-600 - slightly darker time */ font-weight: 400; /* Standard normal weight */}
 
