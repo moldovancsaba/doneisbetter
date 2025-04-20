@@ -7,19 +7,21 @@ import { updateCardStatus, updateCardsOrder } from '@/app/actions';
 
 export default function KanbanBoard({ initialCards }) {
   // --- State ---
+  // --- State ---
   const [activeCards, setActiveCards] = useState([]);
   const [doneCards, setDoneCards] = useState([]);
   const [deletedCards, setDeletedCards] = useState([]);
+  const [decideCards, setDecideCards] = useState([]);
   const [isClient, setIsClient] = useState(false); // Track client-side mount
-
   // --- Helper Functions (defined within component scope) ---
 
-  // Maps column ID ('Active', 'Done', 'Deleted') to state details
+  // Maps column ID ('Active', 'Done', 'Deleted', 'Decide') to state details
   const getListInfo = (statusId) => {
     switch (statusId) {
       case 'Active': return { list: activeCards, setter: setActiveCards };
       case 'Done': return { list: doneCards, setter: setDoneCards };
       case 'Deleted': return { list: deletedCards, setter: setDeletedCards };
+      case 'Decide': return { list: decideCards, setter: setDecideCards };
       default: return { list: [], setter: () => console.warn(`getListInfo: Setter not found for statusId: ${statusId}`) };
     }
   };
@@ -28,14 +30,16 @@ export default function KanbanBoard({ initialCards }) {
   const mapIdToStatus = (id) => {
     if (id === 'Deleted') return 'deleted';
     if (id === 'Done') return 'done';
+    if (id === 'Decide') return 'decide';
     return 'active'; // Default
   };
 
-  // Finds the current column ID ('Active', 'Done', 'Deleted') for a card
+  // Finds the current column ID ('Active', 'Done', 'Deleted', 'Decide') for a card
   const findColumnId = (cardId) => {
     if (activeCards.some(c => c.id === cardId)) return 'Active';
     if (doneCards.some(c => c.id === cardId)) return 'Done';
     if (deletedCards.some(c => c.id === cardId)) return 'Deleted';
+    if (decideCards.some(c => c.id === cardId)) return 'Decide';
     return null;
   };
 
@@ -70,6 +74,7 @@ export default function KanbanBoard({ initialCards }) {
     setActiveCards(cards.filter(card => card.status === 'active'));
     setDoneCards(cards.filter(card => card.status === 'done'));
     setDeletedCards(cards.filter(card => card.status === 'deleted'));
+    setDecideCards(cards.filter(card => card.status === 'decide'));
   }, [initialCards]); // Rerun if initialCards changes
 
 
@@ -165,27 +170,36 @@ export default function KanbanBoard({ initialCards }) {
 
 
   // --- Render Logic ---
+  // --- Render Logic ---
   // Render placeholder if not client-side yet
   if (!isClient) {
     console.log("KanbanBoard: Rendering placeholder (not client yet).");
     return (
-        <div className="kanban-board" aria-busy="true">
-             <div className="kanban-column"><h2 className="column-title">DELETED (Loading...)</h2></div>
-             <div className="kanban-column"><h2 className="column-title">DO (Loading...)</h2></div>
-             <div className="kanban-column"><h2 className="column-title">DONE (Loading...)</h2></div>
+        <div className="kanban-board kanban-grid" aria-busy="true">
+          <div className="grid-row">
+            <div className="kanban-column"><h2 className="column-title">DO (Loading...)</h2></div>
+            <div className="kanban-column"><h2 className="column-title">DECIDE (Loading...)</h2></div>
+          </div>
+          <div className="grid-row">
+            <div className="kanban-column"><h2 className="column-title">DELEGATE (Loading...)</h2></div>
+            <div className="kanban-column"><h2 className="column-title">DELETE (Loading...)</h2></div>
+          </div>
         </div>
     );
   }
-
   // Render DND context and columns on client
   console.log("KanbanBoard: Rendering DragDropContext (client is true).");
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="kanban-board">
-        {/* CORRECTED: Only one set of columns */}
-        <Column droppableId="Deleted" title="DELETED" cards={deletedCards} />
-        <Column droppableId="Active" title="DO" cards={activeCards} />
-        <Column droppableId="Done" title="DONE" cards={doneCards} />
+      <div className="kanban-board kanban-grid">
+        <div className="grid-row">
+          <Column droppableId="Active" title="DO" cards={activeCards} />
+          <Column droppableId="Decide" title="DECIDE" cards={decideCards} />
+        </div>
+        <div className="grid-row">
+          <Column droppableId="Deleted" title="DELEGATE" cards={deletedCards} />
+          <Column droppableId="Done" title="DELETE" cards={doneCards} />
+        </div>
       </div>
     </DragDropContext>
   );
