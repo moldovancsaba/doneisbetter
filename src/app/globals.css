@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark Mode - Single Section */
+/* Dark Mode */
 @media (prefers-color-scheme: dark) {
   body { background-color: #030712; color: #f9fafb; }
   .card { background-color: #1f2937; border-color: #374151; }
@@ -150,13 +150,12 @@
 .card:active {
   cursor: grabbing;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transform: scale(1.02);
 }
 
 .card-item-draggable {
   user-select: none;
   position: relative;
-  transition: transform 0.2s ease;
+  /* Remove transform-origin as it causes jumping */
 }
 
 p { 
@@ -186,16 +185,13 @@ p {
   pointer-events: none;
 }
 
-[data-rbd-draggable-context-id] {
-  transform: none !important;
-}
-
 .card-item-draggable.dragging {
   opacity: 1 !important;
   visibility: visible !important;
   z-index: 10000;
 }
 
+/* Ensure proper positioning during drag */
 .dragging .card {
   background-color: #ffffff !important;
   border: 2px solid #3b82f6 !important;
@@ -223,7 +219,6 @@ div[data-rbd-placeholder-context-id] {
   opacity: 1 !important;
   visibility: visible !important;
   z-index: 10000;
-  position: relative !important;
 }
 
 /* Media Queries */
@@ -267,9 +262,6 @@ div[data-rbd-placeholder-context-id] {
   
   .kanban-column {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
   }
   
   .card-list-in-column {
@@ -277,18 +269,6 @@ div[data-rbd-placeholder-context-id] {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
     align-content: start;
-  }
-  
-  .card-item-draggable {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    font-size: 0.9rem;
   }
 }
 
@@ -298,7 +278,7 @@ div[data-rbd-placeholder-context-id] {
 .mt-8 { margin-top: 1rem; }
 .mx-auto { margin-left: auto; margin-right: auto; }
 
-/* Custom scrollbar for webkit browsers */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
