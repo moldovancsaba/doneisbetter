@@ -2,85 +2,373 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* Base styles using system font stack */
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; /* Standard system stack */
-  font-weight: 400; /* Default normal weight */
-  margin: 0;
-  padding: 0;
-  background-color: #f9fafb; /* gray-50 */
-  color: #111827; /* gray-900 - Darker default text */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  height: 100vh;
-  overflow: hidden;
-}
 
-/* For browser consistency */
-html {
-  box-sizing: border-box;
-  height: 100%;
-  overflow: hidden;
-}
-
-*, *:before, *:after {
-  box-sizing: inherit;
-}
-
-/* Dark Mode */
+/* Dark Mode - Single Section */
 @media (prefers-color-scheme: dark) {
-  body { background-color: #030712; color: #f9fafb; } /* Near black bg, near white text */
+  body { background-color: #030712; color: #f9fafb; }
   .card { background-color: #1f2937; border-color: #374151; }
-  .input-base { background-color: #1f2937; border-color: #374151; color: #f9fafb; } /* Lighter input text */
-  .input-active { border-color: #3b82f6; }
-  .input-error { border-color: #ef4444; }
-  .card-list-in-column.dragging-over { background-color: rgba(59, 130, 246, 0.2); }
-  .column-title { border-bottom-color: #374151; color: #d1d5db; } /* Adjusted dark title color */
-  .column-title-count { color: #9ca3af; } /* Dark mode count color */
+  .kanban-column { background-color: rgba(31, 41, 55, 0.5); }
+  .column-title { border-bottom-color: #374151; color: #d1d5db; }
+  .column-title-count { color: #9ca3af; }
   .empty-column-message { color: #4b5563; }
   .card-time { color: #6b7280; }
-  .kanban-column { background-color: rgba(31, 41, 55, 0.5); } /* Dark mode column background */
-  .grid-row { border-color: #374151; }
-  .card { background-color: rgba(31, 41, 55, 0.8); border-color: #374151; } /* Dark mode card background */
-   .page-title .title-light { color: #e5e7eb; } /* Ensure light part visible */
-   .page-title .title-bold { color: #ffffff; } /* Ensure bold part visible */
+  
+  /* Dark mode dragging styles */
+  .dragging .card {
+    background-color: #1f2937 !important;
+    border-color: #60a5fa !important;
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.7), 0 4px 10px -2px rgba(0, 0, 0, 0.6) !important;
+  }
+  
+  div[data-rbd-placeholder-context-id] {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+  }
 }
 
-
-/* Headings and Bold */
-h1, h2, h3, h4, h5, h6, strong, b {
-  font-weight: 700; /* Standard bold */
-}
-
-/* Custom Title Styles removed as they relied on specific font weights */
-.page-title {
-    font-size: 2rem; /* Adjust as needed */
-    text-align: center;
-    margin-bottom: 2rem;
-    font-weight: 700; /* Make title bold */
-}
-/* .title-bold and .title-light classes are removed */
-
-/* Keep other necessary plain CSS rules for layout, input, kanban, card */
-.main-container { 
-  height: 100vh; 
-  padding: 0.5rem; 
+/* Base Layout */
+.main-container {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Prevent scrolling */
+  margin: 0 auto;
+  width: 100%;
 }
-.content-wrapper-kanban { 
-  max-width: 100%; 
+
+.error-message { 
+  color: #ef4444; 
+  font-size: 0.875rem; 
+  margin-top: 0.25rem; 
+}
+
+.loading-indicator { 
+  font-size: 0.875rem; 
+  color: #6b7280; 
+  margin-left: 0.5rem; 
+}
+
+/* Kanban Grid Layout */
+.kanban-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  flex: 1;
+  height: calc(100vh - 130px);
+  overflow: hidden;
+}
+
+.grid-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Column Styles */
+.kanban-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.75rem;
+  background-color: rgba(243, 244, 246, 0.5);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+.column-title {
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  text-align: center;
+  color: #4b5563;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.column-title-text {
+  font-weight: 700;
+}
+
+.column-title-count {
+  font-weight: 400;
+  margin-left: 0.25rem;
+  color: #6b7280;
+}
+
+.card-list-in-column { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.75rem; 
+  padding: 0.5rem 0.25rem; 
+  border-radius: 0.25rem; 
+  transition: background-color 0.2s ease; 
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.card-list-in-column.dragging-over { 
+  background-color: rgba(59, 130, 246, 0.1); 
+}
+
+.empty-column-message { 
+  text-align: center; 
+  color: #9ca3af; 
+  font-style: italic; 
+  margin-top: 1rem; 
+  padding: 1rem; 
+}
+
+/* Original kanban-board for backward compatibility */
+.kanban-board:not(.kanban-grid) { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+  gap: 1.5rem; 
+  margin-top: 2rem; 
+}
+
+/* Card Styles */
+.card { 
+  padding: 1rem;
+  background-color: #ffffff; 
+  border-radius: 0.5rem; 
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); 
+  border: 1px solid #e5e7eb; 
+  cursor: grab;
+  min-height: 80px;
+  word-break: break-word;
+  position: relative;
+  user-select: none;
+  touch-action: none;
+}
+
+.card:active {
+  cursor: grabbing;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02);
+}
+
+.card-item-draggable {
+  user-select: none;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+p { 
+  margin: 0; 
+  word-wrap: break-word; 
+  font-weight: 400;
+  color: #111827;
+}
+
+.card-content { 
+  user-select: none; 
+  -webkit-user-select: none; 
+}
+
+.card-time { 
+  display: block; 
+  margin-top: 0.5rem; 
+  font-size: 0.75rem; 
+  color: #4b5563;
+  font-weight: 400;
+  user-select: none; 
+  -webkit-user-select: none; 
+}
+
+/* Drag and Drop */
+.card p, .card-time {
+  pointer-events: none;
+}
+
+[data-rbd-draggable-context-id] {
+  transform: none !important;
+}
+
+.card-item-draggable.dragging {
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10000;
+}
+
+.dragging .card {
+  background-color: #ffffff !important;
+  border: 2px solid #3b82f6 !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10000;
+  cursor: grabbing !important;
+}
+
+*[data-rbd-drag-handle-dragging="true"] {
+  cursor: grabbing !important;
+}
+
+div[data-rbd-placeholder-context-id] {
+  opacity: 0.5 !important;
+  background: rgba(59, 130, 246, 0.2) !important;
+  border: 2px dashed rgba(59, 130, 246, 0.5) !important;
+  border-radius: 0.5rem !important;
+  min-height: 80px !important;
+  margin: 4px !important;
+}
+
+[data-rbd-draggable-id][data-rbd-dragging="true"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10000;
+  position: relative !important;
+}
+
+/* Media Queries */
+@media (max-width: 640px) {
+  .kanban-grid {
+    gap: 0.5rem;
+    height: auto;
+    overflow-y: auto;
+  }
+  
+  .grid-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    height: auto;
+  }
+  
+  .kanban-column {
+    height: 30vh;
+  }
+  
+  .main-container {
+    height: auto;
+    overflow-y: auto;
+  }
+  
+  .card-list-in-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .card {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 641px) {
+  .grid-row {
+    height: 50%;
+  }
+  
+  .kanban-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .card-list-in-column {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    align-content: start;
+  }
+  
+  .card-item-draggable {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+  }
+}
+
+/* Utilities */
+.text-center { text-align: center; }
+.mb-8 { margin-bottom: 1rem; }
+.mt-8 { margin-top: 1rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+  div[data-rbd-placeholder-context-id] {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+  }
+}
+
+/* Base styles */
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.error-message { 
+  color: #ef4444; 
+  font-size: 0.875rem; 
+  margin-top: 0.25rem; 
+}
+
+.loading-indicator { 
+  font-size: 0.875rem; 
+  color: #6b7280; 
+  margin-left: 0.5rem; 
+}
+  .page-title .title-light { color: #e5e7eb; } /* Ensure light part visible */
+  .page-title .title-bold { color: #ffffff; } /* Ensure bold part visible */
+  
+  /* Dark mode dragging styles */
+  .dragging .card {
+    background-color: #1f2937 !important; /* Dark gray background */
+    border-color: #60a5fa !important; /* Bright blue border */
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.7), 0 4px 10px -2px rgba(0, 0, 0, 0.6) !important;
+  }
+  
+  /* Dark mode placeholder */
+  div[data-rbd-placeholder-context-id] {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+  }
+}
+
+/* Base styles */
+.main-container {
   flex: 1;
   display: flex;
   flex-direction: column;
   margin: 0 auto; 
   width: 100%;
 }
-.input-wrapper { margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
-.input-base { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; transition: border-color 0.2s, box-shadow 0.2s; outline: none;}
-.input-active { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
-.input-error { border-color: #ef4444; }
+  .card { background-color: rgba(31, 41, 55, 0.8); border-color: #374151; } /* Dark mode card background */
+  .page-title .title-light { color: #e5e7eb; } /* Ensure light part visible */
+  .page-title .title-bold { color: #ffffff; } /* Ensure bold part visible */
+  
+  /* Dark mode dragging styles */
+  .dragging .card {
+    background-color: #1f2937 !important; /* Dark gray background */
+    border-color: #60a5fa !important; /* Bright blue border */
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.7), 0 4px 10px -2px rgba(0, 0, 0, 0.6) !important;
+  }
+  
+  /* Dark mode placeholder */
+  div[data-rbd-placeholder-context-id] {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+  }
+}
+
+/* Base styles */
+.main-container {
 .error-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; }
 .loading-indicator { font-size: 0.875rem; color: #6b7280; margin-left: 0.5rem; } /* Note: SVG is used in Input.js now */
 /* Eisenhower Matrix 2x2 Grid Layout */
@@ -255,8 +543,9 @@ h1, h2, h3, h4, h5, h6, strong, b {
   cursor: grabbing !important;
 }
 
+/* Card styles */
 .card { 
-  padding: 0.75rem; /* Slightly reduced padding for denser layout */
+  padding: 1rem; /* Standard padding without accommodating for drag handle/delete button */
   background-color: #ffffff; 
   border-radius: 0.5rem; 
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); 
@@ -264,91 +553,24 @@ h1, h2, h3, h4, h5, h6, strong, b {
   cursor: grab;
   min-height: 80px; /* Minimum height to ensure consistent card appearance */
   word-break: break-word; /* Prevent overflow of long words */
-  position: relative; /* For absolute positioning of the delete button */
-  padding-bottom: 2rem; /* Extra space at bottom for the delete button */
+  position: relative;
+  user-select: none; /* Prevent text selection */
+  touch-action: none; /* Improve touch experience */
 }
+
 p { margin: 0; word-wrap: break-word; font-weight: 400; /* Standard normal weight */ color: #111827; /* gray-900 - explicit contrast */}
-.card-time { display: block; margin-top: 0.5rem; font-size: 0.75rem; color: #4b5563; /* gray-600 - slightly darker time */ font-weight: 400; /* Standard normal weight */}
+.card-content { user-select: none; -webkit-user-select: none; }
+.card-time { display: block; margin-top: 0.5rem; font-size: 0.75rem; color: #4b5563; /* gray-600 - slightly darker time */ font-weight: 400; /* Standard normal weight */ user-select: none; -webkit-user-select: none; }
 
-/* Delete Button Styles */
-.delete-button {
-  position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  padding: 0.25rem;
-  border-radius: 0.25rem;
-  transition: all 0.2s ease;
-  opacity: 0.6;
-  z-index: 5; /* Ensure it's above other card content */
-}
-
-.delete-button:hover {
-  opacity: 1;
-  transform: scale(1.1);
-  background-color: rgba(239, 68, 68, 0.1); /* Light red background on hover */
-}
-
-.delete-button:focus {
-  outline: 2px solid rgba(239, 68, 68, 0.5);
-  outline-offset: 2px;
-}
-
-.delete-button:active {
-  transform: scale(0.95);
-}
-
-.delete-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-/* Drag Handle Styles */
-.drag-handle {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  background: rgba(59, 130, 246, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab !important; /* Force cursor style */
-  font-size: 1.25rem;
-  width: 1.75rem;
-  height: 1.75rem;
-  line-height: 1;
-  border-radius: 0.25rem;
-  transition: all 0.2s ease;
-  opacity: 0.8;
-  z-index: 50;
-  user-select: none;
-  touch-action: manipulation;
-  pointer-events: auto;
-}
-
-.drag-handle:hover {
-  opacity: 1;
-  transform: scale(1.1);
-  background-color: rgba(59, 130, 246, 0.3);
-}
-
-.drag-handle:focus {
-  outline: 2px solid rgba(59, 130, 246, 0.5);
-  outline-offset: 2px;
-}
-
-.dragging .drag-handle {
-  cursor: grabbing !important;
-  opacity: 1;
-  background-color: rgba(59, 130, 246, 0.5) !important;
-  transform: scale(1.1);
+/* Improve drag experience */
+.card:active {
+  cursor: grabbing;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02);
 }
 
 /* Prevent other elements from interfering with drag */
-.card p, .card-time, .delete-button {
+.card p, .card-time {
   pointer-events: none;
 }
 
@@ -366,31 +588,13 @@ div[data-rbd-placeholder-context-id] {
   min-height: 80px !important;
   margin: 4px !important;
 }
+
 /* Ensure proper drag preview */
 [data-rbd-draggable-id][data-rbd-dragging="true"] {
   opacity: 1 !important;
   visibility: visible !important;
   z-index: 10000;
   position: relative !important;
-}
-
-/* Adjust card padding to accommodate the handle */
-.card {
-  padding-top: 1.75rem; /* Extra space at top for the drag handle */
-}
-
-/* Error message styling */
-.delete-error {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444; /* Red-500 */
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  text-align: center;
-  border-radius: 0 0 0.5rem 0.5rem;
 }
 
 /* Dark mode adjustments */

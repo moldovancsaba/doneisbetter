@@ -1,0 +1,74 @@
+/* src/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+/* Utilities */
+.text-center { text-align: center; }
+.mb-8 { margin-bottom: 1rem; } /* Re/* Eisenhower Matrix 2x2 Grid Layout */
+  padding-bottom: 0.5rem; 
+  border-bottom: 2px solid #e5e7eb; 
+  text-align: center; 
+  color: #4b5563;
+  font-weight: 700; /* Make titles bold */
+  text-transform: uppercase; /* Make them all uppercase for consistency */
+}
+
+.column-title-text {
+  font-weight: 700; /* Standard bold for title text */
+}
+
+.column-title-count {
+  font-weight: 400; /* Standard normal weight for count */
+  margin-left: 0.25rem; /* Add a small space */
+  color: #6b7280; /* Slightly lighter count color */
+}
+
+.card-list-in-column { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.75rem; 
+  padding: 0.5rem 0.25rem; 
+  border-radius: 0.25rem; 
+  transition: background-color 0.2s ease; 
+  flex: 1;
+  overflow-y: auto; /* Allow scrolling within columns */
+  scrollbar-width: thin; /* Firefox */
+}
+
+/* Card styles */
+.card-item-draggable { 
+
+.empty-column-message { 
+  text-align: center; 
+  color: #9ca3af; 
+  font-style: italic; 
+  margin-top: 1rem; 
+  padding: 1rem; 
+}
+/* Original kanban-board for backward compatibility */
+.kanban-board:not(.kanban-grid) { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+  gap: 1.5rem; 
+  margin-top: 2rem; 
+}
+
+/* Card styles */
+.card { 
+  padding: 1rem; /* Standard padding without accommodating for drag handle/delete button */
+  background-color: #ffffff; 
+  border-radius: 0.5rem; 
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); 
+  border: 1px solid #e5e7eb; 
+  cursor: grab;
+  min-height: 80px; /* Minimum height to ensure consistent card appearance */
+
+/* Original kanban-board for backward compatibility */
+.kanban-board:not(.kanban-grid) { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+  gap: 1.5rem; 
+  margin-top: 2rem; 
+}
