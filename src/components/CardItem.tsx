@@ -61,23 +61,22 @@ export default function CardItem({ card, index }: CardItemProps) {
           className={`card-item-draggable ${snapshot.isDragging ? 'dragging' : ''}`}
           style={{
             ...provided.draggableProps.style,
-            position: 'relative', 
+            position: 'relative',
+            transform: snapshot.isDragging 
+              ? provided.draggableProps.style?.transform 
+              : undefined,
+            zIndex: snapshot.isDragging ? 9999 : 'auto',
           }}
           aria-roledescription="Draggable item"
+          data-is-dragging={snapshot.isDragging}
         >
-          <div className="card">
-            {/* Drag handle */}
-            <div
-              {...provided.dragHandleProps}
-              className="drag-handle"
-              title="Drag to reorder"
-              aria-label="Drag to reorder card"
-              tabIndex={0}
-            >
-              🔃
-            </div>
-            
-            <p>{card.content}</p>
+          <div 
+            {...provided.dragHandleProps}
+            className="card"
+            title="Drag to reorder"
+            aria-label="Draggable card"
+          >
+            <p className="card-content">{card.content}</p>
             
             <time 
               dateTime={createdAtString} 
@@ -85,18 +84,6 @@ export default function CardItem({ card, index }: CardItemProps) {
             >
               {createdAtString}
             </time>
-            
-            {/* Delete button */}
-            <button 
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="delete-button"
-              aria-label="Delete card"
-              title="Delete card permanently"
-              type="button"
-            >
-              {isDeleting ? '⏳' : '🗑️'}
-            </button>
             
             {/* Error message if deletion fails */}
             {deleteError && (

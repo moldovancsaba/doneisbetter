@@ -226,11 +226,33 @@ h1, h2, h3, h4, h5, h6, strong, b {
 }
 .card-list-in-column.dragging-over { background-color: rgba(59, 130, 246, 0.1); }
 .empty-column-message { text-align: center; color: #9ca3af; font-style: italic; margin-top: 1rem; padding: 1rem; }
-.card-item-draggable { user-select: none; }
-.card-item-draggable.dragging .card { 
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
-  cursor: grabbing; 
-  z-index: 10; /* Ensure dragged card appears above others */
+.card-item-draggable { 
+  user-select: none;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+/* Remove transform overrides that interfere with DnD */
+[data-rbd-draggable-context-id] {
+  transform: none !important;
+}
+
+/* Update dragging styles */
+.card-item-draggable.dragging {
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10000;
+}
+
+/* Card appearance while dragging */
+.dragging .card {
+  background-color: #ffffff !important;
+  border: 2px solid #3b82f6 !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10000;
+  cursor: grabbing !important;
 }
 
 .card { 
@@ -330,9 +352,26 @@ p { margin: 0; word-wrap: break-word; font-weight: 400; /* Standard normal weigh
   pointer-events: none;
 }
 
-/* Make sure the card is properly highlighted during drag */
-.card-item-draggable.dragging {
-  z-index: 100;
+/* Drag preview enhancement */
+*[data-rbd-drag-handle-dragging="true"] {
+  cursor: grabbing !important;
+}
+
+/* Placeholder where card will be dropped */
+div[data-rbd-placeholder-context-id] {
+  opacity: 0.5 !important;
+  background: rgba(59, 130, 246, 0.2) !important;
+  border: 2px dashed rgba(59, 130, 246, 0.5) !important;
+  border-radius: 0.5rem !important;
+  min-height: 80px !important;
+  margin: 4px !important;
+}
+/* Ensure proper drag preview */
+[data-rbd-draggable-id][data-rbd-dragging="true"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10000;
+  position: relative !important;
 }
 
 /* Adjust card padding to accommodate the handle */
@@ -375,6 +414,21 @@ p { margin: 0; word-wrap: break-word; font-weight: 400; /* Standard normal weigh
   
   .drag-handle:hover {
     background-color: rgba(59, 130, 246, 0.2); /* Darker blue in dark mode */
+  }
+  
+  /* Dark mode dragging styles */
+  .dragging .card {
+    background-color: #1f2937 !important; /* Dark gray background */
+    border-color: #60a5fa !important; /* Bright blue border */
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.7), 0 4px 10px -2px rgba(0, 0, 0, 0.6) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Dark mode placeholder */
+  div[data-rbd-placeholder-context-id] {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
   }
 }
 
