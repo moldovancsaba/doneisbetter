@@ -1,0 +1,47 @@
+@tailwind utilities;
+
+/* Free-positioned card canvas styles */
+.canvas-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #f6f8fa;
+}
+
+.card-item-draggable {
+  position: absolute;
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
+}
+
+.card-item-draggable.dragging {
+  cursor: grabbing;
+  z-index: 999;
+}
+
+.card {
+  width: 300px;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.dragging .card {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  border-color: #3b82f6;
+}
+
+.card-content, .card-time {
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}

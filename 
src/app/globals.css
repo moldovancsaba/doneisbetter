@@ -3,56 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 /* Dark mode adjustments */
-@media (prefers-color-scheme: dark) {
-/* Utilities */
-.text-center { text-align: center; }
-.mb-8 { margin-bottom: 1rem; } /* Re/* Eisenhower Matrix 2x2 Grid Layout */
-  padding-bottom: 0.5rem; 
-  border-bottom: 2px solid #e5e7eb; 
-  text-align: center; 
-  color: #4b5563;
-  font-weight: 700; /* Make titles bold */
-  text-transform: uppercase; /* Make them all uppercase for consistency */
-}
-
-.column-title-text {
-  font-weight: 700; /* Standard bold for title text */
-}
-
-.column-title-count {
-  font-weight: 400; /* Standard normal weight for count */
-  margin-left: 0.25rem; /* Add a small space */
-  color: #6b7280; /* Slightly lighter count color */
-}
-
-.card-list-in-column { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 0.75rem; 
-  padding: 0.5rem 0.25rem; 
-  border-radius: 0.25rem; 
-  transition: background-color 0.2s ease; 
   flex: 1;
   overflow-y: auto; /* Allow scrolling within columns */
   scrollbar-width: thin; /* Firefox */
-}
-
-/* Card styles */
-.card-item-draggable { 
-
-.empty-column-message { 
-  text-align: center; 
-  color: #9ca3af; 
-  font-style: italic; 
-  margin-top: 1rem; 
-  padding: 1rem; 
-}
-/* Original kanban-board for backward compatibility */
-.kanban-board:not(.kanban-grid) { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-  gap: 1.5rem; 
-  margin-top: 2rem; 
 }
 
 /* Card styles */
@@ -71,4 +24,169 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
   gap: 1.5rem; 
   margin-top: 2rem; 
+}
+p { 
+  margin: 0; 
+  word-wrap: break-word; 
+  font-weight: 400;
+  color: #111827;
+}
+
+.card-content { 
+  user-select: none; 
+  -webkit-user-select: none; 
+}
+
+.card-time { 
+  display: block; 
+  margin-top: 0.5rem; 
+  font-size: 0.75rem; 
+  color: #4b5563;
+  font-weight: 400;
+  user-select: none; 
+  -webkit-user-select: none; 
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5); /* gray-400 at 50% opacity */
+  border-radius: 3px;
+}
+/* Drag and Drop */
+.card p, .card-time {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Maintain cursor position during drag */
+.card-item-draggable {
+  user-select: none;
+  position: relative;
+  /* Remove any transform handling to fix cursor position */
+}
+
+.card-item-draggable {
+  user-select: none;
+  position: relative;
+}
+}
+}
+
+/* Ensure proper positioning during drag */
+.dragging .card {
+  background-color: #ffffff !important;
+  border: 2px solid #3b82f6 !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10000;
+  cursor: grabbing !important;
+}
+  position: relative !important;
+}
+}
+  /* Let the library handle transforms */
+}
+  transform-origin: 0 0 !important; /* Fix position jumping */
+}
+}
+  transform-origin: unset !important;
+}
+
+*[data-rbd-drag-handle-dragging="true"] {
+  cursor: grabbing !important;
+}
+
+div[data-rbd-placeholder-context-id] {
+  opacity: 0.5 !important;
+  background: rgba(59, 130, 246, 0.2) !important;
+  border: 2px dashed rgba(59, 130, 246, 0.5) !important;
+  border-radius: 0.5rem !important;
+  min-height: 80px !important;
+  margin: 4px !important;
+[data-rbd-draggable-id][data-rbd-dragging="true"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10000;
+  /* Let react-beautiful-dnd handle positioning */
+}
+  z-index: 10000;
+}
+
+/* Prevent transform issues */
+[data-rbd-draggable-context-id] {
+  /* Let react-beautiful-dnd handle transforms */
+  position: relative !important;
+}
+
+/* Media Queries */
+[data-rbd-draggable-context-id] {
+  position: relative !important;
+}
+
+/* Add this to prevent transform issues */
+[data-rbd-draggable-id][data-rbd-dragging="true"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-in}
+
+/* Prevent transform issues */
+[data-rbd-draggable-context-id] {
+  /* Let react-beautiful-dnd handle transforms */
+  position: relative !important;
+}
+
+/* Media Queries */
+@media (min-width: 641px) {
+
+/* Remove any transform adjustments */
+[data-rbd-draggable-context-id] {
+  position: relative !important;
+}
+
+/* Media Queries */
+@media (max-width: 640px) {
+  .kanban-grid {
+    gap: 0.5rem;
+    height: auto;
+    overflow-y: auto;
+  }
+  
+  .grid-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    height: auto;
+  }
+  
+  .kanban-column {
+    height: 30vh;
+  }
+  
+  .main-container {
+    height: auto;
+    overflow-y: auto;
+  }
+  
+  .card-list-in-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .card {
+    font-size: 1rem;
+.card:active {
+  cursor: grabbing;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Remove transform scale as it affects drag positioning */
 }
