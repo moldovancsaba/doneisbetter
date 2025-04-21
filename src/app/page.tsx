@@ -1,54 +1,39 @@
 'use client';
-import { useState, useEffect } from 'react';
-import CardCanvas from '../components/CardCanvas';
-
-export interface Card {
-  id: string;
-  content: string;
-  createdAt: string;
-  position: { x: number; y: number };
-}
-
-export const initialCards: Card[] = [
-  {
-    id: 'card-1',
-    content: 'Take out the trash',
-    createdAt: '2025-04-21T08:00:00',
-    position: { x: 400, y: 250 },
-  },
-  {
-    id: 'card-2',
-    content: 'Finish lesson plan',
-    createdAt: '2025-04-21T12:00:00',
-    position: { x: 600, y: 400 },
-  },
-];
+import React from 'react';
 
 export default function Page() {
-  const [cards, setCards] = useState<Card[]>(initialCards);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('cards');
-      if (saved) {
-        try {
-          setCards(JSON.parse(saved));
-        } catch (e) {
-          // Parse error: use initialCards
-        }
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('cards', JSON.stringify(cards));
-    }
-  }, [cards]);
-
   return (
-    <main>
-      <CardCanvas cards={cards} onCardsChange={setCards} />
+    <main style={{
+      position: 'fixed', inset: 0, width: '100vw', height: '100vh', background: '#f6f8fa'
+    }}>
+      <div style={{
+        position: 'absolute',
+        top: 250,
+        left: 400,
+        width: 300,
+        padding: 16,
+        borderRadius: 8,
+        background: '#fff',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.11)',
+        border: '1px solid #e5e7eb'
+      }}>
+        <p style={{margin: 0, fontWeight: 400}}>Take out the trash</p>
+        <small style={{color: '#4b5563'}}>2025-04-21T08:00:00</small>
+      </div>
+      <div style={{
+        position: 'absolute',
+        top: 400,
+        left: 600,
+        width: 300,
+        padding: 16,
+        borderRadius: 8,
+        background: '#fff',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.11)',
+        border: '1px solid #e5e7eb'
+      }}>
+        <p style={{margin: 0, fontWeight: 400}}>Finish lesson plan</p>
+        <small style={{color: '#4b5563'}}>2025-04-21T12:00:00</small>
+      </div>
     </main>
   );
 }
