@@ -1,42 +1,53 @@
-import Input from '@/components/Input';
-import KanbanBoard from '@/components/KanbanBoard';
-import { createCard, getCards } from '@/app/actions';
+import { useState, useEffect } from 'react';
+import CardCanvas from '../components/CardCanvas';
 
-// Type definitions
 export interface Card {
   id: string;
   content: string;
-  status: 'active' | 'done' | 'deleted' | 'decide';
-  order: number;
   createdAt: string;
+  position: { x: number; y: number };
 }
 
-export default async function Home() {
-  // Fetch cards server-side
-  let cards: Card[] = [];
-  
-  try {
-    cards = await getCards();
-  } catch (error) {
-    console.error("Failed to fetch initial cards:", error);
-    // Error is handled gracefully - empty array will be used
-  }
+export const initialCards: Card[] = [
+  {
+    id: 'card-1',
+    content: 'Take out the trash',
+    createdAt: '2025-04-21T08:00:00',
+    position: { x: 400, y: 250 },
+  },
+  {
+    id: 'card-2',
+    content: 'Finish lesson plan',
+    createdAt: '2025-04-21T12:00:00',
+    position: { x: 600, y: 400 },
+  },
+];
+
+export default function Page() {
+  const [cards, setCards] = useState<Card[]>(initialCards);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('cards');
+      if (saved) {
+        try {
+          setCards(JSON.parse(saved));
+        } catch (e) {
+          // Parse error: use initialCards
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cards', JSON.stringify(cards));
+    }
+  }, [cards]);
 
   return (
-    <main className="main-container">
-      <div className="content-wrapper-kanban">
-        <h1 className="page-title">
-          <span className="title-bold">#️⃣DONE</span>
-          <span className="title-light">ISBETTER</span>
-        </h1>
-
-        <div className="input-wrapper">
-          <Input onSubmit={createCard} />
-        </div>
-        
-        <KanbanBoard initialCards={cards} />
-      </div>
+    <main>
+      <CardCanvas cards={cards} onCardsChange={setCards} />
     </main>
   );
 }
-
