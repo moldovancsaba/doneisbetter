@@ -10,7 +10,7 @@ import {
   DragStartEvent,
   DragEndEvent,
 } from '@dnd-kit/core';
-import { Card } from '@/app/page';
+import { Card } from '../app/page';
 import CardItem from './CardItem';
 
 interface CardCanvasProps {
