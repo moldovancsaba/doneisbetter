@@ -1,5 +1,16 @@
 # Release Notes
 
+## v1.7.1 - Fix Authentication Build Errors (2025-04-23T15:15:00+02:00)
+
+### Fixes
+- **Build Error:** Resolved TypeScript type errors (`Object is of type 'unknown'`) related to Mongoose `_id` field in NextAuth callbacks (`jwt`).
+- **Type Handling:** Implemented defensive checks for MongoDB document IDs within `src/lib/authOptions.ts`.
+- **Syntax Correction:** Fixed minor syntax errors in `authOptions.ts` and `types/auth.ts`.
+- **Index Warnings:** Removed duplicate Mongoose index definitions in `User` model to resolve build warnings.
+
+### Deployment
+- **Platform:** Vercel
+- **Deployment Date:** 2025-04-23T15:15:00+02:00
 ## v1.7.0 - Google Authentication (2025-04-23T14:45:00+02:00)
 
 ### Features

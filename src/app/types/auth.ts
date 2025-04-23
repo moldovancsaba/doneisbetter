@@ -6,7 +6,7 @@ declare module 'next-auth' {
    */
   interface Session {
     user: {
-      /** The user's unique identifier (usually Google ID in this setup) */
+      /** The user's MongoDB _id */
       id: string;
       /** The user's email address */
       email: string;
@@ -18,16 +18,19 @@ declare module 'next-auth' {
   }
   
   // You can also extend the User type if needed, for example, to include the MongoDB _id
+  // You can also extend the User type if needed, for example, to include the MongoDB _id
   // interface User {
-  //   _id?: string; // Optional MongoDB _id
+  //   _id?: string; 
   // }
 }
 
 declare module 'next-auth/jwt' {
   /** Extends the built-in JWT type */
   interface JWT {
-    /** This is the user ID (Google ID) */
-    id?: string;
+    /** This is the user's Google ID (from token.sub) */
+    sub?: string;
+    /** This is the user's MongoDB _id */
+    dbUserId?: string; 
+    // id?: string; // 'id' in JWT often refers to the provider ID (token.sub)
   }
 }
-
