@@ -1,38 +1,37 @@
-'use client';
-import React from 'react';
+import { initialCards } from "./lib/data";
 
-export default function Page() {
+/**
+ * Home page component
+ * Displays a list of task cards from the initialCards data
+ * 
+ * @returns JSX.Element
+ */
+export default function HomePage(): JSX.Element {
   return (
-    <main style={{
-      position: 'fixed', inset: 0, width: '100vw', height: '100vh', background: '#f6f8fa'
-    }}>
-      <div style={{
-        position: 'absolute',
-        top: 250,
-        left: 400,
-        width: 300,
-        padding: 16,
-        borderRadius: 8,
-        background: '#fff',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.11)',
-        border: '1px solid #e5e7eb'
-      }}>
-        <p style={{margin: 0, fontWeight: 400}}>Take out the trash</p>
-        <small style={{color: '#4b5563'}}>2025-04-21T08:00:00</small>
-      </div>
-      <div style={{
-        position: 'absolute',
-        top: 400,
-        left: 600,
-        width: 300,
-        padding: 16,
-        borderRadius: 8,
-        background: '#fff',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.11)',
-        border: '1px solid #e5e7eb'
-      }}>
-        <p style={{margin: 0, fontWeight: 400}}>Finish lesson plan</p>
-        <small style={{color: '#4b5563'}}>2025-04-21T12:00:00</small>
+    <main className="flex min-h-screen flex-col items-center justify-start p-6 md:p-24">
+      <div className="w-full max-w-md">
+        <h1 className="text-3xl font-bold mb-8 text-center">Task Manager</h1>
+        
+        <section aria-labelledby="tasks-heading">
+          <h2 id="tasks-heading" className="text-xl font-semibold mb-4">Your Tasks</h2>
+          
+          {initialCards.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">No tasks available</p>
+          ) : (
+            <ul className="space-y-3" role="list" aria-label="Task list">
+              {initialCards.map((card) => (
+                <li 
+                  key={card.id}
+                  className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start">
+                    <span className="text-gray-800">{card.content}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
     </main>
   );
