@@ -5,7 +5,8 @@ import Input from './components/Input';
 import KanbanBoard from './components/KanbanBoard';
 import AuthButtons from './components/AuthButtons';
 import { Card, CardStatus } from './types/card';
-import { updateCardStatus, getCards } from './actions';
+import { updateCardStatus, getCards } from './actions'; // Keep user-specific actions here
+import { getAllCards } from '@/lib/actions'; // Import getAllCards from lib
 import { toast } from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 
@@ -22,17 +23,20 @@ export default function HomePage(): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session, status } = useSession();
+  const [viewMode, setViewMode] = useState<'myCards' | 'allCards'>('myCards'); // State for view mode
   
   // Load cards from database on component mount and when session changes
   useEffect(() => {
     async function loadCards() {
-      try {
+      try { // <<< Keep only one try
         setIsLoading(true);
-        const cardsFromDB = await getCards();
+        // Fetch cards based on view mode
+        const cardsFromDB = viewMode === 'myCards' 
+          ? await getCards() 
+          : await getAllCards();
         setCards(cardsFromDB);
         setError(null);
       } catch (err) {
-        console.error('Failed to load cards:', err);
         setError('Failed to load cards. Please refresh the page.');
         toast.error('Failed to load cards');
       } finally {
@@ -48,7 +52,7 @@ export default function HomePage(): JSX.Element {
       setIsLoading(false);
       setError(null);
     }
-  }, [status]); // Rerun effect when session status changes
+  }, [status, viewMode]); // Rerun effect when session status or viewMode changes
   
   /**
    * Handler for adding a new card to the board
@@ -168,9 +172,38 @@ export default function HomePage(): JSX.Element {
   return (
     <main className="flex min-h-screen flex-col items-center p-4 md:p-6">
       <div className="w-full max-w-6xl">
-        <header className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-center">Task Manager</h1>
-          <AuthButtons />
+        <header className="flex justify-between items-center mb-6 flex-wrap gap-4">
+          <h1 className="text-3xl font-bold">Task Manager</h1>
+          <div className="flex items-center space-x-4">
+            {/* View Mode Toggle Buttons */}
+            <div className="flex space-x-2 border border-gray-300 rounded p-1">
+              <button
+                onClick={() => setViewMode('myCards')}
+                disabled={viewMode === 'myCards' || status !== 'authenticated'}
+                className={`px-3 py-1 text-sm rounded ${
+                  viewMode === 'myCards' 
+                    ? 'bg-blue-600 text-white cursor-default' 
+                    : 'bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed'
+                }`}
+                aria-pressed={viewMode === 'myCards'}
+              >
+                My Cards
+              </button>
+              <button
+                onClick={() => setViewMode('allCards')}
+                disabled={viewMode === 'allCards' || status !== 'authenticated'}
+                className={`px-3 py-1 text-sm rounded ${
+                  viewMode === 'allCards' 
+                    ? 'bg-blue-600 text-white cursor-default' 
+                    : 'bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed'
+                }`}
+                 aria-pressed={viewMode === 'allCards'}
+              >
+                All Cards
+              </button>
+            </div>
+            <AuthButtons />
+          </div>
         </header>
         
         {/* Show loading state while checking session */}
@@ -189,10 +222,12 @@ export default function HomePage(): JSX.Element {
         {/* Show Kanban board if authenticated */}
         {status === 'authenticated' && (
           <>
-            {/* Input component for adding new tasks */}
-            <div className="mb-6">
-              <Input onCardCreated={handleCardCreated} />
-            </div>
+            {/* Input component - only show if viewing 'My Cards' */}
+            {viewMode === 'myCards' && (
+              <div className="mb-6">
+                <Input onCardCreated={handleCardCreated} />
+              </div>
+            )}
         
         {/* Error state */}
         {error && (
@@ -209,16 +244,18 @@ export default function HomePage(): JSX.Element {
         
         {/* Kanban board with all cards */}
         <div className="h-[calc(100vh-250px)]">
-          <KanbanBoard 
+          <KanbanBoard // <<< Remove duplicate line
             cards={cards}
             isLoading={isUpdating || isLoading}
-            onCardClick={handleCardClick}
-            onCardUpdate={handleCardUpdate}
+            // Disable interactions if viewing 'All Cards'
+            isReadOnly={viewMode === 'allCards'} 
+            onCardClick={viewMode === 'myCards' ? handleCardClick : undefined}
+            onCardUpdate={viewMode === 'myCards' ? handleCardUpdate : undefined}
           />
-        </div>
+        </div> {/* Close h-[calc(100vh-250px)] div */}
         </>
       )}
-      </div>
+      </div> {/* Close w-full max-w-6xl div */}
     </main>
   );
 }

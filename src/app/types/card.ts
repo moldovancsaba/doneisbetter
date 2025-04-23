@@ -30,6 +30,12 @@ export interface Card {
    * Stored as ISO 8601 string for serialization
    */
   createdAt?: string; 
+
+  /** Optional name of the user who created the card (populated in 'All Cards' view) */
+  userName?: string;
+
+  /** Optional image URL of the user who created the card (populated in 'All Cards' view) */
+  userImage?: string;
 }
 /**
  * Available card statuses for Kanban workflow

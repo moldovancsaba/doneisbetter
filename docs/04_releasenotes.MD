@@ -1,5 +1,20 @@
 # Release Notes
 
+## v1.8.3 - Display User Info on "All Cards" View (2025-04-23T19:50:00+02:00)
+
+### UI Change
+- **User Identification:** Added user avatar (if available) and username to cards displayed in the "All Cards" view. This helps identify the owner of each card in the global view.
+- **Conditional Display:** User information is only shown when the board is in "All Cards" mode (read-only).
+
+### Technical Implementation
+- Updated `getAllCards` server action to use Mongoose `.populate()` to fetch user `name` and `image` for each card.
+- Updated frontend `Card` type (`src/app/types/card.ts`) to include optional `userName` and `userImage` fields.
+- Updated `Column.tsx` component to conditionally render user avatar and name based on the `isReadOnly` prop and availability of user data.
+- Resolved related build errors by correcting Mongoose type assertions and JSX structure after extensive debugging.
+
+### Deployment
+- **Platform:** Vercel
+- **Deployment Date:** 2025-04-23T19:50:00+02:00
 ## v1.8.2 - Use Icon for Timestamp Display (2025-04-23T19:30:00+02:00)
 
 ### UI Change

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Card, CardStatus } from '../types/card';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 
@@ -38,20 +39,26 @@ export interface ColumnProps {
    * Optional handler for when a card is clicked
    */
   onCardClick?: (card: Card) => void;
+  
+  /**
+   * If true, disables interactions like drag-and-drop and clicks
+   */
+  isReadOnly?: boolean;
 }
 
 /**
  * Column component for displaying cards of a specific status in a Kanban board
  */
-export default function Column({
+const Column: React.FC<ColumnProps> = ({
   title,
   cards,
   status,
   id,
   color = 'blue',
   isLoading = false,
-  onCardClick
-}: ColumnProps): JSX.Element {
+  onCardClick,
+  isReadOnly = false
+}): JSX.Element => {
   // Map color prop to actual Tailwind classes
   const colorClasses = {
     blue: 'border-blue-300 bg-blue-50',
@@ -70,14 +77,13 @@ export default function Column({
     const isMatchingStatus = card.status === status;
     const isDefaultTodo = !card.status && status === 'TODO';
     return isMatchingStatus || isDefaultTodo;
-  }); // Semicolon marks end of filter logic
+  });
   
-  // Explicitly start return statement on new line
   return (
-    <section // Opening section tag
-      className={`flex flex-col h-full min-h-[300px] border rounded-lg ${colorClasses[color]} overflow-hidden`} // ClassName template literal
-      aria-labelledby={`column-${status}-heading`} // aria-labelledby template literal
-    > {/* Closing bracket for opening section tag */}
+    <section
+      className={`flex flex-col h-full min-h-[300px] border rounded-lg ${colorClasses[color]} overflow-hidden`}
+      aria-labelledby={`column-${status}-heading`}
+    >
       <header className={`p-3 ${headerColors[color]} font-semibold flex justify-between items-center`}>
         <h2 
           id={`column-${status}-heading`} 
@@ -92,71 +98,92 @@ export default function Column({
       
       <Droppable droppableId={id} type="CARD">
         {(provided, snapshot) => (
-          <div 
-            className={`flex-1 p-2 overflow-y-auto ${snapshot.isDraggingOver ? 'bg-gray-50' : ''}`}
+          <div // Main content div for the Droppable area
+            className={`flex-1 p-2 overflow-y-auto ${snapshot.isDraggingOver ? 'bg-gray-100' : ''}`} // Added subtle hover effect
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
+            {/* Conditional Rendering: Loading State */}
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
-                <div className="animate-pulse flex flex-col space-y-2 w-full">
+                <div className="animate-pulse flex flex-col space-y-2 w-full p-2">
+                  {/* Skeleton Loaders */}
                   <div className="h-20 bg-gray-200 rounded"></div>
-                  <div className="h-20 bg-gray-200 rounded"></div>
-                  <div className="h-20 bg-gray-200 rounded"></div>
+                  <div className="h-16 bg-gray-200 rounded"></div>
+                  <div className="h-24 bg-gray-200 rounded"></div>
                 </div>
               </div>
-            ) : filteredCards.length === 0 ? (
-              <div 
-                className="flex items-center justify-center h-full text-gray-500 text-sm"
-                aria-live="polite"
-              >
+            ) :
+            /* Conditional Rendering: Empty State */
+            filteredCards.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-gray-500 text-sm" aria-live="polite">
                 No cards in {title.toLowerCase()}
-                {provided.placeholder}
               </div>
             ) : (
-              <ul 
-                className="space-y-2"
+            /* Conditional Rendering: Card List */
+              <ul
+                className="space-y-2" // Styling for the list
                 role="list"
                 aria-label={`${title} cards`}
               >
+                {/* Map over filtered cards */}
                 {filteredCards.map((card, index) => (
-                  <Draggable 
-                    key={card.id} 
-                    draggableId={card.id} 
+                  <Draggable
+                    key={card.id}
+                    draggableId={card.id}
                     index={index}
-                    isDragDisabled={isLoading}
+                    isDragDisabled={isReadOnly || isLoading}
                   >
-                    {(provided, snapshot) => (
+                    {(providedDraggable, snapshotDraggable) => (
                       <li
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className={`p-3 bg-white rounded-md shadow-sm transition-shadow
-                          ${snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-300' : 'hover:shadow-md'}
-                          ${isLoading ? 'opacity-60' : 'cursor-pointer'}`}
-                        onClick={() => !snapshot.isDragging && onCardClick && onCardClick(card)}
-                        tabIndex={0}
-                        role="button"
-                        aria-pressed="false"
-                        aria-roledescription="Draggable item"
-                        data-testid={`card-${card.id}`} // Ensure only one data-testid
+                        ref={providedDraggable.innerRef}
+                        {...providedDraggable.draggableProps}
+                        {...providedDraggable.dragHandleProps}
+                        className={`p-3 bg-white rounded-md shadow-sm transition-shadow mb-2 // mb-2 for spacing
+                          ${snapshotDraggable.isDragging ? 'shadow-lg ring-2 ring-blue-300' : 'hover:shadow-md'}
+                          ${isReadOnly || isLoading ? 'opacity-60 cursor-default' : 'cursor-pointer'}`}
+                        onClick={() => !isReadOnly && !snapshotDraggable.isDragging && onCardClick && onCardClick(card)}
+                        role={isReadOnly ? undefined : "button"}
+                        aria-pressed={isReadOnly ? undefined : "false"}
+                        data-testid={`card-${card.id}`}
+                        style={{ ...providedDraggable.draggableProps.style }} // Apply draggable styles
                       >
-                        <div className="text-gray-800 mb-1">{card.content}</div>
-                        {card.createdAt && ( // Check if createdAt exists
+                        {/* Conditionally display user info in read-only mode */}
+                        {isReadOnly && (card.userImage || card.userName) && (
+                          <div className="flex items-center mb-2 space-x-2 border-b border-gray-200 pb-1">
+                            {card.userImage && (
+                              <img
+                                src={card.userImage}
+                                alt={card.userName ? `${card.userName}'s avatar` : 'User avatar'}
+                                className="w-5 h-5 rounded-full flex-shrink-0" // Slightly larger avatar
+                                loading="lazy" // Lazy load images
+                              />
+                            )}
+                            {card.userName && ( // Optionally display name
+                               <span className="text-xs text-gray-600 truncate font-medium">{card.userName}</span>
+                            )}
+                          </div>
+                        )}
+                        {/* Card content */}
+                        <div className="text-gray-800 text-sm mb-1 break-words">{card.content}</div>
+                        {/* Timestamp */}
+                        {card.createdAt && (
                           <small className="text-xs text-gray-500 block mt-1">
-                            Created (UTC): {card.createdAt} {/* Display raw ISO string */}
+                            🕒 {card.createdAt}
                           </small>
                         )}
                       </li>
                     )}
                   </Draggable>
-                ))}
-                {provided.placeholder}
-              </ul>
-            )}
-          </div>
+                ))} {/* End of map function call */}
+              </ul> // End of ul
+            )} {/* End of ternary operator */}
+            {provided.placeholder} {/* Droppable placeholder */}
+          </div> // End of main content div for Droppable
         )}
       </Droppable>
     </section>
   );
-}
+};
+
+export default Column;
