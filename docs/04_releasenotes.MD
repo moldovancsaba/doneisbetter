@@ -1,5 +1,41 @@
 # Release Notes
 
+## v1.4.0 - Kanban Board Implementation (2025-04-23T13:00:00+02:00)
+
+### Features
+- **Kanban Board:** Implemented 3-column Kanban board layout (TODO, IN_PROGRESS, DONE)
+- **Status Management:** Added ability to move cards between workflow stages
+- **Visual Design:** Color-coded columns with customizable styling
+- **Count Indicators:** Added card count badges for each column
+- **Progressive Movement:** One-click progression through workflow stages
+- **Responsive Layout:** Adapts to mobile, tablet, and desktop viewports
+- **Empty States:** Added visual indicators for empty columns
+
+### Technical Implementation
+- **Component Architecture:**
+  - Created reusable Column component for consistent column rendering
+  - Implemented KanbanBoard component for layout management
+  - Extended Card type with status field and column metadata
+- **Status Handling:**
+  - Added updateCardStatus server action for status changes
+  - Implemented client-side state management for immediate updates
+  - Added loading states during status transitions
+- **TypeScript Improvements:**
+  - Added CardStatus type for workflow statuses
+  - Created ColumnData interface for column configuration
+  - Enhanced type safety throughout components
+
+### Accessibility Improvements
+- **ARIA Attributes:** Enhanced screen reader support for Kanban layout
+- **Keyboard Navigation:** Improved focus management and keyboard interactions
+- **Status Announcements:** Added aria-live regions for dynamic updates
+- **Semantic Structure:** Used proper HTML5 sectioning and heading hierarchy
+- **Visual Indicators:** Added loading states with appropriate ARIA properties
+
+### Deployment
+- **Platform:** Vercel
+- **URL:** https://doneisbetter.vercel.app
+- **Deployment Date:** 2025-04-23T13:00:00+02:00
 ## v1.3.0 - Card Creation Functionality (2025-04-23T11:35:00+02:00)
 
 ### Features
