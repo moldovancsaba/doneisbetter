@@ -1,5 +1,50 @@
 # Done Is Better Development Diary - 50 First Dates
 
+## v1.7.3 - Revert Timestamp Format to ISO 8601 (2025-04-23T17:30:00+02:00)
+
+### Summary
+Reverted the display format for the card creation timestamp (`createdAt`) back to the raw UTC ISO 8601 string (`YYYY-MM-DDTHH:mm:ss.sssZ`). This aligns with the project's previously established standard (v0.8.1). The previous implementation used `toLocaleString()`, which has been removed.
+
+### Key Changes
+- Updated `src/app/components/Column.tsx` to render `card.createdAt` directly.
+- Changed label to "Created (UTC):".
+
+### Status
+- **🟢 BUILT & DEPLOYED:** Change implemented, documented (`04_releasenotes.MD`), committed (`a589156`), tagged (v1.7.3), and deployed successfully.
+- **🟡 PENDING USER VERIFICATION:** User needs to confirm the timestamp format on production.
+- **Definition of Done:** All steps completed except final user verification.
+
+### Links
+- **Deployment:** https://doneisbetter-4uu7ku13n-narimato.vercel.app
+- **Commit:** `a589156`
+
+**Project is stable and ready for the next task, pending user confirmation of this timestamp format change.**
+
+---
+## v1.7.2 - Display Card Creation Time (2025-04-23T17:20:00+02:00)
+
+### Summary
+Added the creation timestamp (`createdAt`) to each card displayed on the Kanban board. This involved updating the frontend `Card` type, ensuring the Mongoose model static methods return the timestamp as an ISO string, and modifying the `Column` component to render the formatted time. Also resolved a related build error in `Column.tsx` caused by upstream type inconsistencies.
+
+### Key Changes
+- **Feature:** Card creation time is now visible on each card (formatted via `toLocaleString()`).
+- **Types:** Added `createdAt: string` to `Card` interface in `types/card.ts`.
+- **Model:** Updated `findCardsByUser` and `updateCardStatus` in `models/Card.ts` to return `createdAt` as ISO string.
+- **Component:** Updated `Column.tsx` to display the `createdAt` value.
+- **Fixes:** Resolved build error ("Unexpected token `section`") by fixing type propagation.
+
+### Status
+- **🟢 BUILT & DEPLOYED:** Feature implemented, documented, committed (cab6feb), tagged (v1.7.2), and deployed successfully.
+- **🟡 PENDING USER VERIFICATION:** User needs to confirm timestamp display on production.
+- **Definition of Done:** All steps completed except final user verification.
+
+### Links
+- **Deployment:** https://doneisbetter-r118rzk2y-narimato.vercel.app
+- **Commit:** `cab6feb`
+
+**Project is stable and ready for the next task, pending user confirmation of this feature.**
+
+---
 ## v1.7.1 - Google Authentication & Fixes (2025-04-23T16:45:00+02:00)
 
 ### Summary
