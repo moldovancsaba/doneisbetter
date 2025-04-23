@@ -1,5 +1,21 @@
 # Release Notes
 
+## v1.8.0 - "View All Cards" Admin/Debug Feature (2025-04-23T18:30:00+02:00)
+
+### Features
+- **View All Cards:** Added an option to toggle between viewing only the current user's cards ("My Cards") and viewing all cards created by all users ("All Cards").
+- **Server Action:** Introduced `getAllCards` server action in `src/lib/actions.ts` which fetches all cards without user filtering. (Note: This function currently lacks authorization controls and should only be used for admin/debug scenarios.)
+- **Frontend Toggle:** Implemented toggle UI in `page.tsx` to switch view modes. Default is "My Cards".
+- **Read-only Mode:** In "All Cards" view, drag-and-drop, card creation, and card actions are disabled for data integrity and security.
+
+### Technical Implementation
+- Updated `KanbanBoard` and `Column` components to use an `isReadOnly` prop for disabling interactions.
+- Updated data fetching logic in `page.tsx` to use `getCards` or `getAllCards` per the active mode.
+- Updated PropTypes/types and fixed build errors related to Draggable/Droppable structure.
+
+### Deployment
+- **Platform:** Vercel
+- **Deployment Date:** 2025-04-23T18:30:00+02:00
 ## v1.7.3 - Revert Timestamp Format to ISO 8601 (2025-04-23T17:25:00+02:00)
 
 ### Changes
