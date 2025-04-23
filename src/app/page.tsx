@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { initialCards } from "./lib/data";
+import { useState, useEffect } from 'react';
 import Input from './components/Input';
 import KanbanBoard from './components/KanbanBoard';
 import { Card, CardStatus } from './types/card';
-import { updateCardStatus } from './actions';
+import { updateCardStatus, getCards } from './actions';
 import { toast } from 'react-hot-toast';
 
 /**
@@ -15,9 +14,31 @@ import { toast } from 'react-hot-toast';
  * @returns JSX.Element
  */
 export default function HomePage(): JSX.Element {
-  // Initialize state with the default cards
-  const [cards, setCards] = useState<Card[]>(initialCards);
+  // State for cards, loading, and errors
+  const [cards, setCards] = useState<Card[]>([]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Load cards from database on component mount
+  useEffect(() => {
+    async function loadCards() {
+      try {
+        setIsLoading(true);
+        const cardsFromDB = await getCards();
+        setCards(cardsFromDB);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load cards:', err);
+        setError('Failed to load cards. Please refresh the page.');
+        toast.error('Failed to load cards');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadCards();
+  }, []);
   
   /**
    * Handler for adding a new card to the board
@@ -116,13 +137,17 @@ export default function HomePage(): JSX.Element {
       console.error('Failed to update card via drag and drop:', error);
       
       // Revert the change in state
+      // Revert the change in state to the previous version
       setCards(prevCards => {
-        const originalCard = initialCards.find(c => c.id === updatedCard.id);
+        // Find the original card from previous state
+        const originalCard = prevCards.find(c => c.id === updatedCard.id);
+        if (!originalCard) return prevCards;
+        
+        // Remove any optimistic updates
         return prevCards.map(card => 
-          card.id === updatedCard.id && originalCard ? originalCard : card
+          card.id === updatedCard.id ? originalCard : card
         );
       });
-      
       // Show error notification
       toast.error('Failed to update card. Please try again.');
     } finally {
@@ -140,11 +165,24 @@ export default function HomePage(): JSX.Element {
           <Input onCardCreated={handleCardCreated} />
         </div>
         
+        {/* Error state */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <p>{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Reload Page
+            </button>
+          </div>
+        )}
+        
         {/* Kanban board with all cards */}
         <div className="h-[calc(100vh-250px)]">
           <KanbanBoard 
             cards={cards}
-            isLoading={isUpdating}
+            isLoading={isUpdating || isLoading}
             onCardClick={handleCardClick}
             onCardUpdate={handleCardUpdate}
           />

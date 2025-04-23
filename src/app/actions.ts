@@ -1,6 +1,9 @@
 'use server';
 
 import { Card, CardStatus } from "./types/card";
+import { getCardModel, CardDocument } from "./models/Card";
+import mongoose from 'mongoose';
+
 /**
  * Creates a new card with the given content
  * 
@@ -14,25 +17,32 @@ export async function createCard(content: string): Promise<Card> {
     throw new Error('Card content cannot be empty');
   }
 
-  if (content.length > 200) {
-    throw new Error('Card content cannot exceed 200 characters');
+  if (content.length > 500) {
+    throw new Error('Card content cannot exceed 500 characters');
   }
 
   try {
-    // Create a unique ID (in a real app, this would come from a database)
-    const id = `card-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-
-    // In a real app, this would save to a database
-    const newCard: Card = {
-      id,
+    // Get the Card model with an active database connection
+    const CardModel = await getCardModel();
+    
+    // Count existing cards to determine order 
+    // (new cards should appear at the top of the TODO column)
+    const todoCardsCount = await CardModel.countDocuments({ status: 'TODO' });
+    
+    // Create a new card document
+    const cardDocument = await CardModel.create({
       content: content.trim(),
-      status: 'TODO' // Default status for new cards
+      status: 'TODO' as CardStatus,
+      order: todoCardsCount // Place at the end of TODO cards
+    });
+    
+    // Return in the format expected by the frontend
+    return {
+      id: cardDocument._id.toString(),
+      content: cardDocument.content,
+      status: cardDocument.status,
+      order: cardDocument.order
     };
-
-    // Simulate network delay for demo purposes
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    return newCard;
   } catch (error) {
     console.error('Error creating card:', error);
     throw new Error('Failed to create card. Please try again.');
@@ -67,27 +77,39 @@ export async function updateCardStatus(
       throw new Error('Order must be a non-negative number');
     }
     
-    // In a real app, this would find the card in the database
-    // For this demo, we're checking initialCards from lib/data.ts
-    const { initialCards } = await import('./lib/data');
-    const existingCard = initialCards.find(card => card.id === cardId);
+    // Validate MongoDB ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(cardId)) {
+      throw new Error(`Invalid card ID format: ${cardId}`);
+    }
     
-    if (!existingCard) {
+    // Get the Card model with an active database connection
+    const CardModel = await getCardModel();
+    // Use the model's updateCardStatus method which handles typing
+    const updatedCard = await CardModel.updateCardStatus(cardId, newStatus, order);
+    
+    if (!updatedCard) {
       throw new Error(`Card with ID ${cardId} not found`);
     }
     
-    // Simulate network delay for demo purposes
-    await new Promise<void>(resolve => setTimeout(resolve, 300));
-    
-    // Return the updated card object, preserving existing content
-    return {
-      id: cardId,
-      content: existingCard.content,
-      status: newStatus,
-      order: order
-    };
+    return updatedCard;
   } catch (error) {
     console.error('Error updating card status or order:', error);
     throw new Error('Failed to update card. Please try again.');
+  }
+}
+
+/**
+ * Retrieves all cards from the database
+ * 
+ * @returns Array of cards
+ */
+export async function getCards(): Promise<Card[]> {
+  try {
+    const CardModel = await getCardModel();
+    // Use the model's findCards method which handles document conversion
+    return await CardModel.findCards();
+  } catch (error) {
+    console.error('Error fetching cards:', error);
+    throw new Error('Failed to fetch cards. Please try again.');
   }
 }

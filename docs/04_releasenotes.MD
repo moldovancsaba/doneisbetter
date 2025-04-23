@@ -1,5 +1,43 @@
 # Release Notes
 
+## v1.6.0 - MongoDB Integration (2025-04-23T14:15:00+02:00)
+
+### Features
+- **Database Persistence:** Added MongoDB Atlas integration for persistent card storage
+- **Server Actions:** Updated card operations to use database storage
+- **Connection Management:** Implemented connection pooling and caching
+- **Error Handling:** Added robust error handling for database operations
+- **Type Safety:** Enhanced TypeScript type definitions throughout the data layer
+
+### Technical Implementation
+- **MongoDB Integration:**
+  - Implemented secure connection handling with MongoDB Atlas
+  - Added environment variable configuration for connection string
+  - Created connection pooling to optimize performance
+  - Implemented connection caching for development hot-reloading
+- **Data Models:**
+  - Created mongoose schema for Card model
+  - Added proper indexes for efficient queries
+  - Implemented data validation at the schema level
+  - Separated database interface from application logic
+- **Type Safety:**
+  - Enhanced TypeScript definitions for MongoDB documents
+  - Created proper interfaces for database operations
+  - Fixed circular type references
+  - Ensured strict type checking across server/client boundary
+
+### Infrastructure
+- **Environment Setup:**
+  - Added .env.local configuration
+  - Deployed MongoDB environment variables to Vercel
+  - Implemented database connection rotation
+  - Added database connection status monitoring
+
+### Deployment
+- **Platform:** Vercel
+- **Database:** MongoDB Atlas
+- **URL:** https://doneisbetter.vercel.app
+- **Deployment Date:** 2025-04-23T14:15:00+02:00
 ## v1.5.0 - Drag-and-Drop Implementation (2025-04-23T14:00:00+02:00)
 
 ### Features
