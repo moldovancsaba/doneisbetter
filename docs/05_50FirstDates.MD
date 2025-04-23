@@ -1,5 +1,26 @@
 # Done Is Better Development Diary - 50 First Dates
 
+## v1.8.2 - Use Icon for Timestamp Display (2025-04-23T19:30:00+02:00)
+
+### Summary
+Replaced the text label "Created (UTC):" with the clock emoji "🕒" next to the card creation timestamp in the `Column` component for a more compact UI. Also fixed related JSX syntax errors identified during debugging.
+
+### Key Changes
+- Updated `src/app/components/Column.tsx` to use "🕒" before the timestamp.
+- Corrected JSX structure within the `Draggable` and `Droppable` components.
+
+### Status
+- **🟢 BUILT & DEPLOYED:** UI change implemented, documented (`04_releasenotes.MD`), committed (`9a753db`), tagged (v1.8.2), and deployed successfully.
+- **🟡 PENDING USER VERIFICATION:** User needs to confirm the icon display on production.
+- **Definition of Done:** All steps completed except final user verification.
+
+### Links
+- **Deployment:** https://doneisbetter-nddvt8tom-narimato.vercel.app
+- **Commit:** `9a753db`
+
+**Project is stable and ready for the next task, pending user confirmation of this UI change.**
+
+---
 ## v1.8.1 - Restore Full Kanban Board Functionality & Final Verification (2025-04-23T19:10:00+02:00)
 
 ### Summary
