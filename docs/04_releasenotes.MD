@@ -1,5 +1,35 @@
 # Release Notes
 
+## v1.8.2 - Use Icon for Timestamp Display (2025-04-23T19:30:00+02:00)
+
+### UI Change
+- **Timestamp Icon:** Replaced the text label "Created (UTC):" with the clock emoji "🕒" for the card creation timestamp display, improving visual compactness.
+
+### Technical Implementation
+- Updated the rendering logic within the `<small>` tag in `src/app/components/Column.tsx`.
+- Fixed related JSX syntax errors identified during implementation and debugging of previous build errors.
+
+### Deployment
+- **Platform:** Vercel
+- **Deployment Date:** 2025-04-23T19:30:00+02:00
+## v1.8.1 - Restore Full Kanban Board Functionality & Final Verification (2025-04-23T19:10:00+02:00)
+
+### Fixes & Completion
+- **Kanban Logic:** Restored full Kanban board implementation in `KanbanBoard.tsx` that was temporarily commented out during debugging.
+- **Drag-and-Drop:** Restored and verified full drag-and-drop functionality with proper read-only mode handling.
+- **Type Safety:** Resolved TypeScript issues with `@hello-pangea/dnd` event handlers (`onDragEnd`).
+- **Functionality Verified:** User confirmed all Kanban features (drag, status changes, reordering) and read-only mode work correctly on production.
+
+### Technical Implementation
+- Restored original `KanbanBoard` component logic.
+- Corrected `onDragEnd` type handling.
+
+### User Verification
+- Passed: User verified all intended functionality on deployment `https://doneisbetter-lg9ecqm8y-narimato.vercel.app`.
+
+### Deployment
+- **Platform:** Vercel
+- **Deployment Date:** 2025-04-23T19:10:00+02:00
 ## v1.8.0 - "View All Cards" Admin/Debug Feature (2025-04-23T18:30:00+02:00)
 
 ### Features
