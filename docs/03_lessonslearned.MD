@@ -1,5 +1,45 @@
 # Done Is Better - Lessons Learned
 
+## Google Authentication Implementation (v1.7.0 - v1.7.1) - 2025-04-23T16:45:00+02:00
+
+### 1. Challenge: TypeScript & Mongoose Type Inference
+**Issue:** TypeScript struggled to correctly infer the type of the `_id` field returned by Mongoose queries (e.g., `UserModel.findOne`), often treating it as `unknown`. This occurred specifically within NextAuth callbacks (`jwt`), causing build failures even when the `UserDocument` interface correctly defined `_id: mongoose.Types.ObjectId;`. Standard type annotations on the variable (`const dbUser: UserDocument | null = ...`) were insufficient.
+**Solution:** A defensive runtime check was implemented within the `jwt` callback before accessing `_id.toString()`:
+```typescript
+if (dbUser && dbUser._id && typeof dbUser._id.toString === 'function') {
+  token.dbUserId = dbUser._id.toString();
+} else {
+  // Log error or handle missing/invalid _id
+}
+```
+**Lesson:** When complex library interactions (Mongoose + NextAuth + TypeScript) lead to persistent, seemingly incorrect type errors, resorting to runtime checks can be a pragmatic solution to unblock builds, although it sacrifices some compile-time safety. Understanding *why* type inference failed requires deeper investigation into Mongoose's type definitions or NextAuth's callback signatures.
+
+### 2. Challenge: Next.js Path Resolution (Aliases vs. Relative Paths)
+**Issue:** Consistent `Module not found` errors occurred when importing modules into the NextAuth API route (`src/app/api/auth/[...nextauth]/route.ts`) and server actions (`src/app/actions.ts`). Both path aliases (`@/app/...`, `@/lib/...`) defined in `tsconfig.json` and manually calculated relative paths (`../`, `../../`, `../../../`, `../../../../`) failed intermittently or consistently depending on the file location and build context.
+**Solution:** Restructured the project to move shared logic (database connection, models) into a top-level `src/lib` directory. Imports were updated to use the `@/lib/...` alias. This structure proved more reliable for Next.js's build system across different file types (API routes, server actions, components).
+**Lesson:** Next.js path resolution, especially involving aliases, can be sensitive within certain directories like `api/`. Centralizing shared utilities and models in a dedicated `src/lib` directory and using aliases consistently seems to be a more robust pattern for the App Router. Avoid overly complex relative path calculations.
+
+### 3. Challenge: Missing `NEXTAUTH_SECRET` in Production
+**Issue:** After deploying the authentication feature, login attempts resulted in a generic "Server error" message. Vercel logs revealed `[next-auth][error][NO_SECRET] Please define a \`secret\` in production.`
+**Solution:** Generated a strong secret (`openssl rand -base64 32`) and added it as the `NEXTAUTH_SECRET` environment variable in the Vercel project settings for the **Production** environment. Redeployed the application.
+**Lesson:** `NEXTAUTH_SECRET` is mandatory for production deployments to secure session tokens (especially when using JWT strategy). While `.env.local` works for development, production environment variables must be explicitly configured in the deployment platform (Vercel).
+
+### 4. Challenge: User ID Management (Provider ID vs. Database ID)
+**Issue:** Initial implementation stored the Google User ID (`token.sub` or `user.id` from the provider) in the session (`session.user.id`). Server actions then used this Google ID when querying the `Card` collection's `user` field, which expected a MongoDB `ObjectId`. This resulted in a `CastError: Cast to ObjectId failed...`.
+**Solution:** Modified the NextAuth callbacks:
+    - **`signIn`:** After finding or creating the user in the `User` collection, ensure the MongoDB `_id` is available.
+    - **`jwt`:** Fetch the `User` document using the Google ID (`token.sub`) and store the user's MongoDB `_id` as `token.dbUserId`.
+    - **`session`:** Assign `token.dbUserId` to `session.user.id`.
+Server actions now correctly receive and use the MongoDB `_id` for database queries.
+**Lesson:** Clearly distinguish between the external identity provider's ID and the application's internal database user ID. Ensure the session object contains the internal ID needed for database operations.
+
+### 5. Challenge: Build vs. Development Discrepancies
+**Issue:** Several issues, particularly the TypeScript type errors and path resolution problems, behaved differently or were only apparent during the production build (`npm run build`), while the development server (`npm run dev`) sometimes compiled without errors.
+**Solution:** Adopted a stricter workflow of running `npm run build` locally after significant changes, especially those involving types, imports, or configuration, before committing or deploying.
+**Lesson:** The Next.js development server uses different compilation and caching mechanisms than the production build. Relying solely on `npm run dev` for validation is insufficient. Always test with `npm run build` to catch production-specific errors early.
+
+---
+
 ## 📌 Project Context
 All operations inside the following path:  
 `/Users/moldovan/Projects/doneisbetter/`

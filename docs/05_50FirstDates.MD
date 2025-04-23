@@ -1,247 +1,72 @@
 # Done Is Better Development Diary - 50 First Dates
 
-**Current State**: 🟢 Urbanist Font Integrated (via Standard CSS).
-**Last Updated**: 2025-04-13T14:05:00.000Z
-**Deployment**: https://doneisbetter-7yqr97f90-narimato.vercel.app
-**Version**: v0.9.0
+## v1.7.1 - Google Authentication & Fixes (2025-04-23T16:45:00+02:00)
 
-## Latest Development (v0.9.0)
+### Summary
+Successfully implemented Google Authentication using NextAuth.js, integrated user persistence with MongoDB, and updated server actions for user-specific card management. Resolved several build errors related to TypeScript types, path resolution, and production environment variables. The application now supports user login, and cards are associated with the logged-in user.
 
-### 2025-04-18T18:33:59.722546+02:00: Authentication Implementation Rollback
-- Reverted to stable commit 9375766 (v1.1.1)
-- Cleaned all auth-related changes
-- Documented implementation challenges in LESSONS_LEARNED.md
-- Successfully redeployed stable version
+### Key Changes
+- **Authentication:** Integrated NextAuth.js with Google Provider.
+- **Database:** Added User model; updated Card model to link to User.
+- **Server Actions:** Modified `createCard`, `updateCardStatus`, `getCards` to be user-aware and use MongoDB `_id`.
+- **Session:** Implemented session provider and updated UI (`AuthButtons`, conditional rendering on `HomePage`).
+- **Structure:** Moved DB connection and models to `src/lib` for better path resolution.
+- **Fixes (v1.7.1):** Addressed build errors (`unknown` type for `_id`, path resolution, missing `NEXTAUTH_SECRET`), removed Mongoose index warnings.
 
-### 2025-04-18T18:28:22.943481+02:00: Successful Rollback
-- Integrated Urbanist Google Font (Light 300, ExtraBold 800) using `next/font/google` and CSS variables.
-- Styled main title `#DONEISBETTER` with specified weights.
-- Encountered persistent, conflicting PostCSS/Tailwind build errors related to plugin configuration and utility class recognition (`font-light`).
-- Resolved build errors by removing `@tailwind` directives from `globals.css` and applying font weights and styles via standard CSS selectors, effectively bypassing the problematic Tailwind processing layer for this feature. Manually created config files after `npx init` failed.
-- Successfully built and deployed the application with the new font applied via standard CSS.
+### Status
+- **🟢 COMPLETE & VERIFIED:** Feature implemented, documented, committed (0576569), tagged (v1.7.1), and deployed successfully.
+- **🟢 TESTED:** User confirmed login/logout works as expected on production. Card loading and creation after login are functional.
+- **Definition of Done:** All criteria met.
 
-## Previous Development History
+### Links
+- **Deployment:** https://doneisbetter-cvypuh09x-narimato.vercel.app
+- **Commit:** `0576569` (Specific commit hash for v1.7.1 fixes)
 
-### 2025-04-13T11:07:00.000Z: Fix Card Timestamp Display (v0.8.2)
-- Debugged and corrected structural errors in `CardItem.js` that were causing timestamps to display incorrectly (showing locale format instead of the intended raw ISO string).
-- Confirmed the component now correctly renders the full UTC ISO 8601 string (`YYYY-MM-DDTHH:mm:ss.sssZ`).
-- Finalized documentation updates with correct ISO 8601 timestamps.
+**Project is stable and ready for the next task.**
 
-## Previous Development History
+---
 
-### 2025-04-13T10:43:42.534Z: Drag-and-Drop Fix (@hello-pangea/dnd) (v0.8.0)
-- Switched from non-functional `@dnd-kit` implementation to `@hello-pangea/dnd`.
-- Refactored `KanbanBoard`, `Column`, `CardItem` components for the new library.
-- Implemented `onDragEnd` logic for inter-column moves (status updates) and intra-column reorders (order updates).
-- Corrected client-side hydration errors.
-- Tested locally and deployed working DnD functionality.
+## Previous Development History (Cleaned)
 
-### 2025-04-13T07:37:00.000Z: Persistent Reordering (v0.7.0)
-- Added `order` field to `Card` schema.
-- Updated `createCard` for default order, `getCards` to sort by order.
-- Created `updateCardsOrder` action using `bulkWrite`.
-- Integrated persistence call into `@dnd-kit` `handleDragEnd`.
+### v1.7.0 - Google Authentication (Initial Implementation) - 2025-04-23T14:45:00+02:00
+- Initial setup of NextAuth.js, Google Provider, User model, and session integration.
+- Encountered build/runtime errors addressed in v1.7.1.
 
-### 2025-04-13T07:32:00.000Z: Client-Side Reordering (v0.6.0)
-- Implemented visual-only reordering within columns using `arrayMove` (@dnd-kit).
+### v1.6.0 - MongoDB Integration - 2025-04-23T14:15:00+02:00
+- Added MongoDB Atlas integration for persistent card storage using Mongoose.
+- Implemented connection management (`src/lib/db.ts`) and Card model (`src/lib/models/Card.ts`).
+- Updated server actions to use the database.
 
-### 2025-04-13T07:23:00.000Z: Drag-and-Drop Implementation (@dnd-kit Attempt) (v0.5.0)
-- Attempted first DnD implementation using `@dnd-kit`. Encountered functional issues and client-side errors.
+### v1.5.0 - Drag-and-Drop Implementation - 2025-04-23T14:00:00+02:00
+- Integrated `@hello-pangea/dnd` for card drag-and-drop.
+- Added card reordering within columns and status updates between columns.
+- Implemented optimistic UI updates and toast notifications.
 
-### 2025-04-13T07:13:00.000Z: Kanban Board Layout (v0.4.0)
-- Implemented 3-column layout.
-- Refactored card display using `KanbanBoard` and `Column` components.
-- Modified `getCards` to fetch all cards for client-side sorting into columns.
+### v1.4.0 - Kanban Board Implementation - 2025-04-23T13:00:00+02:00
+- Created `Column` and `KanbanBoard` components.
+- Implemented 3-column layout (TODO, IN_PROGRESS, DONE).
+- Added basic card status progression on click.
 
-### 2025-04-13T06:57:00.000Z: Swipe Actions Implementation (v0.3.0)
-- Added `react-swipeable` for swipe-to-delete/done functionality.
-- Added `status` field to schema and `updateCardStatus` action.
-- Implemented optimistic UI updates.
+### v1.3.0 - Card Creation Functionality - 2025-04-23T11:35:00+02:00
+- Implemented `Input` component and `createCard` server action.
+- Added form validation, loading states, and client-side state management.
 
-### 2025-04-13T06:34:00.000Z: Input Field and Card Display (v0.2.0)
-- Implemented core feature: Add card via input, save to DB, display list.
-- Added Mongoose, DB connection utility, `createCard`/`getCards` actions.
+### v1.2.2 - TypeScript Build System Fix - 2025-04-22T09:15:00+02:00
+- Resolved persistent build errors by cleaning repository state and rebuilding foundations.
 
-### 2025-04-12T08:48:00.000Z: Initial Implementation & Setup (v0.1.0)
-- Set up Next.js project (JavaScript, App Router).
-- Resolved initial build/deployment challenges.
-- Established core documentation structure.
+*(Older history omitted for brevity)*
 
-## Project Status (as of v0.8.2)
-- Core features (Add, View, Move via DnD, Reorder via DnD) implemented and persistent.
-- Timestamps displayed in correct ISO 8601 format.
-- Basic testing performed locally.
-- Core documentation structure in place and updated.
-- CI/CD via Vercel working.
+---
 
-### Current Architecture
-- Next.js 15.3.0 (App Router)
-- React 19
-- MongoDB / Mongoose
-- `@hello-pangea/dnd`
-- CSS Modules / Global CSS
+## Project Status (as of v1.7.1)
+- **Core Features:** Kanban board (Add, View, DnD Move/Reorder), User Authentication (Google), MongoDB Persistence.
+- **Technology:** Next.js 14.0.4 (App Router), React 18, TypeScript, MongoDB/Mongoose, NextAuth.js, `@hello-pangea/dnd`, Tailwind CSS.
+- **Deployment:** Vercel CI/CD operational.
 
-### Known Issues
-- Basic styling only.
-- Optimistic update reversal logic is basic.
-- Order persistence is not updated when moving cards *between* columns (only status is updated).
-
-### Future Considerations
-- User authentication.
-- Card editing functionality.
-- Search/filtering.
-- More robust error handling/feedback.
-- UI/UX refinements.
-- Address order update on inter-column moves.
-
-# Done Is Better Development Diary - 50 First Dates
-
-**Current State**: 🟢 Working Drag-and-Drop Kanban with Correct Timestamp Display.
-**Last Updated**: 2025-04-13T11:07:00.000Z
-**Deployment**: https://doneisbetter-aeidmp1k2-narimato.vercel.app
-**Version**: v0.8.2
-
-## Latest Development (v0.8.2)
-
-### 2025-04-13T11:07:00.000Z: Fix Card Timestamp Display
-- Debugged and corrected structural errors in `CardItem.js` that were causing timestamps to display incorrectly (showing locale format instead of the intended raw ISO string).
-- Confirmed the component now correctly renders the full UTC ISO 8601 string (`YYYY-MM-DDTHH:mm:ss.sssZ`).
-- Updated documentation timestamps throughout project files to ISO 8601 format.
-
-## Previous Development History
-
-### 2025-04-13T10:43:42.534Z: Drag-and-Drop Fix (@hello-pangea/dnd) (v0.8.0)
-- Switched from non-functional `@dnd-kit` implementation to `@hello-pangea/dnd`.
-- Refactored `KanbanBoard`, `Column`, `CardItem` components for the new library.
-- Implemented `onDragEnd` logic for inter-column moves (status updates) and intra-column reorders (order updates).
-- Corrected client-side hydration errors.
-- Tested locally and deployed working DnD functionality.
-
-### 2025-04-13T07:37:00.000Z: Persistent Reordering (v0.7.0)
-- Added `order` field to `Card` schema.
-- Updated `createCard` for default order, `getCards` to sort by order.
-- Created `updateCardsOrder` action using `bulkWrite`.
-- Integrated persistence call into `@dnd-kit` `handleDragEnd`.
-
-### 2025-04-13T07:32:00.000Z: Client-Side Reordering (v0.6.0)
-- Implemented visual-only reordering within columns using `arrayMove` (@dnd-kit).
-
-### 2025-04-13T07:23:00.000Z: Drag-and-Drop Implementation (@dnd-kit Attempt) (v0.5.0)
-- Attempted first DnD implementation using `@dnd-kit`. Encountered functional issues and client-side errors.
-
-### 2025-04-13T07:13:00.000Z: Kanban Board Layout (v0.4.0)
-- Implemented 3-column layout.
-- Refactored card display using `KanbanBoard` and `Column` components.
-- Modified `getCards` to fetch all cards for client-side sorting into columns.
-
-### 2025-04-13T06:57:00.000Z: Swipe Actions Implementation (v0.3.0)
-- Added `react-swipeable` for swipe-to-delete/done functionality.
-- Added `status` field to schema and `updateCardStatus` action.
-- Implemented optimistic UI updates.
-
-### 2025-04-13T06:34:00.000Z: Input Field and Card Display (v0.2.0)
-- Implemented core feature: Add card via input, save to DB, display list.
-- Added Mongoose, DB connection utility, `createCard`/`getCards` actions.
-
-### 2025-04-12T08:48:00.000Z: Initial Implementation & Setup (v0.1.0)
-- Set up Next.js project (JavaScript, App Router).
-- Resolved initial build/deployment challenges.
-- Established core documentation structure.
-
-## Project Status (as of v0.8.2)
-- Core features (Add, View, Move via DnD, Reorder via DnD) implemented and persistent.
-- Timestamps displayed in correct ISO 8601 format.
-- Basic testing performed locally.
-- Core documentation structure in place and updated.
-- CI/CD via Vercel working.
-### Current Architecture
-- Next.js 15.3.0 (App Router)
-- React 19
-- MongoDB / Mongoose
-- `@hello-pangea/dnd`
-- Standard Global CSS (No active Tailwind processing via `@tailwind` directives)
-- Google Fonts via `next/font/google` (Urbanist)
-
-### Known Issues
-### Known Issues
-- Basic styling only.
-- Optimistic update reversal logic is basic.
-- Order persistence is not updated when moving cards *between* columns (only status is updated).
-
-### Future Considerations
-- User authentication.
-- Card editing functionality.
-- Search/filtering.
-- More robust error handling/feedback.
-- UI/UX refinements.
-- Address order update on inter-column moves.
-- Added `react-swipeable` dependency.
-- Updated `Card` schema in `actions.js` to include a `status` field ('active', 'done', 'deleted').
-- Created `updateCardStatus` server action to set 'done' or 'deleted' status.
-- Refactored card display into client components: `CardList.js` (manages local state) and `CardItem.js` (handles swipe logic).
-- Implemented swipe left (delete) and swipe right (done) gestures using `useSwipeable`.
-- Added optimistic UI update: card is removed from the list immediately on swipe completion.
-- Added visual feedback (background color change) during swipe.
-- Successfully deployed v0.3.0 to Vercel production.
-## Latest Development (v0.2.0)
-
-### 2025-04-13T06:34:00.000Z: Input Field and Card Display // Keeping original estimate
-- Installed Mongoose for database interaction.
-- Created MongoDB connection utility (`lib/db.js`).
-- Implemented server actions (`createCard`, `getCards`) with error handling and revalidation.
-- Developed client-side Input component (`components/Input.js`) with active/loading/error states and event handling (submit, escape, click outside).
-- Updated main page (`app/page.js`) to use Input component, fetch cards via `getCards`, and display them in a list.
-- Added basic CSS styling for layout, input, and cards, including dark mode support.
-- Successfully deployed v0.2.0 to Vercel production.
-## Latest Development (v0.1.0)
-
-
-### 2025-04-12T08:48:00.000Z: Initial Implementation // Keeping original estimate
-- Created basic input field functionality
-- Implemented MongoDB integration
-- Deployed to Vercel
-
-### Technical Implementation Details
-- Next.js 15.3.0 setup
-- MongoDB connection with Mongoose
-- Basic CSS styling
-- Error handling implementation
-
-### Current Capabilities
-- Text input with focus states
-- MongoDB data persistence
-- Newest-to-oldest display
-- Production deployment
-- Basic CSS styling and dark mode support
-- Swipe left/right to mark cards as deleted/done. (Removed in v0.5.0)
-- Cards can be reliably reordered within their columns, and the order persists.
-- Optimistic UI updates for drag actions.
-### Next Steps
-- Add input animations
-- Enable search functionality
-
-## Project Status
-## Project Status
-- Core features implemented
-- Basic testing in place
-- Core documentation structure created
-- CI/CD operational
-### Current Architecture
-- Next.js 15.3.0 with App Router
-- React 19 for UI
-- MongoDB for storage
-- CSS Modules for styling
-
-### Known Issues
-- Basic styling only
-- Optimistic updates lack robust error recovery (if server action fails after UI update).
-- Reversal logic for failed optimistic updates is basic and might need refinement.
-- Simple CRUD operations
-- Order persistence is not updated when moving cards *between* columns (only status is updated).
-
-### Future Considerations
-- User authentication
-- Advanced card features
-- Search functionality
-- Analytics integration
+### Next Steps / Future Considerations
+- Card Editing Functionality
+- Card Deletion Functionality
+- Search/Filtering
+- UI/UX Refinements (e.g., visual confirmation on DnD, more card details)
+- Testing (Unit, Integration, E2E)
 
