@@ -144,8 +144,7 @@ export default function Column({
                         <div className="text-gray-800 mb-1">{card.content}</div>
                         {card.createdAt && ( // Check if createdAt exists
                           <small className="text-xs text-gray-500 block mt-1">
-                            Created: {new Date(card.createdAt).toLocaleString()} {/* Optionally format */}
-                            {/* Or display raw ISO string: {card.createdAt} */}
+                            Created (UTC): {card.createdAt} {/* Display raw ISO string */}
                           </small>
                         )}
                       </li>

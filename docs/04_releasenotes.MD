@@ -1,5 +1,16 @@
 # Release Notes
 
+## v1.7.3 - Revert Timestamp Format to ISO 8601 (2025-04-23T17:25:00+02:00)
+
+### Changes
+- **Timestamp Format:** Changed the displayed `createdAt` timestamp on cards back to the raw UTC ISO 8601 string (`YYYY-MM-DDTHH:mm:ss.sssZ`) to align with the project's previously established standard (v0.8.1). Removed `toLocaleString()` formatting for consistency.
+
+### Technical Implementation
+- Updated `Column.tsx` to render `card.createdAt` directly without formatting.
+
+### Deployment
+- **Platform:** Vercel
+- **Deployment Date:** 2025-04-23T17:25:00+02:00
 ## v1.7.2 - Display Card Creation Time (2025-04-23T17:15:00+02:00)
 
 ### Features
