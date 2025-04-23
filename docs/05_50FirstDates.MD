@@ -1,5 +1,26 @@
 # Done Is Better Development Diary - 50 First Dates
 
+## v1.8.1 - Restore Full Kanban Board Functionality & Final Verification (2025-04-23T19:10:00+02:00)
+
+### Summary
+Restored the full Kanban board implementation in `KanbanBoard.tsx` that was temporarily commented out during debugging. This included re-enabling drag-and-drop functionality, fixing related TypeScript type errors (`onDragEnd`), and ensuring the `isReadOnly` prop correctly disabled interactions in the "All Cards" view.
+
+### Key Changes
+- Restored `KanbanBoard.tsx` component logic.
+- Fixed `@hello-pangea/dnd` type errors for `onDragEnd`.
+- Verified `isReadOnly` prop functionality in `KanbanBoard` and `Column` components.
+
+### Status
+- **🟢 COMPLETE & VERIFIED:** Logic restored, documented (`04_releasenotes.MD`), committed (`3baf685`), tagged (v1.8.1), deployed, and user confirmed full functionality on production.
+- **Definition of Done:** All criteria met.
+
+### Links
+- **Deployment:** https://doneisbetter-lg9ecqm8y-narimato.vercel.app
+- **Commit:** `3baf685`
+
+**Project is stable and ready for the next task.**
+
+---
 ## v1.7.3 - Revert Timestamp Format to ISO 8601 (2025-04-23T17:30:00+02:00)
 
 ### Summary
