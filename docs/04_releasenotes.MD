@@ -1,5 +1,32 @@
 # Release Notes
 
+## v1.3.0 - Card Creation Functionality (2025-04-23T11:35:00+02:00)
+
+### Features
+- **Task Creation:** Implemented ability to add new task cards
+- **Form Validation:** Added client-side validation with error handling
+- **Loading States:** Added visual feedback during task creation
+- **State Management:** Implemented client-side state for immediate UI updates
+- **Server Actions:** Used Next.js 14 server actions for form processing
+
+### Technical Implementation
+- Created Input component with proper TypeScript typing
+- Implemented server action (createCard) for task processing
+- Added client-side state management in the Home page component
+- Used React hooks for form state and error handling
+- Implemented proper error boundaries and loading states
+
+### Accessibility Improvements
+- Added ARIA attributes for form controls
+- Implemented proper form labels and error messaging
+- Added loading state indicators for screen readers
+- Included keyboard navigation support
+- Enhanced focus management during form interactions
+
+### Deployment
+- **Platform:** Vercel
+- **URL:** https://doneisbetter.vercel.app
+- **Deployment Date:** 2025-04-23T11:35:00+02:00
 ## v1.2.2 - TypeScript Build System Fix (2025-04-22T09:15:00+02:00)
 
 ### Fixes
