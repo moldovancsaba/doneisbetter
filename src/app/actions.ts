@@ -1,8 +1,12 @@
 'use server';
 
 import { Card, CardStatus } from "./types/card";
-import { getCardModel, CardDocument } from "./models/Card";
+import { getCardModel, CardDocument } from "@/lib/models/Card"; // Use alias for lib/models
 import mongoose from 'mongoose';
+import { getServerSession } from 'next-auth/next';
+// Assuming authOptions is exported from the NextAuth route handler
+// Adjust the path if your file structure is different
+import { authOptions } from '@/lib/authOptions';
 
 /**
  * Creates a new card with the given content
@@ -12,6 +16,12 @@ import mongoose from 'mongoose';
  * @throws Error if content is empty or invalid
  */
 export async function createCard(content: string): Promise<Card> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated');
+  }
+  const userId = session.user.id;
+
   // Validate input
   if (!content || content.trim() === '') {
     throw new Error('Card content cannot be empty');
@@ -22,18 +32,17 @@ export async function createCard(content: string): Promise<Card> {
   }
 
   try {
-    // Get the Card model with an active database connection
     const CardModel = await getCardModel();
     
-    // Count existing cards to determine order 
-    // (new cards should appear at the top of the TODO column)
-    const todoCardsCount = await CardModel.countDocuments({ status: 'TODO' });
+    // Count existing cards for the user to determine order
+    const userTodoCardsCount = await CardModel.countDocuments({ user: userId, status: 'TODO' });
     
-    // Create a new card document
+    // Create a new card document associated with the user
     const cardDocument = await CardModel.create({
       content: content.trim(),
       status: 'TODO' as CardStatus,
-      order: todoCardsCount // Place at the end of TODO cards
+      order: userTodoCardsCount, // Place at the end of the user's TODO cards
+      user: userId // Associate with the logged-in user
     });
     
     // Return in the format expected by the frontend
@@ -63,6 +72,12 @@ export async function updateCardStatus(
   newStatus: CardStatus, 
   order?: number
 ): Promise<Card> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated');
+  }
+  const userId = session.user.id;
+
   try {
     // Validate input
     if (!cardId) {
@@ -82,15 +97,15 @@ export async function updateCardStatus(
       throw new Error(`Invalid card ID format: ${cardId}`);
     }
     
-    // Get the Card model with an active database connection
     const CardModel = await getCardModel();
-    // Use the model's updateCardStatus method which handles typing
-    const updatedCard = await CardModel.updateCardStatus(cardId, newStatus, order);
+    // Use the model's static updateCardStatus method
+    const updatedCard = await CardModel.updateCardStatus(cardId, userId, newStatus, order);
     
     if (!updatedCard) {
-      throw new Error(`Card with ID ${cardId} not found`);
+      throw new Error(`Card with ID ${cardId} not found or user does not have permission`);
     }
     
+    // The static method already returns the correct format
     return updatedCard;
   } catch (error) {
     console.error('Error updating card status or order:', error);
@@ -104,10 +119,18 @@ export async function updateCardStatus(
  * @returns Array of cards
  */
 export async function getCards(): Promise<Card[]> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    // Return empty array for unauthenticated users, or throw error depending on desired behavior
+    return []; 
+    // throw new Error('User not authenticated'); 
+  }
+  const userId = session.user.id;
+
   try {
     const CardModel = await getCardModel();
-    // Use the model's findCards method which handles document conversion
-    return await CardModel.findCards();
+    // Use the model's static findCardsByUser method
+    return await CardModel.findCardsByUser(userId);
   } catch (error) {
     console.error('Error fetching cards:', error);
     throw new Error('Failed to fetch cards. Please try again.');

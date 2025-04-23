@@ -1,5 +1,5 @@
 import Providers from './components/Providers';
-
+import AuthProvider from './components/SessionProvider';
 export default function RootLayout({
   children,
 }: {
@@ -8,8 +8,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
-        <Providers />
+        <AuthProvider>
+          {children}
+          <Providers /> {/* For Toaster */}
+        </AuthProvider>
       </body>
     </html>
   )

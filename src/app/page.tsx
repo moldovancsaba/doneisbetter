@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import Input from './components/Input';
 import KanbanBoard from './components/KanbanBoard';
+import AuthButtons from './components/AuthButtons';
 import { Card, CardStatus } from './types/card';
 import { updateCardStatus, getCards } from './actions';
 import { toast } from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
 
 /**
  * Home page component
@@ -19,8 +21,9 @@ export default function HomePage(): JSX.Element {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: session, status } = useSession();
   
-  // Load cards from database on component mount
+  // Load cards from database on component mount and when session changes
   useEffect(() => {
     async function loadCards() {
       try {
@@ -37,8 +40,15 @@ export default function HomePage(): JSX.Element {
       }
     }
     
-    loadCards();
-  }, []);
+    if (status === 'authenticated') {
+      loadCards();
+    } else if (status === 'unauthenticated') {
+      // Clear cards and loading state if user signs out
+      setCards([]);
+      setIsLoading(false);
+      setError(null);
+    }
+  }, [status]); // Rerun effect when session status changes
   
   /**
    * Handler for adding a new card to the board
@@ -158,12 +168,31 @@ export default function HomePage(): JSX.Element {
   return (
     <main className="flex min-h-screen flex-col items-center p-4 md:p-6">
       <div className="w-full max-w-6xl">
-        <h1 className="text-3xl font-bold mb-6 text-center">Task Manager</h1>
+        <header className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-center">Task Manager</h1>
+          <AuthButtons />
+        </header>
         
-        {/* Input component for adding new tasks */}
-        <div className="mb-6">
-          <Input onCardCreated={handleCardCreated} />
-        </div>
+        {/* Show loading state while checking session */}
+        {status === 'loading' && (
+          <div className="text-center text-gray-500">Authenticating...</div>
+        )}
+        
+        {/* Show login prompt if unauthenticated */}
+        {status === 'unauthenticated' && (
+          <div className="text-center p-10 border rounded-lg bg-gray-50">
+            <p className="mb-4 text-lg">Please sign in to manage your tasks.</p>
+            <AuthButtons />
+          </div>
+        )}
+        
+        {/* Show Kanban board if authenticated */}
+        {status === 'authenticated' && (
+          <>
+            {/* Input component for adding new tasks */}
+            <div className="mb-6">
+              <Input onCardCreated={handleCardCreated} />
+            </div>
         
         {/* Error state */}
         {error && (
@@ -187,6 +216,8 @@ export default function HomePage(): JSX.Element {
             onCardUpdate={handleCardUpdate}
           />
         </div>
+        </>
+      )}
       </div>
     </main>
   );

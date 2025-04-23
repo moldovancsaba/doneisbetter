@@ -1,5 +1,44 @@
 # Release Notes
 
+## v1.7.0 - Google Authentication (2025-04-23T14:45:00+02:00)
+
+### Features
+- **Google Login:** Implemented user authentication using Google OAuth via NextAuth.js.
+- **User Persistence:** Added MongoDB User model to store user information.
+- **Data Ownership:** Associated cards with specific users in the database.
+- **Authenticated Actions:** Updated server actions (create, update, get cards) to be user-specific.
+- **Session Management:** Integrated NextAuth session provider for frontend state.
+- **UI Updates:** Added Login/Logout buttons and conditional rendering based on auth status.
+
+### Technical Implementation
+- **NextAuth.js Setup:**
+  - Configured Google Provider with client ID/secret.
+  - Implemented `signIn`, `session`, and `jwt` callbacks.
+  - Created API route handler `src/app/api/auth/[...nextauth]/route.ts`.
+  - Separated configuration into `src/lib/authOptions.ts`.
+- **Database Integration:**
+  - Created `User` model with Mongoose schema.
+  - Updated `Card` model to include `user` reference.
+  - Modified Card model static methods (`findCardsByUser`, `updateCardStatus`) to filter by user ID.
+  - Ensured database connection is handled correctly.
+- **Server Actions:**
+  - Integrated `getServerSession` to fetch user session.
+  - Added authentication checks to all actions.
+  - Modified database queries to be user-specific.
+- **Frontend:**
+  - Created `AuthProvider` and `AuthButtons` components.
+  - Updated `HomePage` to use `useSession` hook and manage UI based on authentication status.
+  - Added loading states for authentication.
+- **Project Structure:**
+  - Moved database connection (`db.ts`) and models (`User.ts`, `Card.ts`) to `src/lib/` directory.
+  - Updated all import paths to use `@/lib/...` aliases for better resolution.
+
+### Deployment
+- **Platform:** Vercel
+- **Authentication:** NextAuth.js with Google Provider
+- **Database:** MongoDB Atlas
+- **URL:** https://doneisbetter.vercel.app
+- **Deployment Date:** 2025-04-23T14:45:00+02:00
 ## v1.6.0 - MongoDB Integration (2025-04-23T14:15:00+02:00)
 
 ### Features

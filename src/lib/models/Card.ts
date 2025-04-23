@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { CardStatus } from '../types/card';
-import { connectToDatabase } from '../lib/db';
+import { CardStatus } from '@/app/types/card'; // Keep this alias if types/card.ts remains in app
+import { connectToDatabase } from '@/lib/db'; // Updated path
+import { UserDocument } from '@/lib/models/User'; // Updated path
 
 /**
  * MongoDB document interface for Card
@@ -64,6 +65,7 @@ interface CardModel extends Model<CardDocument> {
    * Finds cards for a specific user and returns them in a format compatible with the frontend Card type
    */
   findCardsByUser(userId: string): Promise<Array<{
+    id: string; // Ensure id is included in return type
     content: string;
     status: CardStatus;
     order: number;
