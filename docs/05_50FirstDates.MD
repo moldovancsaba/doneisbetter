@@ -10,15 +10,14 @@ Reverted the display format for the card creation timestamp (`createdAt`) back t
 - Changed label to "Created (UTC):".
 
 ### Status
-- **🟢 BUILT & DEPLOYED:** Change implemented, documented (`04_releasenotes.MD`), committed (`a589156`), tagged (v1.7.3), and deployed successfully.
-- **🟡 PENDING USER VERIFICATION:** User needs to confirm the timestamp format on production.
-- **Definition of Done:** All steps completed except final user verification.
+- **🟢 COMPLETE & VERIFIED:** Change implemented, documented (`04_releasenotes.MD`), committed (`a589156`), tagged (v1.7.3), deployed successfully, and user confirmed timestamp format (ISO 8601) is correct on production.
+- **Definition of Done:** All criteria met.
 
 ### Links
 - **Deployment:** https://doneisbetter-4uu7ku13n-narimato.vercel.app
 - **Commit:** `a589156`
 
-**Project is stable and ready for the next task, pending user confirmation of this timestamp format change.**
+**Project is stable and ready for the next task.**
 
 ---
 ## v1.7.2 - Display Card Creation Time (2025-04-23T17:20:00+02:00)
