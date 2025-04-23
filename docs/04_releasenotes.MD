@@ -1,5 +1,23 @@
 # Release Notes
 
+## v1.7.2 - Display Card Creation Time (2025-04-23T17:15:00+02:00)
+
+### Features
+- **Timestamp Display:** Added the creation timestamp (`createdAt`) to each card displayed in the Kanban columns.
+- **Formatting:** Timestamp is formatted using `toLocaleString()` for readability.
+
+### Fixes
+- **Type Synchronization:** Ensured the `createdAt` field (as ISO string) is correctly propagated from the database through server actions to the frontend `Card` type.
+- **Build Resolution:** Resolved a build error ("Unexpected token `section`") in `Column.tsx` that was likely caused by upstream type inconsistencies related to `createdAt`. Fixed by correcting type handling in Mongoose model static methods.
+
+### Technical Implementation
+- Updated `Card` type in `src/app/types/card.ts` to include `createdAt: string`.
+- Updated `CardModel` static methods (`findCardsByUser`, `updateCardStatus`) in `src/lib/models/Card.ts` to return `createdAt` as an ISO string and include missing `id`/`content` fields in `updateCardStatus` return object.
+- Updated `Column.tsx` to render the `createdAt` field.
+
+### Deployment
+- **Platform:** Vercel
+- **Deployment Date:** 2025-04-23T17:15:00+02:00
 ## v1.7.1 - Fix Authentication Build Errors (2025-04-23T15:15:00+02:00)
 
 ### Fixes

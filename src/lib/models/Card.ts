@@ -69,7 +69,7 @@ interface CardModel extends Model<CardDocument> {
     content: string;
     status: CardStatus;
     order: number;
-    createdAt: Date;
+    createdAt: string; // Changed to string for ISO format
   }>>;
   
   /**
@@ -85,7 +85,7 @@ interface CardModel extends Model<CardDocument> {
     content: string;
     status: CardStatus;
     order: number;
-    createdAt: Date;
+    createdAt: string; // Changed to string
   } | null>;
 }
 
@@ -102,7 +102,7 @@ CardSchema.statics.findCardsByUser = async function(userId: string): Promise<any
     content: card.content,
     status: card.status,
     order: card.order,
-    createdAt: card.createdAt
+    createdAt: card.createdAt.toISOString() // Convert to ISO string
   }));
 };
 
@@ -136,11 +136,11 @@ CardSchema.statics.updateCardStatus = async function(
     
     // Convert to frontend-compatible object
     return {
-      id: updatedCard._id.toString(),
-      content: updatedCard.content,
+      id: updatedCard._id.toString(), // Add id
+      content: updatedCard.content,   // Add content
       status: updatedCard.status,
       order: updatedCard.order,
-      createdAt: updatedCard.createdAt
+      createdAt: updatedCard.createdAt.toISOString() // Convert to ISO string
     };
   } catch (error) {
     console.error('Error updating card status:', error);

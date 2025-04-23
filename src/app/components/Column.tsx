@@ -10,11 +10,6 @@ export interface ColumnProps {
   title: string;
   
   /**
-   * Array of cards to display in this column
-   */
-  cards: Card[];
-  
-  /**
    * Status that this column represents
    */
   status: CardStatus;
@@ -23,6 +18,11 @@ export interface ColumnProps {
    * Unique identifier for the column, used as droppableId
    */
   id: string;
+  
+  /**
+   * Array of cards to display in this column
+   */
+  cards: Card[];
   
   /**
    * CSS color class for styling the column
@@ -66,14 +66,18 @@ export default function Column({
   };
   
   // Filter cards to only include those matching this column's status
-  const filteredCards = cards.filter(card => card.status === status || 
-    (!card.status && status === 'TODO')); // Cards without status default to TODO
+  const filteredCards = cards.filter(card => {
+    const isMatchingStatus = card.status === status;
+    const isDefaultTodo = !card.status && status === 'TODO';
+    return isMatchingStatus || isDefaultTodo;
+  }); // Semicolon marks end of filter logic
   
+  // Explicitly start return statement on new line
   return (
-    <section 
-      className={`flex flex-col h-full min-h-[300px] border rounded-lg ${colorClasses[color]} overflow-hidden`}
-      aria-labelledby={`column-${status}-heading`}
-    >
+    <section // Opening section tag
+      className={`flex flex-col h-full min-h-[300px] border rounded-lg ${colorClasses[color]} overflow-hidden`} // ClassName template literal
+      aria-labelledby={`column-${status}-heading`} // aria-labelledby template literal
+    > {/* Closing bracket for opening section tag */}
       <header className={`p-3 ${headerColors[color]} font-semibold flex justify-between items-center`}>
         <h2 
           id={`column-${status}-heading`} 
@@ -135,9 +139,15 @@ export default function Column({
                         role="button"
                         aria-pressed="false"
                         aria-roledescription="Draggable item"
-                        data-testid={`card-${card.id}`}
+                        data-testid={`card-${card.id}`} // Ensure only one data-testid
                       >
-                        <div className="text-gray-800">{card.content}</div>
+                        <div className="text-gray-800 mb-1">{card.content}</div>
+                        {card.createdAt && ( // Check if createdAt exists
+                          <small className="text-xs text-gray-500 block mt-1">
+                            Created: {new Date(card.createdAt).toLocaleString()} {/* Optionally format */}
+                            {/* Or display raw ISO string: {card.createdAt} */}
+                          </small>
+                        )}
                       </li>
                     )}
                   </Draggable>
@@ -151,4 +161,3 @@ export default function Column({
     </section>
   );
 }
-

@@ -24,8 +24,13 @@ export interface Card {
    * @default 0
    */
   order?: number;
-}
 
+  /**
+   * Timestamp when the card was created
+   * Stored as ISO 8601 string for serialization
+   */
+  createdAt?: string; 
+}
 /**
  * Available card statuses for Kanban workflow
  */
