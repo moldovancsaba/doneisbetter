@@ -1,5 +1,44 @@
 # Release Notes
 
+## v1.5.0 - Drag-and-Drop Implementation (2025-04-23T14:00:00+02:00)
+
+### Features
+- **Drag and Drop:** Implemented intuitive drag-and-drop for card movement between columns
+- **Order Preservation:** Added ability to reorder cards within columns
+- **Visual Feedback:** Enhanced UI with hover, active, and drag state indicators
+- **Toast Notifications:** Added success and error notifications for card actions
+- **Optimistic Updates:** Immediately update UI before server response for better UX
+- **Error Recovery:** Added state recovery when server operations fail
+
+### Technical Implementation
+- **@hello-pangea/dnd Integration:**
+  - Used DragDropContext, Droppable, and Draggable components
+  - Implemented proper drag source/destination handling
+  - Added keyboard accessibility for drag operations
+- **State Management:**
+  - Enhanced card ordering with explicit sort algorithm
+  - Added card position tracking with order field
+  - Implemented status and position-aware sorting
+- **Client/Server Separation:**
+  - Created dedicated Providers component for client-side features
+  - Maintained server-rendered layout with client islands
+  - Optimized component architecture for Next.js App Router
+- **Error Handling:**
+  - Added comprehensive try/catch blocks
+  - Implemented state rollback on failed operations
+  - Added contextual error notifications
+
+### Accessibility Improvements
+- **Keyboard Navigation:** Full keyboard support for drag operations
+- **ARIA Attributes:** Enhanced screen reader support for drag context
+- **State Announcements:** Added aria-live regions for dynamic updates
+- **Focus Management:** Improved focus handling during drag operations
+- **Semantic Structure:** Used proper HTML5 elements with role attributes
+
+### Deployment
+- **Platform:** Vercel
+- **URL:** https://doneisbetter.vercel.app
+- **Deployment Date:** 2025-04-23T14:00:00+02:00
 ## v1.4.0 - Kanban Board Implementation (2025-04-23T13:00:00+02:00)
 
 ### Features

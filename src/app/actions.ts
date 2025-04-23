@@ -1,7 +1,6 @@
 'use server';
 
-import { Card } from "./types/card";
-
+import { Card, CardStatus } from "./types/card";
 /**
  * Creates a new card with the given content
  * 
@@ -41,14 +40,19 @@ export async function createCard(content: string): Promise<Card> {
 }
 
 /**
- * Updates a card's status
+ * Updates a card's status and order
  * 
  * @param cardId - The ID of the card to update
  * @param newStatus - The new status to assign to the card
+ * @param order - The new order position of the card
  * @returns The updated card object
  * @throws Error if the card cannot be found or updated
  */
-export async function updateCardStatus(cardId: string, newStatus: string): Promise<Card> {
+export async function updateCardStatus(
+  cardId: string, 
+  newStatus: CardStatus, 
+  order?: number
+): Promise<Card> {
   try {
     // Validate input
     if (!cardId) {
@@ -59,21 +63,31 @@ export async function updateCardStatus(cardId: string, newStatus: string): Promi
       throw new Error('Invalid status value');
     }
     
-    // In a real app, this would update the database
-    // For this demo, we're simulating a successful update
+    if (order !== undefined && (typeof order !== 'number' || order < 0)) {
+      throw new Error('Order must be a non-negative number');
+    }
+    
+    // In a real app, this would find the card in the database
+    // For this demo, we're checking initialCards from lib/data.ts
+    const { initialCards } = await import('./lib/data');
+    const existingCard = initialCards.find(card => card.id === cardId);
+    
+    if (!existingCard) {
+      throw new Error(`Card with ID ${cardId} not found`);
+    }
     
     // Simulate network delay for demo purposes
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise<void>(resolve => setTimeout(resolve, 300));
     
-    // Return the "updated" card object
-    // In a real app, this would be fetched from the database
+    // Return the updated card object, preserving existing content
     return {
       id: cardId,
-      content: 'Card content', // This would be populated from the database
-      status: newStatus as any
+      content: existingCard.content,
+      status: newStatus,
+      order: order
     };
   } catch (error) {
-    console.error('Error updating card status:', error);
-    throw new Error('Failed to update card status. Please try again.');
+    console.error('Error updating card status or order:', error);
+    throw new Error('Failed to update card. Please try again.');
   }
 }

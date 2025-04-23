@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardStatus } from '../types/card';
+import { Droppable, Draggable } from '@hello-pangea/dnd';
 
 export interface ColumnProps {
   /**
@@ -17,6 +18,11 @@ export interface ColumnProps {
    * Status that this column represents
    */
   status: CardStatus;
+  
+  /**
+   * Unique identifier for the column, used as droppableId
+   */
+  id: string;
   
   /**
    * CSS color class for styling the column
@@ -41,6 +47,7 @@ export default function Column({
   title,
   cards,
   status,
+  id,
   color = 'blue',
   isLoading = false,
   onCardClick
@@ -79,43 +86,68 @@ export default function Column({
         </span>
       </header>
       
-      <div className="flex-1 p-2 overflow-y-auto">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-pulse flex flex-col space-y-2 w-full">
-              <div className="h-20 bg-gray-200 rounded"></div>
-              <div className="h-20 bg-gray-200 rounded"></div>
-              <div className="h-20 bg-gray-200 rounded"></div>
-            </div>
-          </div>
-        ) : filteredCards.length === 0 ? (
+      <Droppable droppableId={id} type="CARD">
+        {(provided, snapshot) => (
           <div 
-            className="flex items-center justify-center h-full text-gray-500 text-sm"
-            aria-live="polite"
+            className={`flex-1 p-2 overflow-y-auto ${snapshot.isDraggingOver ? 'bg-gray-50' : ''}`}
+            ref={provided.innerRef}
+            {...provided.droppableProps}
           >
-            No cards in {title.toLowerCase()}
-          </div>
-        ) : (
-          <ul 
-            className="space-y-2"
-            role="list"
-            aria-label={`${title} cards`}
-          >
-            {filteredCards.map(card => (
-              <li 
-                key={card.id}
-                className="p-3 bg-white rounded-md shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => onCardClick && onCardClick(card)}
-                tabIndex={0}
-                role="button"
-                aria-pressed="false"
+            {isLoading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-pulse flex flex-col space-y-2 w-full">
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            ) : filteredCards.length === 0 ? (
+              <div 
+                className="flex items-center justify-center h-full text-gray-500 text-sm"
+                aria-live="polite"
               >
-                <div className="text-gray-800">{card.content}</div>
-              </li>
-            ))}
-          </ul>
+                No cards in {title.toLowerCase()}
+                {provided.placeholder}
+              </div>
+            ) : (
+              <ul 
+                className="space-y-2"
+                role="list"
+                aria-label={`${title} cards`}
+              >
+                {filteredCards.map((card, index) => (
+                  <Draggable 
+                    key={card.id} 
+                    draggableId={card.id} 
+                    index={index}
+                    isDragDisabled={isLoading}
+                  >
+                    {(provided, snapshot) => (
+                      <li
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className={`p-3 bg-white rounded-md shadow-sm transition-shadow
+                          ${snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-300' : 'hover:shadow-md'}
+                          ${isLoading ? 'opacity-60' : 'cursor-pointer'}`}
+                        onClick={() => !snapshot.isDragging && onCardClick && onCardClick(card)}
+                        tabIndex={0}
+                        role="button"
+                        aria-pressed="false"
+                        aria-roledescription="Draggable item"
+                        data-testid={`card-${card.id}`}
+                      >
+                        <div className="text-gray-800">{card.content}</div>
+                      </li>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </ul>
+            )}
+          </div>
         )}
-      </div>
+      </Droppable>
     </section>
   );
 }

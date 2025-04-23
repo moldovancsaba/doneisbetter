@@ -6,6 +6,7 @@ import Input from './components/Input';
 import KanbanBoard from './components/KanbanBoard';
 import { Card, CardStatus } from './types/card';
 import { updateCardStatus } from './actions';
+import { toast } from 'react-hot-toast';
 
 /**
  * Home page component
@@ -50,9 +51,9 @@ export default function HomePage(): JSX.Element {
     try {
       setIsUpdating(true);
       
-      // In a real app, this would call the server action to update the card in the database
-      // await updateCardStatus(card.id, nextStatus);
       
+      // Update card status via server action
+      await updateCardStatus(card.id, nextStatus);
       // Update the card in our local state
       setCards(prevCards => 
         prevCards.map(c => 
@@ -62,6 +63,68 @@ export default function HomePage(): JSX.Element {
     } catch (error) {
       console.error('Failed to update card status:', error);
       // In a real app, we'd show an error toast or notification
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  
+  /**
+   * Handler for drag-and-drop card updates
+   * @param updatedCard - The card with updated status and/or order
+   */
+  const handleCardUpdate = async (updatedCard: Card): Promise<void> => {
+    // Skip if no status change
+    if (!updatedCard.status) {
+      return;
+    }
+    
+    try {
+      // Optimistically update UI state first for better UX
+      setCards(prevCards => {
+        // Find the card to update
+        const updatedCards = prevCards.map(card => 
+          card.id === updatedCard.id ? { ...card, ...updatedCard } : card
+        );
+        
+        
+        // Sort cards by order within each status group
+        return updatedCards.sort((a, b) => {
+          const aStatus = a.status || 'TODO';
+          const bStatus = b.status || 'TODO';
+          
+          // First sort by status column order (TODO, IN_PROGRESS, DONE)
+          if (aStatus !== bStatus) {
+            const statusOrder = { 'TODO': 0, 'IN_PROGRESS': 1, 'DONE': 2 };
+            return statusOrder[aStatus] - statusOrder[bStatus];
+          }
+          
+          // Then by order within the same status
+          const aOrder = a.order ?? 0;
+          const bOrder = b.order ?? 0;
+          return aOrder - bOrder;
+        });
+      });
+      
+      setIsUpdating(true);
+      
+      // Update card via server action
+      await updateCardStatus(updatedCard.id, updatedCard.status, updatedCard.order);
+      
+      // Show success notification
+      toast.success(`Card moved to ${updatedCard.status}`);
+    } catch (error) {
+      console.error('Failed to update card via drag and drop:', error);
+      
+      // Revert the change in state
+      setCards(prevCards => {
+        const originalCard = initialCards.find(c => c.id === updatedCard.id);
+        return prevCards.map(card => 
+          card.id === updatedCard.id && originalCard ? originalCard : card
+        );
+      });
+      
+      // Show error notification
+      toast.error('Failed to update card. Please try again.');
     } finally {
       setIsUpdating(false);
     }
@@ -83,6 +146,7 @@ export default function HomePage(): JSX.Element {
             cards={cards}
             isLoading={isUpdating}
             onCardClick={handleCardClick}
+            onCardUpdate={handleCardUpdate}
           />
         </div>
       </div>
