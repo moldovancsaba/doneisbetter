@@ -26,9 +26,8 @@ const UserSchema = new Schema<UserDocument>(
       type: String,
       required: [true, 'Name is required'],
     },
-    image: {
-      type: String,
-    },
+    image: String,
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
     googleId: {
       type: String,
       required: [true, 'Google ID is required'],

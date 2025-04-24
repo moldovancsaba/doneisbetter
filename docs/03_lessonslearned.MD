@@ -509,3 +509,8 @@ This case study demonstrates the importance of maintaining a "Feature Registry" 
 - **Result:** Package persists despite all standard cleaning methods.
 - **Hypothesis:** Might be linked via build tooling, global packages, or non-standard npm resolution, not directly by `package.json`.
 - **Decision:** As `npm audit` shows 0 vulnerabilities and the package doesn't prevent successful builds, ignoring its presence for stability (Rule 07). Further investigation deferred unless it causes runtime issues. Build successfully completed after ignoring.
+
+## 2025-04-24: Security Vulnerability Neutralized
+- **Issue:** Critical NPM dependency vulnerability detected during admin role implementation
+- **Action:** Executed `npm audit fix --force` to upgrade vulnerable Next.js dependency to 14.2.28
+- **Verification:** Post-fix audit shows 0 vulnerabilities
