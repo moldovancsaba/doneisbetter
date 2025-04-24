@@ -511,3 +511,21 @@
 ### Deployment
 - Platform: Vercel
 - URL: https://doneisbetter-6o3vm7ng0-narimato.vercel.app
+## v1.10.1 (2025-04-24)
+- Fixed form submission handling
+- Improved input component with proper loading states
+- Stabilized admin role implementation
+- Optimized MongoDB connection handling
+- Updated NextAuth configuration for better type safety
+## v1.10.2 (2025-04-24)
+- Added 'Admin Login (Dev)' button for testing (non-production only)
+- Fixed numerous build errors related to TypeScript types, imports, and syntax
+- Corrected NextAuth adapter version mismatch and configuration
+- Enabled Next.js Server Actions
+- Refined MongoDB connection logic
+- Stabilized build and deployment process
+## v1.10.3 (2025-04-24)
+- **Feat:** Automatically assign 'admin' role to 'moldovancsaba@gmail.com' on Google sign-in.
+- **Feat:** Implemented fallback default values for card properties in server actions to prevent loading errors from missing data.
+- **Fix:** Corrected multiple critical syntax and type errors in NextAuth configuration ().
+- **Fix:** Resolved build failures related to dependencies, imports, and component structure.
