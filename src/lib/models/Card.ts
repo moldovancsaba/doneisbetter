@@ -15,6 +15,8 @@ export interface CardDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
   user: mongoose.Types.ObjectId; // Reference to User
+  isDeleted: boolean; // Added for soft delete
+  deletedAt?: Date; // Added for soft delete timestamp
 }
 
 /**
@@ -46,6 +48,15 @@ const CardSchema = new Schema<CardDocument>(
       ref: 'User',
       required: true,
       index: true // Add index for querying by user
+    },
+    isDeleted: { // Add isDeleted field
+      type: Boolean,
+      default: false,
+      index: true // Index for querying deleted items
+    },
+    deletedAt: { // Add deletedAt field
+      type: Date,
+      default: null 
     }
   },
   {
@@ -54,8 +65,11 @@ const CardSchema = new Schema<CardDocument>(
 );
 
 // Add indexes for efficient querying and sorting
-CardSchema.index({ user: 1, status: 1, order: 1 }); // Index for user-specific sorting
+CardSchema.index({ user: 1, isDeleted: 1, status: 1, order: 1 }); // Updated index for main view filtering
+CardSchema.index({ user: 1, isDeleted: 1 }); // Index for finding user's deleted/non-deleted
 CardSchema.index({ createdAt: -1 }); // For sorting by creation date
+// Optional: Index for TTL (Time-To-Live) for automatic hard delete after 30 days
+// CardSchema.index({ deletedAt: 1 }, { expireAfterSeconds: 30 * 24 * 60 * 60 }); 
 
 /**
  * Methods for Card model
@@ -94,7 +108,8 @@ CardSchema.statics.findCardsByUser = async function(userId: string): Promise<any
   if (!userId) {
     throw new Error("User ID is required to find cards");
   }
-  const cards = await this.find({ user: userId }).sort({ status: 1, order: 1 });
+  // Filter out deleted cards
+  const cards = await this.find({ user: userId, isDeleted: { $ne: true } }).sort({ status: 1, order: 1 });
   
   // Convert MongoDB documents to frontend-compatible objects
   return cards.map((card: CardDocument) => ({

@@ -1,5 +1,28 @@
 # Done Is Better Development Diary - 50 First Dates
 
+## v1.9.0 - Soft Delete Functionality (2025-04-24T08:30:00+02:00)
+
+### Summary
+Implemented a "soft delete" feature where clicking the delete icon (🗑️) marks a card as deleted instead of removing it permanently. Added a new "Deleted" view toggle in the header to display only these soft-deleted cards for the current user. Updated database schema, server actions, and frontend components to support this workflow. Resolved significant build issues encountered after a Next.js upgrade by downgrading back to v14.0.4 and cleaning up dependencies/configurations. Re-enabled drag-and-drop functionality after ensuring build stability.
+
+### Key Changes
+- **Schema:** Added `isDeleted`, `deletedAt` fields to `Card` model.
+- **Actions:** Created `softDeleteCard`, `getDeletedCards`. Updated `getCards`, `getAllCards` to filter `isDeleted: { $ne: true }`.
+- **UI:** Added "Deleted" view mode toggle. Added delete button (🗑️) to cards in `Column.tsx` (only in "My Cards"). Wired up delete button to `softDeleteCard` action via `handleCardDelete` in `page.tsx`.
+- **Build Fixes:** Downgraded Next.js to 14.0.4, aligned React types, fixed ESLint config, resolved persistent JSX build errors by debugging component structure and finally removing a stray semicolon. Reinstalled and re-integrated `@hello-pangea/dnd`.
+
+### Status
+- **🟢 BUILT & DEPLOYED:** Feature implemented, documented (`04_releasenotes.MD`), committed (TBD), tagged (TBD), and deployed successfully.
+- **🟡 PENDING USER VERIFICATION:** User needs to test soft delete functionality (delete button, "Deleted" view) and confirm DnD is working again on production.
+- **Definition of Done:** All steps completed except final user verification.
+
+### Links
+- **Deployment:** TBD (Will be added after successful deployment)
+- **Commit:** TBD (Will be added after successful commit)
+
+**Project is stable on Next.js 14.0.4 and ready for the next task, pending user confirmation of the soft delete feature and restored DnD.**
+
+---
 ## v1.8.3 - Display User Info on "All Cards" View (2025-04-23T19:50:00+02:00)
 
 ### Summary

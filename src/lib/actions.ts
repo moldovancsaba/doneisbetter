@@ -152,8 +152,8 @@ export async function getAllCards(): Promise<Card[]> {
 
   try {
     const CardModel = await getCardModel();
-    // Fetch all cards and populate user's name and image
-    const cardDocuments = await CardModel.find({})
+    // Fetch all non-deleted cards and populate user's name and image
+    const cardDocuments = await CardModel.find({ isDeleted: { $ne: true } }) // Exclude deleted
                                         .populate<{ user: Pick<UserDocument, 'name' | 'image'> | null }>('user', 'name image') // Populate specific fields
                                         .sort({ status: 1, order: 1 });
 
@@ -181,5 +181,96 @@ export async function getAllCards(): Promise<Card[]> {
   } catch (error) {
     console.error('Error fetching all cards:', error);
     throw new Error('Failed to fetch all cards. Please try again.');
+  }
+}
+
+/**
+ * Retrieves soft-deleted cards for the authenticated user from the database.
+ */
+// NOTE: getDeletedCards function definition should follow softDeleteCard
+
+/**
+ * Soft deletes a card by setting its isDeleted flag to true.
+ * Soft deletes a card by setting its isDeleted flag to true.
+ * Ensures the card belongs to the authenticated user.
+ * @param {string} cardId - The ID of the card to soft delete.
+ * @returns {Promise<{ success: boolean; message?: string }>} Result object indicating success or failure.
+ */
+export async function softDeleteCard(cardId: string): Promise<{ success: boolean; message?: string }> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    // Authentication check
+    return { success: false, message: 'User not authenticated' };
+  }
+  const userId = session.user.id;
+
+  // Validate input
+  if (!cardId) {
+    return { success: false, message: 'Card ID is required' };
+  }
+  if (!mongoose.Types.ObjectId.isValid(cardId)) {
+    return { success: false, message: `Invalid card ID format: ${cardId}` };
+  }
+
+  try {
+    const CardModel = await getCardModel();
+    const deletedCard = await CardModel.findOneAndUpdate(
+      { _id: cardId, user: userId }, // Filter by ID and owner
+      { isDeleted: true, deletedAt: new Date() }, // Set soft delete fields
+      { new: true } // Option to return the modified document (optional here)
+    );
+
+    if (!deletedCard) {
+      // Card not found or user doesn't own it
+      return { success: false, message: 'Card not found or permission denied' };
+    }
+
+    console.log(`Card ${cardId} soft deleted by user ${userId}`);
+    return { success: true };
+
+  } catch (error) {
+    console.error('Error soft deleting card:', error);
+    return { success: false, message: 'Failed to delete card. Please try again.' };
+  }
+}
+
+/**
+ * Retrieves soft-deleted cards for the authenticated user from the database.
+ * 
+ * @returns {Promise<Card[]>} Array of deleted cards belonging to the user, sorted by deletion date.
+ * @throws Error if user is not authenticated or fetch fails.
+ */
+export async function getDeletedCards(): Promise<Card[]> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    // Return empty array for unauthenticated users
+    return []; 
+  }
+  const userId = session.user.id;
+
+  try {
+    const CardModel = await getCardModel();
+    // Find cards marked as deleted for the specific user, sort by deletion date descending
+    const cardDocuments = await CardModel.find({ 
+      user: userId, 
+      isDeleted: true 
+    }).sort({ deletedAt: -1 }); // Sort by deletion date, newest first
+
+    // Convert MongoDB documents to frontend-compatible objects
+    return cardDocuments.map((doc) => {
+      const typedDoc = doc as CardDocument; 
+      return {
+        id: typedDoc._id.toString(),
+        content: typedDoc.content,
+        status: typedDoc.status, // Keep status for potential restoration later
+        order: typedDoc.order,
+        createdAt: typedDoc.createdAt.toISOString() // Include createdAt
+        // We could optionally include deletedAt here if needed on the frontend
+        // deletedAt: typedDoc.deletedAt?.toISOString() 
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching deleted cards:', error);
+    throw new Error('Failed to fetch deleted cards. Please try again.');
   }
 }

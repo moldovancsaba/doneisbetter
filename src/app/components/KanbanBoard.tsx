@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { DragDropContext } from '@hello-pangea/dnd';
-import { Card, CardStatus, ColumnData, DragEndResult } from '../types/card';
+import { useState } from 'react'; // Re-add useState
+import { DragDropContext, DropResult } from '@hello-pangea/dnd'; // Change DragEndResult to DropResult
+import { Card, CardStatus, ColumnData } from '../types/card'; // Keep types
 import Column from './Column';
 
 export interface KanbanBoardProps {
@@ -11,6 +11,7 @@ export interface KanbanBoardProps {
   onCardClick?: (card: Card) => void;
   onCardUpdate?: (updatedCard: Card) => void;
   isReadOnly?: boolean;
+  onCardDelete?: (cardId: string) => void; 
 }
 
 const COLUMNS: ColumnData[] = [
@@ -24,21 +25,23 @@ export default function KanbanBoard({
   isLoading = false,
   onCardClick,
   onCardUpdate,
-  isReadOnly = false
-}: KanbanBoardProps): JSX.Element {
-  const [isDragging, setIsDragging] = useState(false);
-
-  const handleDragEnd = (result: DragEndResult) => {
-    if (isReadOnly) return;
+  isReadOnly = false,
+  onCardDelete // Destructure the new prop
+}: KanbanBoardProps): JSX.Element { 
+  // Restore state and handler
+  const [isDragging, setIsDragging] = useState<boolean>(false); 
+  
+  const handleDragEnd = (result: DropResult) => { // Use DropResult type
+    if (isReadOnly) return; 
     setIsDragging(false);
 
     const { destination, source, draggableId } = result;
-    if (!destination) return;
+    if (!destination) return; 
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     ) {
-      return;
+      return; 
     }
 
     const card = cards.find(c => c.id === draggableId);
@@ -54,12 +57,13 @@ export default function KanbanBoard({
   };
 
   return (
+    // Restore DragDropContext wrapper
     <DragDropContext
       onDragEnd={handleDragEnd}
       onDragStart={isReadOnly ? undefined : () => setIsDragging(true)}
     >
-      <div
-        className={`h-full ${isDragging ? 'cursor-grabbing' : ''}`}
+      <div 
+        className={`h-full ${isDragging ? 'cursor-grabbing' : ''}`} 
         role="region"
         aria-label="Kanban board"
       >
@@ -78,13 +82,15 @@ export default function KanbanBoard({
               isLoading={isLoading}
               isReadOnly={isReadOnly}
               onCardClick={onCardClick}
+              onCardDelete={onCardDelete} 
             />
           ))}
-        </div>
+        </div> 
+        {/* Restore screen reader announcement div */}
         <div className="sr-only" aria-live="polite">
-          {isDragging ? 'Card is being dragged' : ''}
-        </div>
-      </div>
-    </DragDropContext>
-  );
+           {isDragging ? 'Card is being dragged' : ''}
+        </div> 
+      </div> 
+    </DragDropContext> 
+  ); 
 }

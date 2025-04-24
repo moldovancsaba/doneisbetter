@@ -5,8 +5,8 @@ import Input from './components/Input';
 import KanbanBoard from './components/KanbanBoard';
 import AuthButtons from './components/AuthButtons';
 import { Card, CardStatus } from './types/card';
-import { updateCardStatus, getCards } from './actions'; // Keep user-specific actions here
-import { getAllCards } from '@/lib/actions'; // Import getAllCards from lib
+import { updateCardStatus, getCards, getDeletedCards, softDeleteCard } from '@/lib/actions'; 
+import { getAllCards } from '@/lib/actions'; 
 import { toast } from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 
@@ -17,26 +17,32 @@ import { useSession } from 'next-auth/react';
  * @returns JSX.Element
  */
 export default function HomePage(): JSX.Element {
-  // State for cards, loading, and errors
+  // State for cards, loading, errors, and view mode
   const [cards, setCards] = useState<Card[]>([]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session, status } = useSession();
-  const [viewMode, setViewMode] = useState<'myCards' | 'allCards'>('myCards'); // State for view mode
+  const [viewMode, setViewMode] = useState<'myCards' | 'allCards' | 'deleted'>('myCards');
   
-  // Load cards from database on component mount and when session changes
+  // Load cards from database on component mount and when session/viewMode changes
   useEffect(() => {
     async function loadCards() {
-      try { // <<< Keep only one try
+      try {
         setIsLoading(true);
         // Fetch cards based on view mode
-        const cardsFromDB = viewMode === 'myCards' 
-          ? await getCards() 
-          : await getAllCards();
+        let cardsFromDB: Card[];
+        if (viewMode === 'deleted') {
+          cardsFromDB = await getDeletedCards();
+        } else if (viewMode === 'myCards') {
+          cardsFromDB = await getCards();
+        } else { // viewMode === 'allCards'
+          cardsFromDB = await getAllCards();
+        }
         setCards(cardsFromDB);
         setError(null);
       } catch (err) {
+        console.error('Failed to load cards:', err);
         setError('Failed to load cards. Please refresh the page.');
         toast.error('Failed to load cards');
       } finally {
@@ -52,14 +58,19 @@ export default function HomePage(): JSX.Element {
       setIsLoading(false);
       setError(null);
     }
-  }, [status, viewMode]); // Rerun effect when session status or viewMode changes
+  }, [status, viewMode]); 
   
   /**
    * Handler for adding a new card to the board
    * @param newCard - The newly created card from the Input component
    */
   const handleCardCreated = (newCard: Card): void => {
-    setCards(prevCards => [newCard, ...prevCards]);
+    // Only add to view if in 'My Cards' mode initially
+    if (viewMode === 'myCards') {
+       setCards(prevCards => [newCard, ...prevCards]);
+    }
+     // Optionally show toast regardless of view
+     toast.success('Card created successfully!');
   };
   
   /**
@@ -67,37 +78,27 @@ export default function HomePage(): JSX.Element {
    * @param card - The card that was clicked
    */
   const handleCardClick = async (card: Card): Promise<void> => {
-    // Determine the next status in the workflow
     let nextStatus: CardStatus;
     
     switch (card.status) {
-      case 'TODO':
-        nextStatus = 'IN_PROGRESS';
-        break;
-      case 'IN_PROGRESS':
-        nextStatus = 'DONE';
-        break;
-      case 'DONE':
-        return; // No next status for DONE cards
-      default:
-        nextStatus = 'IN_PROGRESS'; // Default for cards without status
+      case 'TODO': nextStatus = 'IN_PROGRESS'; break;
+      case 'IN_PROGRESS': nextStatus = 'DONE'; break;
+      case 'DONE': return; 
+      default: nextStatus = 'IN_PROGRESS'; 
     }
     
     try {
       setIsUpdating(true);
-      
-      
-      // Update card status via server action
       await updateCardStatus(card.id, nextStatus);
-      // Update the card in our local state
       setCards(prevCards => 
         prevCards.map(c => 
           c.id === card.id ? { ...c, status: nextStatus } : c
         )
       );
+      toast.success(`Card moved to ${nextStatus}`);
     } catch (error) {
       console.error('Failed to update card status:', error);
-      // In a real app, we'd show an error toast or notification
+      toast.error('Failed to move card.');
     } finally {
       setIsUpdating(false);
     }
@@ -108,32 +109,22 @@ export default function HomePage(): JSX.Element {
    * @param updatedCard - The card with updated status and/or order
    */
   const handleCardUpdate = async (updatedCard: Card): Promise<void> => {
-    // Skip if no status change
-    if (!updatedCard.status) {
-      return;
-    }
-    
+    if (!updatedCard.status) return;
+    const originalCards = [...cards]; // Snapshot for potential revert
+
     try {
-      // Optimistically update UI state first for better UX
+      // Optimistic UI update
       setCards(prevCards => {
-        // Find the card to update
         const updatedCards = prevCards.map(card => 
           card.id === updatedCard.id ? { ...card, ...updatedCard } : card
         );
-        
-        
-        // Sort cards by order within each status group
-        return updatedCards.sort((a, b) => {
+        return updatedCards.sort((a, b) => { // Keep sorted
           const aStatus = a.status || 'TODO';
           const bStatus = b.status || 'TODO';
-          
-          // First sort by status column order (TODO, IN_PROGRESS, DONE)
           if (aStatus !== bStatus) {
             const statusOrder = { 'TODO': 0, 'IN_PROGRESS': 1, 'DONE': 2 };
             return statusOrder[aStatus] - statusOrder[bStatus];
           }
-          
-          // Then by order within the same status
           const aOrder = a.order ?? 0;
           const bOrder = b.order ?? 0;
           return aOrder - bOrder;
@@ -141,31 +132,40 @@ export default function HomePage(): JSX.Element {
       });
       
       setIsUpdating(true);
-      
-      // Update card via server action
+      // Call server action
       await updateCardStatus(updatedCard.id, updatedCard.status, updatedCard.order);
-      
-      // Show success notification
-      toast.success(`Card moved to ${updatedCard.status}`);
+      // No success toast needed for drag-drop? Or maybe a subtle one.
+      // toast.success(`Card moved to ${updatedCard.status}`); 
     } catch (error) {
       console.error('Failed to update card via drag and drop:', error);
-      
-      // Revert the change in state
-      // Revert the change in state to the previous version
-      setCards(prevCards => {
-        // Find the original card from previous state
-        const originalCard = prevCards.find(c => c.id === updatedCard.id);
-        if (!originalCard) return prevCards;
-        
-        // Remove any optimistic updates
-        return prevCards.map(card => 
-          card.id === updatedCard.id ? originalCard : card
-        );
-      });
-      // Show error notification
-      toast.error('Failed to update card. Please try again.');
+      setCards(originalCards); // Revert optimistic update
+      toast.error('Failed to update card position.');
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  /**
+   * Handler for soft deleting a card
+   * @param cardId - The ID of the card to delete
+   */
+  const handleCardDelete = async (cardId: string): Promise<void> => {
+    const originalCards = [...cards];
+    setCards(prev => prev.filter(c => c.id !== cardId)); // Optimistic UI update
+    const toastId = toast.loading('Deleting card...');
+
+    try {
+      const result = await softDeleteCard(cardId); 
+      if (result.success) {
+        toast.success('Card deleted', { id: toastId });
+      } else {
+        setCards(originalCards); // Revert
+        toast.error(result.message || 'Failed to delete card', { id: toastId });
+      }
+    } catch (error) {
+      setCards(originalCards); // Revert
+      console.error('Error deleting card:', error);
+      toast.error('An unexpected error occurred while deleting.', { id: toastId });
     }
   };
   
@@ -196,22 +196,35 @@ export default function HomePage(): JSX.Element {
                   viewMode === 'allCards' 
                     ? 'bg-blue-600 text-white cursor-default' 
                     : 'bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed'
-                }`}
-                 aria-pressed={viewMode === 'allCards'}
+                }`} 
+                aria-pressed={viewMode === 'allCards'} 
               >
                 All Cards
               </button>
-            </div>
+              {/* Deleted View Button */}
+              <button
+                onClick={() => setViewMode('deleted')}
+                disabled={viewMode === 'deleted' || status !== 'authenticated'}
+                className={`px-3 py-1 text-sm rounded ${
+                  viewMode === 'deleted' 
+                    ? 'bg-red-600 text-white cursor-default' 
+                    : 'bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed'
+                }`}
+                 aria-pressed={viewMode === 'deleted'}
+              >
+                Deleted
+              </button>
+            </div> 
             <AuthButtons />
-          </div>
-        </header>
+          </div> 
+        </header> 
         
-        {/* Show loading state while checking session */}
+        {/* Loading state while checking session */}
         {status === 'loading' && (
-          <div className="text-center text-gray-500">Authenticating...</div>
+          <div className="text-center text-gray-500 py-10">Authenticating...</div>
         )}
         
-        {/* Show login prompt if unauthenticated */}
+        {/* Login prompt if unauthenticated */}
         {status === 'unauthenticated' && (
           <div className="text-center p-10 border rounded-lg bg-gray-50">
             <p className="mb-4 text-lg">Please sign in to manage your tasks.</p>
@@ -219,43 +232,43 @@ export default function HomePage(): JSX.Element {
           </div>
         )}
         
-        {/* Show Kanban board if authenticated */}
+        {/* Main content if authenticated */}
         {status === 'authenticated' && (
-          <>
-            {/* Input component - only show if viewing 'My Cards' */}
-            {viewMode === 'myCards' && (
+          <> 
+            {/* Input only for My Cards */}
+            {viewMode === 'myCards' && ( 
               <div className="mb-6">
                 <Input onCardCreated={handleCardCreated} />
               </div>
+            )} 
+
+            {/* Error Display */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded" role="alert">
+                <p>{error}</p>
+                <button
+                  onClick={() => window.location.reload()} 
+                  className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  Reload Page
+                </button>
+              </div>
             )}
-        
-        {/* Error state */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            <p>{error}</p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-            >
-              Reload Page
-            </button>
-          </div>
-        )}
-        
-        {/* Kanban board with all cards */}
-        <div className="h-[calc(100vh-250px)]">
-          <KanbanBoard // <<< Remove duplicate line
-            cards={cards}
-            isLoading={isUpdating || isLoading}
-            // Disable interactions if viewing 'All Cards'
-            isReadOnly={viewMode === 'allCards'} 
-            onCardClick={viewMode === 'myCards' ? handleCardClick : undefined}
-            onCardUpdate={viewMode === 'myCards' ? handleCardUpdate : undefined}
-          />
-        </div> {/* Close h-[calc(100vh-250px)] div */}
-        </>
-      )}
-      </div> {/* Close w-full max-w-6xl div */}
-    </main>
-  );
+
+            {/* Kanban Board */}
+            <div className="h-[calc(100vh-250px)]"> 
+              <KanbanBoard
+                cards={cards}
+                isLoading={isUpdating || isLoading}
+                isReadOnly={viewMode !== 'myCards'} // Read-only if not 'My Cards'
+                onCardClick={viewMode === 'myCards' ? handleCardClick : undefined} // Click only in 'My Cards'
+                onCardUpdate={viewMode === 'myCards' ? handleCardUpdate : undefined} // Drag update only in 'My Cards'
+                onCardDelete={viewMode === 'myCards' ? handleCardDelete : undefined} // Delete only in 'My Cards'
+              />
+            </div>
+          </> 
+        )} 
+      </div> 
+    </main> 
+  ); 
 }
