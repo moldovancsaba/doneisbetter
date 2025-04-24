@@ -1,107 +1,74 @@
-import NextAuth, { AuthOptions } from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import { connectToDatabase } from '@/lib/db';
-import { getUserModel, UserDocument } from '@/lib/models/User'; // Import UserDocument
+import { MongoDBAdapter } from '@auth/mongodb-adapter';
+import type { Adapter } from 'next-auth/adapters';
+import clientPromise from './mongodb';
+import { connectDB } from '@/lib/db';
+import UserModel, { UserDocument } from '@/lib/models/User';
+import { Types } from 'mongoose';
 
-/**
- * Configuration options for NextAuth.js
- */
-export const authOptions: AuthOptions = {
+type Role = 'user' | 'admin';
+
+export const authOptions: NextAuthOptions = {
+  adapter: MongoDBAdapter(clientPromise) as unknown as Adapter,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code"
-        }
-      }
     }),
   ],
   callbacks: {
-    // This one is correct
-    async session({ session, token }) {
-      // Assign the MongoDB User ID from the token to the session
-      if (session?.user && token?.dbUserId) {
-        session.user.id = token.dbUserId as string; // Use dbUserId from JWT
-      }
-      return session;
-    },
     async jwt({ token, user, account }) {
-      // On successful sign-in (account is available), find the DB user and add their MongoDB _id to the token
       if (account && user) {
         try {
-          await connectToDatabase();
-          const UserModel = await getUserModel(); // Keep only one declaration
-          // Find the user based on Google ID (user.id from provider === token.sub)
-          const dbUser: UserDocument | null = await UserModel.findOne({ googleId: token.sub }); // Add type annotation
+          await connectDB();
+          const dbUser = await UserModel.findOne({ googleId: user.id }).lean() as (UserDocument & { _id: Types.ObjectId }) | null;
           
-          if (dbUser) { // Correct if/else structure
-            // Explicitly check if _id exists and is usable before assigning
-            if (dbUser._id && typeof dbUser._id.toString === 'function') {
-              token.dbUserId = dbUser._id.toString();
-            } else {
-              console.error(`Found DB user for token sub: ${token.sub}, but _id is missing or invalid.`);
-              // Decide how to handle this - maybe don't add dbUserId to token
-            }
-          } else {
-             console.warn(`Could not find DB user for token sub: ${token.sub}`);
+          if (dbUser) {
+            token.id = dbUser._id.toString();
+            token.role = (dbUser.role as Role) || 'user';
+            token.googleId = dbUser.googleId;
           }
         } catch (error) {
-          console.error("Error fetching DB user ID for JWT:", error);
-          // Don't add dbUserId if there's an error
+          console.error("Error fetching DB user for JWT:", error);
         }
       }
       return token;
-    }, // <<< Add closing brace and comma here
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+      }
+      return session;
+    },
     async signIn({ user, account, profile }) {
-      // Check if the sign-in is via Google and profile details are available
       if (account?.provider === 'google' && profile?.email) {
         try {
-          await connectToDatabase();
-          const UserModel = await getUserModel();
-          
-          // Use the Google ID (user.id from provider) to find or create the user
-          const googleId = user.id; 
-          let dbUser = await UserModel.findOne({ googleId: googleId });
+          await connectDB();
+          let dbUser = await UserModel.findOne({ googleId: user.id }).lean() as (UserDocument & { _id: Types.ObjectId }) | null;
           
           if (!dbUser) {
-            // Create a new user if they don't exist in the database
-            console.log(`Creating new user: ${profile.email}`);
-            dbUser = await UserModel.create({
-              googleId: googleId,
+            await UserModel.create({
+              googleId: user.id,
               email: profile.email,
-              name: profile.name || profile.email, // Use email as name if name is not provided
-              image: (profile as any)?.picture || undefined // Access picture safely
+              name: profile.name || profile.email,
+              image: (profile as any)?.picture || undefined,
+              role: 'user' as Role
             });
-          } else {
-            console.log(`User already exists: ${profile.email}`);
           }
-          // Ensure dbUser is found or created before allowing sign-in
-          if (!dbUser?._id) {
-            console.error("Failed to find or create user's MongoDB document during signIn.");
-            return false; // Prevent sign-in if DB user ID is missing
-          }
-          return true; // Allow sign-in
+          return true;
         } catch (error) {
-           console.error('Error during signIn database operation:', error);
-           return false; // Prevent sign-in on error
+          console.error('Error during signIn:', error);
+          return false;
         }
       }
-      // Deny sign-in if it's not Google or profile email is missing
-      return false; 
-    } // <<< End of signIn function
-  }, // <<< End of callbacks object
-  pages: {
-    // Optional: Define custom pages if you have them
-    // signIn: '/auth/signin',
-    // error: '/auth/error', 
+      return !!profile?.email;
+    }
   },
   session: {
-    strategy: 'jwt', // Use JSON Web Tokens for session management
+    strategy: 'jwt'
   },
-  secret: process.env.NEXTAUTH_SECRET!,
+  secret: process.env.NEXTAUTH_SECRET!
 };
 

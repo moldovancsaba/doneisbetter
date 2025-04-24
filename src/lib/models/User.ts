@@ -7,6 +7,7 @@ export interface UserDocument extends Document {
   email: string;
   name: string;
   image?: string;
+  role: string;
   googleId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -42,17 +43,10 @@ const UserSchema = new Schema<UserDocument>(
 // Note: `unique: true` in the schema definition already creates unique indexes for email and googleId.
 // Explicit `UserSchema.index()` calls are not needed for these fields.
 
-interface UserModel extends Model<UserDocument> {}
-let UserModel: UserModel;
+const UserModel = mongoose.model<UserDocument>('User', UserSchema);
 
-try {
-  UserModel = mongoose.model<UserDocument, UserModel>('User');
-} catch {
-  UserModel = mongoose.model<UserDocument, UserModel>('User', UserSchema);
-}
-
-export async function getUserModel(): Promise<UserModel> {
-  // Assuming connectToDatabase is called elsewhere (e.g., in actions)
+export async function getUserModel(): Promise<typeof UserModel> {
+  // Database connection is handled by connectDB() function
   // If not, uncomment the line below:
   // await mongoose.connect(process.env.MONGODB_URI!); 
   return UserModel;

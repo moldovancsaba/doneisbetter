@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { useFormStatus } from 'react-dom';
+import { experimental_useFormStatus as useFormStatus } from 'react-dom';
 import { createCard } from '../actions';
 import { Card } from '../types/card';
 

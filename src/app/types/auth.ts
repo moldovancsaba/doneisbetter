@@ -1,28 +1,32 @@
 import 'next-auth';
+import { DefaultSession } from 'next-auth';
 
 declare module 'next-auth' {
-  /**
-   * Extends the built-in session types to include the user's ID.
   interface Session {
     user: {
-      role?: string;
-    } & DefaultSession["user"]
+      id: string;
+      role: 'user' | 'admin';
+    } & DefaultSession['user']
   }
-  
-  // You can also extend the User type if needed, for example, to include the MongoDB _id
-  // You can also extend the User type if needed, for example, to include the MongoDB _id
-  // interface User {
-  //   _id?: string; 
-  // }
+
+  /**
+   * Extends the built-in user types.
+   */
+  interface User {
+    id: string;
+    role: 'user' | 'admin';
+    googleId?: string;
+  }
 }
 
 declare module 'next-auth/jwt' {
-  /** Extends the built-in JWT type */
+  /**
+   * Extends the built-in JWT type
+   */
   interface JWT {
-    /** This is the user's Google ID (from token.sub) */
+    id: string;
+    role: 'user' | 'admin';
+    googleId?: string;
     sub?: string;
-    /** This is the user's MongoDB _id */
-    dbUserId?: string; 
-    // id?: string; // 'id' in JWT often refers to the provider ID (token.sub)
   }
 }

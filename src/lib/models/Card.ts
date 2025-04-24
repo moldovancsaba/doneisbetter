@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import { CardStatus } from '@/app/types/card'; // Keep this alias if types/card.ts remains in app
-import { connectToDatabase } from '@/lib/db'; // Updated path
+import { connectDB } from '@/lib/db';
 import { UserDocument } from '@/lib/models/User'; // Updated path
 
 /**
@@ -179,7 +179,7 @@ try {
  * Wrapper around CardModel to ensure database connection
  */
 export async function getCardModel(): Promise<CardModel> {
-  await connectToDatabase();
+  await connectDB();
   return CardModel;
 }
 
