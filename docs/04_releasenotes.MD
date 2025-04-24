@@ -529,3 +529,7 @@
 - **Feat:** Implemented fallback default values for card properties in server actions to prevent loading errors from missing data.
 - **Fix:** Corrected multiple critical syntax and type errors in NextAuth configuration ().
 - **Fix:** Resolved build failures related to dependencies, imports, and component structure.
+## v1.10.4 (2025-04-24)
+- **Refactor:** Separated client-side logic in  into  component to optimize rendering (addresses build warning, though warning persists due to necessary client hooks).
+- **Fix:** Corrected multiple critical syntax errors and structural issues in  resulting from previous merge conflicts.
+- **Fix:** Resolved type error in  function call within .
