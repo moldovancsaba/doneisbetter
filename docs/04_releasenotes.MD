@@ -533,3 +533,12 @@
 - **Refactor:** Separated client-side logic in  into  component to optimize rendering (addresses build warning, though warning persists due to necessary client hooks).
 - **Fix:** Corrected multiple critical syntax errors and structural issues in  resulting from previous merge conflicts.
 - **Fix:** Resolved type error in  function call within .
+## v1.12.0 (2025-04-24)
+- **Feat:** Enhanced Admin Dashboard (/admin) to display users and allow role changes (user/admin).
+- **Refactor:** Switched UserTable component to use server actions directly instead of API route.
+- **Fix:** Corrected data transformation for user list display.
+## v1.13.0 (2025-04-24)
+- **Feat:** Added permanent user deletion capability for admins on the Admin Dashboard.
+- **Feat:** Includes confirmation dialog and prevents admins from deleting themselves.
+- **Feat:** User deletion performs a transaction to remove the user and their associated cards.
+- **Fix:** Corrected persistent corruption issues in  component.
