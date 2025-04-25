@@ -1,130 +1,335 @@
 /**
- * Represents a card item in the application
+ * Type definitions for card statuses and card data structures
  */
+
+// Card status constants
+export const CardStatusValues = {
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE'
+} as const;
+
+// Card status type
+export type CardStatus = keyof typeof CardStatusValues;
+
+// NextAuth type extensions 
+declare module "next-auth" {
+  interface User {
+    id: string;
+    role?: 'user' | 'admin';
+  }
+  
+  interface Session {
+    user?: {
+      id: string;
+      name?: string;
+      email?: string; 
+      image?: string;
+      role?: 'user' | 'admin';
+    };
+  }
+}
+
+// Card interface
 export interface Card {
-  /**
-   * Unique identifier for the card
-   */
   id: string;
-  
-  /**
-   * Text content of the card
-   */
   content: string;
-
-  /**
-   * Current status of the card in the workflow
-   * @default "TODO"
-   */
-  status?: CardStatus;
-  
-  /**
-   * Order position of the card within its column
-   * Lower values appear at the top of the column
-   * @default 0
-   */
-  order?: number;
-
-  /**
-   * Timestamp when the card was created
-   * Stored as ISO 8601 string for serialization
-   */
-  createdAt?: string; 
-
-  /** Optional name of the user who created the card (populated in 'All Cards' view) */
+  status: CardStatus;
+  order: number;
+  createdAt: string;
+  isDeleted?: boolean;
+  deletedAt?: string;
   userName?: string;
-
-  /** Optional image URL of the user who created the card (populated in 'All Cards' view) */
   userImage?: string;
 }
-/**
- * Available card statuses for Kanban workflow
- */
-export type CardStatus = "TODO" | "IN_PROGRESS" | "DONE";
+
+// Data transfer objects
+export interface CreateCardDTO {
+  content: string;
+  status?: CardStatus;
+  order?: number;
+}
+
+export interface UpdateCardDTO {
+  content?: string;
+  status?: CardStatus;
+  order?: number; 
+  isDeleted?: boolean;
+}
 
 /**
- * Column properties for the Kanban board
+ * Card status constants and types
  */
-export interface ColumnData {
-  /**
-   * Status represented by this column
-   */
-  status: CardStatus;
+
+// Runtime values for card statuses
+export const CardStatusValues = {
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE'
+} as const;
+
+// Type for card status values
+export type CardStatus = keyof typeof CardStatusValues;
+
+/**
+ * Extend NextAuth types with our custom fields
+ */
+declare module "next-auth" {
+  interface User {
+    id: string;
+    role?: 'user' | 'admin';
+  }
   
-  /**
-   * Display title for the column
-   */
-  title: string;
-  
-  /**
-   * Color scheme for the column (used for borders, headers)
-   */
-  color: "blue" | "amber" | "green";
-  
-  /**
-   * Unique ID used as droppableId for the column
-   */
+  interface Session {
+    user?: {
+      id: string;
+      name?: string;
+      email?: string;
+      image?: string;
+      role?: 'user' | 'admin';
+    };
+  }
+}
+
+// Card interface
+export interface Card {
   id: string;
+  content: string;
+  status: CardStatus;
+  order: number;
+  createdAt: string;
+  isDeleted?: boolean;
+  deletedAt?: string;
+  userName?: string;
+  userImage?: string;
+}
+
+// Data transfer objects
+export interface CreateCardDTO {
+  content: string;
+  status?: CardStatus;
+  order?: number;
+}
+
+export interface UpdateCardDTO {
+  content?: string;
+  status?: CardStatus;
+  order?: number;
+  isDeleted?: boolean;
 }
 
 /**
- * Drag source information
+ * Supported card status values and type definitions
  */
-export interface DragSource {
-  /**
-   * ID of the droppable area where the drag started
-   */
-  droppableId: string;
+
+/** 
+ * Card status constant values - used for runtime validation
+ */
+export const CardStatusValues = {
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE',
+} as const;
+
+/**
+ * Type representing possible card status values
+ */
+export type CardStatus = keyof typeof CardStatusValues;
+
+/**
+ * Extends NextAuth types with our custom fields
+ */
+declare module "next-auth" {
+  interface User {
+    role?: 'user' | 'admin';
+    id: string;
+  }
   
-  /**
-   * Index of the item in the source list
-   */
-  index: number;
+  interface Session {
+    user?: {
+      id: string;
+      name?: string;
+      email?: string;
+      image?: string;
+      role?: 'user' | 'admin';
+    }
+  }
 }
 
 /**
- * Drag destination information
+ * Complete card type with all fields
  */
-export interface DragDestination {
-  /**
-   * ID of the droppable area where the drag ended
-   */
-  droppableId: string;
-  
-  /**
-   * Index where the dragged item was placed
-   */
-  index: number;
+export interface Card {
+  id: string;
+  content: string;
+  status: CardStatus;
+  order: number;
+  createdAt: string;
+  isDeleted?: boolean;
+  deletedAt?: string;
+  userName?: string;
+  userImage?: string;
 }
 
 /**
- * Result of a drag operation
+ * Data structure for creating new cards
  */
-export interface DragEndResult {
-  /**
-   * The draggable item that was moved
-   */
-  draggableId: string;
-  
-  /**
-   * The source location
-   */
-  source: DragSource;
-  
-  /**
-   * The destination location (null if dropped outside a droppable)
-   */
-  destination: DragDestination | null;
-  
-  /**
-   * The type of the droppable
-   */
-  type: string;
+export interface CreateCardDTO {
+  content: string;
+  status?: CardStatus;
+  order?: number;
 }
 
 /**
- * Structure for organizing cards by column
+ * Data structure for updating cards
  */
-export interface ColumnCards {
-  [columnId: string]: Card[];
+export interface UpdateCardDTO {
+  content?: string;
+  status?: CardStatus;
+  order?: number;
+  isDeleted?: boolean;
 }
+
+// Card Status Constants
+export const CardStatusValues = {
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN_PROGRESS', 
+  DONE: 'DONE',
+} as const;
+
+// Card Status Type
+export type CardStatus = keyof typeof CardStatusValues;
+
+// NextAuth Type Augmentations
+declare module "next-auth" {
+  interface User {
+    role?: 'user' | 'admin';
+  }
+  
+  interface Session {
+    user?: {
+      id: string;
+      name?: string;
+      email?: string;
+      image?: string; 
+      role?: 'user' | 'admin';
+    }
+  }
+}
+
+// Card Data Structures
+export interface Card {
+  id: string;
+  content: string;
+  status: CardStatus;
+  order: number;
+  createdAt: string;
+  isDeleted?: boolean;
+  deletedAt?: string;
+  userName?: string;
+  userImage?: string;
+}
+
+export interface CreateCardDTO {
+  content: string;
+  status?: CardStatus;
+  order?: number;
+}
+
+export interface UpdateCardDTO {
+  content?: string;
+  status?: CardStatus;
+  order?: number;
+  isDeleted?: boolean;
+}
+
+export const CardStatusValues = {
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE',
+} as const;
+
+export type CardStatus = keyof typeof CardStatusValues;
+
+declare module "next-auth" {
+  interface User {
+    role?: 'user' | 'admin';
+  }
+  
+  interface Session {
+    user?: {
+      id: string;
+      name?: string;
+      email?: string; 
+      image?: string;
+      role?: 'user' | 'admin';
+    }
+  }
+}
+
+export interface Card {
+  id: string;
+  content: string;
+  status: CardStatus;
+  order: number;
+  createdAt: string;
+  isDeleted?: boolean;
+  deletedAt?: string;
+  userName?: string;
+  userImage?: string;
+}
+
+export interface CreateCardDTO {
+  content: string;
+  status?: CardStatus;
+  order?: number;
+}
+
+export interface UpdateCardDTO {
+  content?: string;
+  status?: CardStatus;
+  order?: number;
+  isDeleted?: boolean;
+}
+  interface User {
+    role?: 'user' | 'admin';
+  }
+  
+  interface Session {
+    user?: {
+      id: string;
+      name?: string;
+      email?: string;
+      image?: string;
+      role?: 'user' | 'admin';
+    }
+  }
+}
+
+export interface Card {
+  id: string;
+  content: string;
+  status: CardStatus;
+  order: number;
+  createdAt: string;
+  isDeleted?: boolean;
+  deletedAt?: string;
+  userName?: string;
+  userImage?: string;
+}
+
+export interface CreateCardDTO {
+  content: string;
+  status?: CardStatus;
+  order?: number;
+}
+
+export interface UpdateCardDTO {
+  content?: string;
+  status?: CardStatus;
+  order?: number;
+  isDeleted?: boolean;
+}
+
+export { CardStatusValues };
+

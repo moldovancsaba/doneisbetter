@@ -1,95 +1,54 @@
-import mongoose, { Mongoose } from 'mongoose';
+import mongoose from 'mongoose';
 
-/**
- * Global connection object that maintains the mongoose connection across requests
- */
-declare global {
-  var mongoose: {
-    conn: Mongoose | null;
-    promise: Promise<Mongoose> | null;
-  };
-}
-
-// Initialize global connection object if not exists
-if (!global.mongoose) {
-  global.mongoose = {
-    conn: null,
-    promise: null
-  };
+if (!process.env.MONGODB_URI) {
+  throw new Error('Please define the MONGODB_URI environment variable inside .env');
 }
 
 /**
- * Connection options for MongoDB
+ * Global is used here to maintain a cached connection across hot reloads
+ * in development. This prevents connections growing exponentially
+ * during API Route usage.
  */
-const options: mongoose.ConnectOptions = {
-  bufferCommands: true,
-};
+let cached = (global as any).mongoose;
 
-/**
- * Validates that the MongoDB connection string is set in environment variables
- */
-function getMongoURI(): string {
-  const uri = process.env.MONGODB_URI;
-  
-  if (!uri) {
-    throw new Error(
-      'Please define the MONGODB_URI environment variable inside .env.local'
-    );
-  }
-  
-  return uri;
+if (!cached) {
+  cached = (global as any).mongoose = { conn: null, promise: null };
 }
 
-/**
- * Connects to MongoDB and caches the connection
- */
-export async function connectDB(): Promise<Mongoose> {
-  if (global.mongoose.conn) {
-    return global.mongoose.conn;
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
   }
 
-  if (!global.mongoose.promise) {
-    const uri = getMongoURI();
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
 
-    global.mongoose.promise = mongoose
-      .connect(uri, options)
-      .then((connection) => {
-        console.log('Connected to MongoDB');
-        return connection;
-      })
-      .catch((error) => {
-        console.error('Error connecting to MongoDB:', error);
-        global.mongoose.promise = null;
-        throw error;
-      });
+    cached.promise = mongoose.connect(process.env.MONGODB_URI!, opts).then((mongoose) => {
+      return mongoose;
+    });
   }
 
   try {
-    const connection = await global.mongoose.promise;
-    global.mongoose.conn = connection;
-    return connection;
-  } catch (error) {
-    global.mongoose.promise = null;
-    throw error;
+    cached.conn = await cached.promise;
+    console.log('MongoDB connected successfully');
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    throw err;
   }
+
+  return cached.conn;
 }
 
-/**
- * Disconnects from MongoDB
- */
-export async function disconnectDB(): Promise<void> {
-  if (global.mongoose.conn) {
-    await mongoose.disconnect();
-    global.mongoose.conn = null;
-    global.mongoose.promise = null;
-    console.log('Disconnected from MongoDB');
-  }
-}
+// Properly handle SIGINT/SIGTERM
+['SIGINT', 'SIGTERM'].forEach((signal) => {
+  process.on(signal, async () => {
+    await mongoose.connection.close(true);
+    console.log(`Mongoose connection closed through ${signal}`);
+    process.exit(0);
+  });
+});
 
-/**
- * Helper to determine if we're connected to the database
- */
-export function isConnected(): boolean {
-  return mongoose.connection.readyState === 1;
-}
+export default connectDB;
 

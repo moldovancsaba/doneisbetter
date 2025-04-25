@@ -1,6 +1,6 @@
 'use server';
 
-import { connectDB } from '@/lib/db';
+import connectDB from '@/lib/db';
 import CardModel, { CardDocument, getCardModel } from '@/lib/models/Card';
 import { revalidatePath } from 'next/cache';
 import { CardStatus, Card } from '@/app/types/card'; // Ensure types are imported

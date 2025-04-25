@@ -1,96 +1,141 @@
 'use client';
 
-import { useState } from 'react'; // Re-add useState
-import { DragDropContext, DropResult } from '@hello-pangea/dnd'; // Change DragEndResult to DropResult
-import { Card, CardStatus, ColumnData } from '../types/card'; // Keep types
-import Column from './Column';
 
-export interface KanbanBoardProps {
+
+import { useCallback, useMemo } from 'react';
+import { DndProvider, useDrop } from 'react-dnd';
+import { Card, CardStatus, CardStatusValues } from '../types/card';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import KanbanCard from './KanbanCard';
+interface KanbanBoardProps {
   cards: Card[];
-  isLoading?: boolean;
+  isLoading: boolean;
+  isReadOnly: boolean;
   onCardClick?: (card: Card) => void;
-  onCardUpdate?: (updatedCard: Card) => void;
-  isReadOnly?: boolean;
-  onCardDelete?: (cardId: string) => void; 
+  onCardUpdate?: (card: Card) => void;
+  onCardDelete?: (cardId: string) => void;
 }
 
-const COLUMNS: ColumnData[] = [
-  { id: 'todo-column', status: 'TODO', title: 'To Do', color: 'blue' },
-  { id: 'in-progress-column', status: 'IN_PROGRESS', title: 'In Progress', color: 'amber' },
-  { id: 'done-column', status: 'DONE', title: 'Done', color: 'green' }
-];
+const statuses: CardStatus[] = ['TODO', 'IN_PROGRESS', 'DONE'];
 
 export default function KanbanBoard({
   cards,
-  isLoading = false,
+  isLoading,
+  isReadOnly,
   onCardClick,
   onCardUpdate,
-  isReadOnly = false,
-  onCardDelete // Destructure the new prop
-}: KanbanBoardProps): JSX.Element { 
-  // Restore state and handler
-  const [isDragging, setIsDragging] = useState<boolean>(false); 
-  
-  const handleDragEnd = (result: DropResult) => { // Use DropResult type
-    if (isReadOnly) return; 
-    setIsDragging(false);
+  onCardDelete
+}: KanbanBoardProps) {
+  const handleDrop = useCallback(
+    (cardId: string, newStatus: CardStatus) => {
+      const card = cards.find(c => c.id === cardId);
+      if (card && card.status !== newStatus && onCardUpdate) {
+        onCardUpdate({ ...card, status: newStatus });
+      }
+    },
+    [cards, onCardUpdate]
+  );
 
-    const { destination, source, draggableId } = result;
-    if (!destination) return; 
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return; 
-    }
-
-    const card = cards.find(c => c.id === draggableId);
-    if (!card) return;
-    const destinationColumn = COLUMNS.find(col => col.id === destination.droppableId);
-    if (!destinationColumn) return;
-    const updatedCard: Card = {
-      ...card,
-      status: destinationColumn.status,
-      order: destination.index
+  const cardsByStatus = useMemo(() => {
+    // Initialize all status groups
+    const grouped: Record<CardStatus, Card[]> = {
+      TODO: [],
+      IN_PROGRESS: [],
+      DONE: []
     };
-    if (onCardUpdate) onCardUpdate(updatedCard);
-  };
+
+    // Process each card with validation
+    cards.forEach(card => {
+      // Ensure the status is valid, default to TODO if not
+      const status = Object.keys(CardStatusValues).includes(card.status)
+        ? card.status
+        : 'TODO';
+      grouped[status as CardStatus].push(card);
+    });
+
+    return grouped;
+  }, [cards]);
 
   return (
-    // Restore DragDropContext wrapper
-    <DragDropContext
-      onDragEnd={handleDragEnd}
-      onDragStart={isReadOnly ? undefined : () => setIsDragging(true)}
-    >
-      <div 
-        className={`h-full ${isDragging ? 'cursor-grabbing' : ''}`} 
-        role="region"
-        aria-label="Kanban board"
-      >
-        <div
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full"
-          aria-orientation="horizontal"
-        >
-          {COLUMNS.map((column) => (
-            <Column
-              key={column.id}
-              id={column.id}
-              title={column.title}
-              status={column.status}
-              cards={cards}
-              color={column.color}
-              isLoading={isLoading}
-              isReadOnly={isReadOnly}
-              onCardClick={onCardClick}
-              onCardDelete={onCardDelete} 
-            />
-          ))}
-        </div> 
-        {/* Restore screen reader announcement div */}
-        <div className="sr-only" aria-live="polite">
-           {isDragging ? 'Card is being dragged' : ''}
-        </div> 
-      </div> 
-    </DragDropContext> 
-  ); 
+    <DndProvider backend={HTML5Backend}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+        {statuses.map(status => (
+          <StatusColumn
+            key={status}
+            status={status}
+            cards={cardsByStatus[status]}
+            isLoading={isLoading}
+            isReadOnly={isReadOnly}
+            onDrop={handleDrop}
+            onCardClick={onCardClick}
+            onCardDelete={onCardDelete}
+          />
+        ))}
+      </div>
+    </DndProvider>
+  );
 }
+
+interface StatusColumnProps {
+  status: CardStatus;
+  cards: Card[];
+  isLoading: boolean;
+  isReadOnly: boolean;
+  onDrop: (cardId: string, status: CardStatus) => void;
+  onCardClick?: (card: Card) => void;
+  onCardDelete?: (cardId: string) => void;
+}
+
+function StatusColumn({
+  status,
+  cards,
+  isLoading,
+  isReadOnly,
+  onDrop,
+  onCardClick,
+  onCardDelete
+}: StatusColumnProps) {
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: 'CARD',
+    drop: (item: { id: string }) => onDrop(item.id, status),
+    collect: monitor => ({
+      isOver: !!monitor.isOver()
+    })
+  }));
+
+  const statusTitle = {
+    TODO: 'To Do',
+    IN_PROGRESS: 'In Progress',
+    DONE: 'Done'
+  }[status];
+
+  return (
+    <div
+      ref={drop}
+      className={`p-4 rounded-lg h-full ${
+        isOver ? 'bg-blue-50' : 'bg-gray-50'
+      } border border-gray-200`}
+    >
+      <h2 className="text-lg font-semibold mb-4 text-center">
+        {statusTitle} ({cards.length})
+      </h2>
+      
+      <div className="space-y-3">
+        {isLoading ? (
+          <div className="text-center py-4">Loading...</div>
+        ) : (
+          cards.map(card => (
+            <KanbanCard
+              key={card.id}
+              card={card}
+              isReadOnly={isReadOnly}
+              onClick={onCardClick}
+              onDelete={onCardDelete}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+

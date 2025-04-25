@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { CardStatus } from '@/app/types/card'; // Assuming CardStatus type is defined here
+import { CardStatus, CardStatusValues } from '@/app/types/card';
 
 // Extend mongoose Document
 export interface CardDocument extends Document {
@@ -22,8 +22,8 @@ const CardSchema = new Schema<CardDocument>(
     },
     status: {
       type: String,
-      enum: Object.values(CardStatus), // Use enum values from CardStatus type
-      default: CardStatus.TODO,
+      enum: Object.values(CardStatusValues), // Use the runtime values
+      default: CardStatusValues.TODO,
       required: true,
     },
     order: {
