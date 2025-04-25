@@ -12,13 +12,13 @@ Implemented a "soft delete" feature where clicking the delete icon (🗑️) mar
 - **Build Fixes:** Downgraded Next.js to 14.0.4, aligned React types, fixed ESLint config, resolved persistent JSX build errors by debugging component structure and finally removing a stray semicolon. Reinstalled and re-integrated `@hello-pangea/dnd`.
 
 ### Status
-- **🟢 BUILT & DEPLOYED:** Feature implemented, documented (`04_releasenotes.MD`), committed (TBD), tagged (TBD), and deployed successfully.
+- **🟢 BUILT & DEPLOYED:** Feature implemented, documented (`04_releasenotes.MD`), committed (`611c1a5`), tagged (`v1.9.0`), and deployed successfully.
 - **🟡 PENDING USER VERIFICATION:** User needs to test soft delete functionality (delete button, "Deleted" view) and confirm DnD is working again on production.
 - **Definition of Done:** All steps completed except final user verification.
 
 ### Links
-- **Deployment:** TBD (Will be added after successful deployment)
-- **Commit:** TBD (Will be added after successful commit)
+- **Deployment:** https://doneisbetter-4im0qdwi6-narimato.vercel.app
+- **Commit:** `611c1a5`
 
 **Project is stable on Next.js 14.0.4 and ready for the next task, pending user confirmation of the soft delete feature and restored DnD.**
 

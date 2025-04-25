@@ -1,13 +1,15 @@
 # Release Notes
 
-## v1.9.0 - Soft Delete Functionality (2025-04-24T08:30:00+02:00)
+## [v1.9.0] - Soft Delete, Build Fixes, DnD Restore - 2025-04-24
+
+### Summary
+Implement soft delete, fix build issues after Next.js upgrade attempt (reverted to 14.0.4), restore DnD functionality.
 
 ### Features
 - **Soft Delete:** Implemented a soft delete mechanism for cards. Clicking the delete icon (🗑️) now marks a card as deleted (`isDeleted: true`, `deletedAt: Date`) instead of removing it permanently.
 - **"Deleted" View:** Added a new "Deleted" view accessible via the header toggle, showing only soft-deleted cards for the current user, sorted by deletion date (newest first).
 - **Delete Button:** Added a delete icon button to cards, visible and active only in the "My Cards" view.
 - **Data Filtering:** Updated `getCards` and `getAllCards` actions to exclude soft-deleted cards from normal views.
-- **Hard Delete (Future):** Schema includes `deletedAt` field, enabling future implementation of automatic hard deletion (e.g., via TTL index or scheduled job).
 
 ### Technical Implementation
 - **Schema:** Added `isDeleted` (boolean) and `deletedAt` (Date) fields to `Card` model (`src/lib/models/Card.ts`) with appropriate indexes.
@@ -15,10 +17,10 @@
     - Created `softDeleteCard` action to mark cards as deleted for the authenticated user.
     - Created `getDeletedCards` action to fetch deleted cards for the authenticated user.
     - Updated `getCards` (via `findCardsByUser` in model) and `getAllCards` actions to filter by `isDeleted: { $ne: true }`.
-- **Frontend (`page.tsx`):**
+- **Frontend (`page.tsx`, `HomePageClient.tsx`):**
     - Added "Deleted" option to the view mode state and UI toggle.
-    - Updated data fetching `useEffect` to call `getDeletedCards` for the "Deleted" view.
-    - Added `handleCardDelete` function with optimistic UI update (filtering) and server action call.
+    - Updated data fetching to call `getDeletedCards` for the "Deleted" view.
+    - Added `handleCardDelete` function with optimistic UI update and server action call.
     - Passed `handleCardDelete` prop down through `KanbanBoard` to `Column`.
     - Reused `KanbanBoard` component (in read-only mode) to display deleted cards.
 - **Component (`Column.tsx`):**
@@ -26,8 +28,10 @@
 - **Dependencies & Build:** Reinstalled `@hello-pangea/dnd`; downgraded Next.js to `14.0.4` and aligned React types to resolve persistent build errors.
 
 ### Deployment
+- **Commit:** `611c1a5`
 - **Platform:** Vercel
-- **Deployment Date:** 2025-04-24T08:30:00+02:00
+- **URL:** `https://doneisbetter-4im0qdwi6-narimato.vercel.app`
+- **Deployment Date:** 2025-04-25
 ## v1.8.3 - Display User Info on "All Cards" View (2025-04-23T19:50:00+02:00)
 
 ### UI Change

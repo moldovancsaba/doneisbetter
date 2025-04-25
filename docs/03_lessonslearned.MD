@@ -1,5 +1,28 @@
 # Done Is Better - Lessons Learned
 
+## 2025-04-25: Build Stability & Git Tag Conflicts (v1.9.0 Completion)
+
+### 1. Build Stability after Upgrade Attempt
+**Issue:** After attempting Next.js upgrade (to >14.0.4), encountered persistent build errors (JSX parsing errors, TypeScript type mismatches). Despite attempts to fix `tsconfig.json`, ESLint config, and component syntax, errors persisted. `@hello-pangea/dnd` also stopped working correctly.
+**Solution:**
+1. Reverted Next.js back to `14.0.4`.
+2. Reviewed and aligned `react` and `@types/react` versions in `package.json`.
+3. Cleaned `node_modules` and `package-lock.json`, reinstalled dependencies (`npm install`).
+4. Reinstalled `@hello-pangea/dnd`.
+5. Manually corrected residual syntax/type errors in affected components.
+**Lesson:** Major framework version upgrades (especially Next.js) can have complex interactions with the ecosystem (React types, UI libraries, build tooling). If initial fixes fail, reverting to the last known stable version is crucial for unblocking development. Thoroughly vetting dependencies and testing after upgrades is essential. Document the specific versions that work together.
+
+### 2. Git Tag Conflict Resolution
+**Issue:** Attempting to push the `v1.9.0` tag failed because the tag already existed locally (pointing to `7ac206d`) and remotely (also pointing to `7ac206d`) from an incomplete previous session. The new commit `611c1a5` needed to be tagged as `v1.9.0`.
+**Solution:**
+1. Delete the incorrect local tag: `git tag -d v1.9.0`
+2. Delete the incorrect remote tag: `git push origin --delete v1.9.0`
+3. Create the correct local tag pointing to the new commit: `git tag -a v1.9.0 -m "..." 611c1a5`
+4. Push the correct tag to the remote: `git push --tags`
+**Lesson:** Ensure the Definition of Done (DoD) is fully completed within a session, including pushing commits *and* tags. If a session is interrupted, verify the state of local and remote tags (`git tag`, `git ls-remote --tags origin`) before attempting to create or push new ones. Have a clear procedure for correcting tag conflicts if they arise.
+
+---
+
 ## Google Authentication Implementation (v1.7.0 - v1.7.1) - 2025-04-23T16:45:00+02:00
 
 ### 1. Challenge: TypeScript & Mongoose Type Inference
