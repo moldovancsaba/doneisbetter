@@ -1,28 +1,25 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { experimental_useFormStatus as useFormStatus } from 'react-dom';
 import { createCard } from '../actions';
 import { Card } from '../types/card';
 
 /**
  * Button component with loading state for form submission
  */
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  
+function SubmitButton({ isSubmitting }: { isSubmitting: boolean }) {
   return (
     <button
       type="submit"
-      aria-disabled={pending}
-      disabled={pending}
+      aria-disabled={isSubmitting}
+      disabled={isSubmitting}
       className={`px-4 py-2 rounded-md text-white font-medium 
-        ${pending 
+        ${isSubmitting 
           ? 'bg-blue-300 cursor-not-allowed' 
           : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'
         } transition-colors`}
     >
-      {pending ? 'Adding...' : 'Add Task'}
+      {isSubmitting ? 'Adding...' : 'Add Task'}
     </button>
   );
 }
@@ -40,6 +37,7 @@ interface InputProps {
 export default function Input({ onCardCreated }: InputProps) {
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   /**
    * Handles the form submission
@@ -47,6 +45,7 @@ export default function Input({ onCardCreated }: InputProps) {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setIsSubmitting(true);
     
     try {
       const newCard = await createCard(content);
@@ -58,6 +57,8 @@ export default function Input({ onCardCreated }: InputProps) {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create task');
+    } finally {
+      setIsSubmitting(false);
     }
   }
   
@@ -94,7 +95,7 @@ export default function Input({ onCardCreated }: InputProps) {
         </div>
         
         <div className="flex justify-end">
-          <SubmitButton />
+          <SubmitButton isSubmitting={isSubmitting} />
         </div>
       </form>
     </div>

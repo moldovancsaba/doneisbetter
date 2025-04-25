@@ -542,3 +542,6 @@
 - **Feat:** Includes confirmation dialog and prevents admins from deleting themselves.
 - **Feat:** User deletion performs a transaction to remove the user and their associated cards.
 - **Fix:** Corrected persistent corruption issues in  component.
+## v1.14.0 (2025-04-24)
+- **Feat:** Added conditional 'Admin' link in header for users with admin role.
+- **Note:** Database cleanup (removing non-admin users) needs to be performed manually due to agent environment limitations.

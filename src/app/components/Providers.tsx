@@ -1,12 +1,14 @@
 'use client';
 
+import React from 'react';
 import { Toaster } from 'react-hot-toast';
 
-/**
- * Client component wrapper for client-side only features
- * Contains toast notifications and other client-side providers
- */
-export default function Providers() {
-  return <Toaster position="bottom-right" />;
+// Ensure it accepts children prop
+export default function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      {children} {/* Render children */}
+      <Toaster position="bottom-right" />
+    </>
+  );
 }
-

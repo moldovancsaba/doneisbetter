@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/authOptions";
-import UserTable from '@/components/admin/UserTable';
+import UserTable from '@/app/components/admin/UserTable';
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
