@@ -1,17 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+// Removed useSession import
 import toast from 'react-hot-toast';
 import Input from './components/Input';
 import KanbanBoard from './components/KanbanBoard';
-import AuthButtons from './components/AuthButtons';
+// Removed AuthButtons import
 import { Card, CardStatus } from './types/card';
-import { updateCardStatus, getCards, getAllCards, getDeletedCards, softDeleteCard } from '@/lib/actions';
+// Simplified actions import (will update actions next)
+import { updateCardStatus, getCards, getDeletedCards, softDeleteCard } from '@/lib/actions';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-// Define view modes
-type ViewMode = 'myCards' | 'allCards' | 'deleted';
+// Simpler view modes - removed 'allCards'
+type ViewMode = 'myCards' | 'deleted';
 
 export default function Home() {
   // Component State
@@ -19,44 +20,39 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Default view mode
   const [viewMode, setViewMode] = useState<ViewMode>('myCards');
 
   // Hooks
-  const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Effect to update view mode from URL search params
+  // Effect to update view mode from URL search params (simplified)
   useEffect(() => {
     const mode = searchParams?.get('view') as ViewMode | null;
-    if (mode && ['myCards', 'allCards', 'deleted'].includes(mode)) {
+    if (mode && ['myCards', 'deleted'].includes(mode)) {
       setViewMode(mode);
     } else {
-      setViewMode('myCards'); // Default to 'myCards' if param is invalid or missing
+      setViewMode('myCards');
     }
   }, [searchParams]);
-  
-  // Effect to load cards based on session status and view mode
+
+  // Effect to load cards based on view mode (removed session dependency)
   useEffect(() => {
     const loadCards = async () => {
       setIsLoading(true);
       setError(null);
       try {
         let fetchedCards: Card[] = [];
-        if (!session?.user?.id) {
-          throw new Error("User session not found.");
-        }
-        
+        // Hardcoded/placeholder user ID - Replace with actual logic if needed later
+        const placeholderUserId = "placeholder-user-id";
+
         switch (viewMode) {
-          case 'allCards':
-            // Add proper authorization check if needed before calling getAllCards
-            fetchedCards = await getAllCards();
-            break;
           case 'deleted':
-            fetchedCards = await getDeletedCards(session.user.id);
+            fetchedCards = await getDeletedCards(placeholderUserId); // Needs user ID
             break;
           default: // 'myCards'
-            fetchedCards = await getCards(session.user.id);
+            fetchedCards = await getCards(placeholderUserId); // Needs user ID
             break;
         }
         setCards(fetchedCards);
@@ -69,48 +65,40 @@ export default function Home() {
       }
     };
 
-    if (status === 'authenticated') {
-      loadCards();
-    } else if (status === 'unauthenticated') {
-      setCards([]);
-      setIsLoading(false);
-      setError(null);
-    }
-  }, [status, viewMode, session]); // Add session to dependency array
+    loadCards(); // Load cards directly
+  }, [viewMode]); // Re-run only when viewMode changes
 
-  // Update URL when view mode changes
+  // Update URL when view mode changes (simplified)
   const handleViewChange = (newMode: ViewMode) => {
     setViewMode(newMode);
     router.push(`/?view=${newMode}`, { scroll: false });
   };
 
-  // Card Handlers (kept similar to original logic)
+  // Card Handlers (Removed session checks, using placeholder user ID)
+  const placeholderUserId = "placeholder-user-id"; // Use consistent placeholder
+
   const handleCardCreated = (newCard: Card): void => {
     if (viewMode === 'myCards') {
-       setCards(prevCards => [newCard, ...prevCards]);
+      setCards(prevCards => [newCard, ...prevCards]);
     }
-     toast.success('Card created successfully!');
+    toast.success('Card created successfully!');
   };
-  
+
   const handleCardClick = async (card: Card): Promise<void> => {
     let nextStatus: CardStatus;
     switch (card.status) {
       case 'TODO': nextStatus = 'IN_PROGRESS'; break;
       case 'IN_PROGRESS': nextStatus = 'DONE'; break;
-      case 'DONE': return; 
-      default: nextStatus = 'IN_PROGRESS'; 
-    }
-    
-    if (!session?.user?.id) {
-      toast.error('Authentication error');
-      return;
+      case 'DONE': return;
+      default: nextStatus = 'IN_PROGRESS';
     }
 
     setIsUpdating(true);
     try {
-      await updateCardStatus(card.id, nextStatus, session.user.id); // Pass userId
-      setCards(prevCards => 
-        prevCards.map(c => 
+      // Pass placeholder user ID
+      await updateCardStatus(card.id, nextStatus, placeholderUserId);
+      setCards(prevCards =>
+        prevCards.map(c =>
           c.id === card.id ? { ...c, status: nextStatus } : c
         )
       );
@@ -122,20 +110,20 @@ export default function Home() {
       setIsUpdating(false);
     }
   };
-  
+
   const handleCardUpdate = async (updatedCard: Card): Promise<void> => {
-    if (!updatedCard.status || !session?.user?.id) return;
+    if (!updatedCard.status) return;
     const originalCards = [...cards];
 
     setCards(prevCards => {
-        const updated = prevCards.map(c => c.id === updatedCard.id ? {...c, ...updatedCard} : c);
-        // You might need a more robust sorting logic here depending on requirements
-        return updated.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      const updated = prevCards.map(c => c.id === updatedCard.id ? {...c, ...updatedCard} : c);
+      return updated.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     });
-    
+
     setIsUpdating(true);
     try {
-      await updateCardStatus(updatedCard.id, updatedCard.status, session.user.id, updatedCard.order); 
+      // Pass placeholder user ID
+      await updateCardStatus(updatedCard.id, updatedCard.status, placeholderUserId, updatedCard.order);
     } catch (error) {
       console.error('Failed to update card via drag and drop:', error);
       setCards(originalCards);
@@ -146,94 +134,73 @@ export default function Home() {
   };
 
   const handleCardDelete = async (cardId: string): Promise<void> => {
-    if (!session?.user?.id) return;
     const originalCards = [...cards];
-    setCards(prev => prev.filter(c => c.id !== cardId)); 
+    setCards(prev => prev.filter(c => c.id !== cardId));
     const toastId = toast.loading('Deleting card...');
 
     try {
-      // Assuming softDeleteCard now just needs cardId and infers user from session
-      await softDeleteCard(cardId, session.user.id); 
+      // Pass placeholder user ID
+      await softDeleteCard(cardId, placeholderUserId);
       toast.success('Card moved to deleted', { id: toastId });
-      // Refetch might be better if deleted view needs immediate update elsewhere
     } catch (error) {
-      setCards(originalCards); 
+      setCards(originalCards);
       console.error('Error deleting card:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to delete card', { id: toastId });
     }
   };
 
-  // Render Logic
-  if (status === 'loading') {
-    return <div className="text-center text-gray-500 py-10">Authenticating...</div>;
-  }
-
-  if (status === 'unauthenticated') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-        <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-center">Done Is Better</h1>
-          <p className="text-center text-gray-600">Please sign in to continue</p>
-          {/* AuthButtons might need context, place it inside client component scope */}
-          <AuthButtons /> 
-        </div>
-      </div>
-    );
-  }
-
-  // Authenticated User View
+  // Simplified Render Logic (Always shows authenticated view content)
   return (
     <main className="flex min-h-screen flex-col items-center p-4 md:p-6">
       <div className="w-full max-w-6xl">
-         {/* Header is now in layout.tsx, no need to repeat */}
-         <div className="mb-6 flex justify-end">
-           {/* View Mode Toggles */}
+        {/* Removed Header / Admin Link */}
+        <div className="mb-6 flex justify-between items-center">
+           <h1 className="text-2xl font-bold">Done Is Better</h1>
+           {/* Simplified View Mode Toggles */}
            <div className="flex space-x-2 border border-gray-300 rounded p-1">
-              <button
-                onClick={() => handleViewChange('myCards')}
-                disabled={viewMode === 'myCards'}
-                className={`px-3 py-1 text-sm rounded ${viewMode === 'myCards' ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'}`}
-                aria-pressed={viewMode === 'myCards'}
-              >My Cards</button>
-              <button
-                onClick={() => handleViewChange('allCards')}
-                disabled={viewMode === 'allCards'}
-                className={`px-3 py-1 text-sm rounded ${viewMode === 'allCards' ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'}`}
-                aria-pressed={viewMode === 'allCards'}
-              >All Cards</button>
-              <button
-                onClick={() => handleViewChange('deleted')}
-                disabled={viewMode === 'deleted'}
-                className={`px-3 py-1 text-sm rounded ${viewMode === 'deleted' ? 'bg-red-600 text-white' : 'bg-white hover:bg-gray-100'}`}
-                aria-pressed={viewMode === 'deleted'}
-              >Deleted</button>
-            </div>
+             <button
+               onClick={() => handleViewChange('myCards')}
+               disabled={viewMode === 'myCards'}
+               className={`px-3 py-1 text-sm rounded ${viewMode === 'myCards' ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'}`}
+               aria-pressed={viewMode === 'myCards'}
+             >My Cards</button>
+             {/* Removed 'All Cards' button */}
+             <button
+               onClick={() => handleViewChange('deleted')}
+               disabled={viewMode === 'deleted'}
+               className={`px-3 py-1 text-sm rounded ${viewMode === 'deleted' ? 'bg-red-600 text-white' : 'bg-white hover:bg-gray-100'}`}
+               aria-pressed={viewMode === 'deleted'}
+             >Deleted</button>
+           </div>
          </div>
 
-         {viewMode === 'myCards' && ( 
-            <div className="mb-6">
-              <Input onCardCreated={handleCardCreated} />
-            </div>
-         )} 
 
-         {error && (
-              <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded" role="alert">
-                <p>{error}</p>
-                <button onClick={() => window.location.reload()} className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Reload Page</button>
-              </div>
-         )}
+        {/* Always show input if in 'myCards' view */}
+        {viewMode === 'myCards' && (
+          <div className="mb-6">
+            <Input onCardCreated={handleCardCreated} />
+          </div>
+        )}
 
-         <div className="h-[calc(100vh-250px)]"> 
-              <KanbanBoard
-                cards={cards}
-                isLoading={isLoading || isUpdating} // Combine loading states
-                isReadOnly={viewMode !== 'myCards'} 
-                onCardClick={viewMode === 'myCards' ? handleCardClick : undefined} 
-                onCardUpdate={viewMode === 'myCards' ? handleCardUpdate : undefined} 
-                onCardDelete={viewMode === 'myCards' ? handleCardDelete : undefined} 
-              />
-         </div>
-      </div> 
-    </main> 
-  ); 
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded" role="alert">
+            <p>{error}</p>
+            <button onClick={() => window.location.reload()} className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Reload Page</button>
+          </div>
+        )}
+
+        <div className="h-[calc(100vh-200px)]"> {/* Adjusted height */}
+          <KanbanBoard
+            cards={cards}
+            isLoading={isLoading || isUpdating}
+            // Simplified readOnly logic
+            isReadOnly={viewMode === 'deleted'}
+            onCardClick={viewMode === 'myCards' ? handleCardClick : undefined}
+            onCardUpdate={viewMode === 'myCards' ? handleCardUpdate : undefined}
+            onCardDelete={viewMode === 'myCards' ? handleCardDelete : undefined}
+          />
+        </div>
+      </div>
+    </main>
+  );
 }

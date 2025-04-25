@@ -3,11 +3,12 @@
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
 
-// Ensure it accepts children prop
+// Removed SessionProvider and related imports
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {children} {/* Render children */}
+      {children} {/* Render children directly */}
       <Toaster position="bottom-right" />
     </>
   );

@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Input from './Input';
 import KanbanBoard from './KanbanBoard';
 import { Card, CardStatus } from '../types/card';
-import { updateCardStatus, getCards, getAllCards, getDeletedCards, softDeleteCard } from '@/lib/actions';
+import { updateCardStatus, getCards, getDeletedCards, softDeleteCard } from '@/lib/actions';
 
 type ViewMode = 'myCards' | 'allCards' | 'deleted';
 
@@ -50,7 +50,7 @@ export default function HomePageClient() {
         switch (viewMode) {
           case 'allCards':
             if (session.user.role !== 'admin') throw new Error("Unauthorized");
-            fetchedCards = await getAllCards();
+            fetchedCards = await getCards();
             break;
           case 'deleted':
             fetchedCards = await getDeletedCards(session.user.id);
@@ -187,9 +187,6 @@ export default function HomePageClient() {
           onCardClick={viewMode === 'myCards' ? handleCardClick : undefined}
           onCardUpdate={viewMode === 'myCards' ? handleCardUpdate : undefined}
           onCardDelete={viewMode === 'myCards' ? handleCardDelete : undefined}
-          // viewMode prop removed
         />
-      </div>
     </>
-  );
-}
+);

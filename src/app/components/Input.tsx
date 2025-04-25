@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { createCard } from '../actions';
+import { createCard } from '@/lib/actions';
 import { Card } from '../types/card';
 
 /**
