@@ -3,6 +3,7 @@ import { validateRequest } from '@/lib/middleware/validateRequest';
 import { withDatabase } from '@/lib/db';
 import { getCardModel } from '@/lib/models/Card';
 import { DatabaseError, DatabaseErrorType } from '@/lib/errors/DatabaseError';
+import type { SortOrder } from 'mongoose';
 import { APIError, withErrorHandler, withMethodHandler } from '@/lib/middleware/errorHandler';
 import { z } from 'zod';
 import { 
@@ -69,7 +70,7 @@ const handleGetCards = validateRequest(getCardsQuerySchema, async (req, data) =>
     const skip = (page - 1) * limit;
     
     // Sorting options
-    let sort: Record<string, number> = { order: 1, createdAt: -1 };
+    let sort: Record<string, SortOrder> = { order: 1, createdAt: -1 };
     if (data.sort) {
       // Format: "field:direction" (e.g., "createdAt:desc")
       const [field, direction] = data.sort.split(':');
