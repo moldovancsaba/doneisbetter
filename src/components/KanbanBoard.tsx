@@ -1,15 +1,3 @@
-/**
- * Wrap the KanbanBoard component with an error boundary
- * This ensures any uncaught errors are handled gracefully
- */
-export default function KanbanBoard({ initialCards, view }: KanbanBoardProps) {
-  return (
-    <ErrorBoundary fallback={KanbanBoardErrorFallback}>
-      <KanbanBoardWithErrorHandling initialCards={initialCards} view={view} />
-    </ErrorBoundary>
-  );
-}
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -349,6 +337,62 @@ const KanbanBoardWithErrorHandling = ({ initialCards, view }: KanbanBoardProps) 
       setIsLoading(false);
     }
   };
+  
+  // Handle card deletion (soft delete)
+  const handleDeleteCard = async (cardId: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await softDeleteCard(cardId);
+      
+      if (!result || !result.success) {
+        throw new Error('Failed to delete card');
+      }
+      
+      toast.success('Card deleted');
+      
+      // Update local state (move to deleted cards or remove from all views)
+      const cardToDelete = [
+        ...todoCards, ...inProgressCards, ...doneCards,
+        ...q1Cards, ...q2Cards, ...q3Cards, ...q4Cards
+      ].find(card => card.id === cardId);
+      
+      if (cardToDelete) {
+        // Remove from all regular lists
+        setTodoCards(prev => prev.filter(card => card.id !== cardId));
+        setInProgressCards(prev => prev.filter(card => card.id !== cardId));
+        setDoneCards(prev => prev.filter(card => card.id !== cardId));
+        setQ1Cards(prev => prev.filter(card => card.id !== cardId));
+        setQ2Cards(prev => prev.filter(card => card.id !== cardId));
+        setQ3Cards(prev => prev.filter(card => card.id !== cardId));
+        setQ4Cards(prev => prev.filter(card => card.id !== cardId));
+        setAllCards(prev => prev.filter(card => card.id !== cardId));
+        
+        // Add to deleted cards
+        const deletedCard = {
+          ...cardToDelete,
+          isDeleted: true,
+          deletedAt: new Date().toISOString()
+        };
+        setDeletedCards(prev => [...prev, deletedCard]);
+      }
+    } catch (err) {
+      console.error('Error deleting card:', err);
+      
+      // Set error state
+      setError(err instanceof Error ? err : new Error('Failed to delete card'));
+      
+      // Show error toast
+      if (err instanceof Error && err.message) {
+        toast.error(err.message);
+      } else {
+        toast.error('Failed to delete card');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Render the board based on the selected view
   const renderBoard = () => {
@@ -473,59 +517,16 @@ const KanbanBoardWithErrorHandling = ({ initialCards, view }: KanbanBoardProps) 
   );
 };
 
-  // Handle card deletion (soft delete)
-  const handleDeleteCard = async (cardId: string) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const result = await softDeleteCard(cardId);
-      
-      if (!result || !result.success) {
-        throw new Error('Failed to delete card');
-      }
-      
-      toast.success('Card deleted');
-      
-      // Update local state (move to deleted cards or remove from all views)
-      const cardToDelete = [
-        ...todoCards, ...inProgressCards, ...doneCards,
-        ...q1Cards, ...q2Cards, ...q3Cards, ...q4Cards
-      ].find(card => card.id === cardId);
-      
-      if (cardToDelete) {
-        // Remove from all regular lists
-        setTodoCards(prev => prev.filter(card => card.id !== cardId));
-        setInProgressCards(prev => prev.filter(card => card.id !== cardId));
-        setDoneCards(prev => prev.filter(card => card.id !== cardId));
-        setQ1Cards(prev => prev.filter(card => card.id !== cardId));
-        setQ2Cards(prev => prev.filter(card => card.id !== cardId));
-        setQ3Cards(prev => prev.filter(card => card.id !== cardId));
-        setQ4Cards(prev => prev.filter(card => card.id !== cardId));
-        setAllCards(prev => prev.filter(card => card.id !== cardId));
-        
-        // Add to deleted cards
-        const deletedCard = {
-          ...cardToDelete,
-          isDeleted: true,
-          deletedAt: new Date().toISOString()
-        };
-        setDeletedCards(prev => [...prev, deletedCard]);
-      }
-    } catch (err) {
-      console.error('Error deleting card:', err);
-      
-      // Set error state
-      setError(err instanceof Error ? err : new Error('Failed to delete card'));
-      
-      // Show error toast
-      if (err instanceof Error && err.message) {
-        toast.error(err.message);
-      } else {
-        toast.error('Failed to delete card');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+/**
+ * Wrap the KanbanBoard component with an error boundary
+ * This ensures any uncaught errors are handled gracefully
+ */
+export default function KanbanBoard({ initialCards, view }: KanbanBoardProps) {
+  return (
+    <ErrorBoundary fallback={KanbanBoardErrorFallback}>
+      <KanbanBoardWithErrorHandling initialCards={initialCards} view={view} />
+    </ErrorBoundary>
+  );
+}
 
+  // Handle card deletion (soft delete)
