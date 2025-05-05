@@ -29,24 +29,23 @@ const getCardsQuerySchema = z.object({
     val => val === 'true' ? true : val === 'false' ? false : val,
     z.boolean().optional()
   ),
-  limit: z.preprocess(
-    // Convert string to number for limit
-    (val): number | undefined => {
-      if (val === undefined || val === null) return undefined;
-      const parsed = parseInt(String(val), 10);
-      return isNaN(parsed) ? undefined : parsed;
-    },
-    z.number().positive().optional()
-  ),
-  page: z.preprocess(
-    // Convert string to number for page
-    (val): number | undefined => {
-      if (val === undefined || val === null) return undefined;
-      const parsed = parseInt(String(val), 10);
-      return isNaN(parsed) ? undefined : parsed;
-    },
-    z.number().positive().optional()
-  ),
+  limit: z.union([
+    z.string().transform(val => {
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) ? 50 : parsed;
+    }),
+    z.number().positive(),
+    z.undefined().transform(() => 50)
+  ]).default(50),
+  
+  page: z.union([
+    z.string().transform(val => {
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) ? 1 : parsed;
+    }),
+    z.number().positive(),
+    z.undefined().transform(() => 1)
+  ]).default(1),
   sort: z.string().optional(),
 });
 
@@ -79,10 +78,10 @@ const handleGetCards = validateRequest(getCardsQuerySchema, async (req, data) =>
       filter.urgency = data.urgency;
     }
     
-    // Pagination options with explicit type safety
-    const limit: number = data.limit !== undefined ? data.limit : 50;
-    const page: number = data.page !== undefined ? data.page : 1;
-    const skip: number = (page - 1) * limit;
+    // Pagination options with defaults already handled by schema
+    const limit = data.limit;
+    const page = data.page;
+    const skip = (page - 1) * limit;
     
     // Sorting options
     let sort: Record<string, number> = { order: 1, createdAt: -1 };
