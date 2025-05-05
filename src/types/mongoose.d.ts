@@ -1,15 +1,18 @@
-import type { Mongoose } from 'mongoose';
+import mongoose from 'mongoose';
 
-declare global {
-  var mongoose: {
-    conn: Mongoose | null;
-    promise: Promise<Mongoose> | null;
-    connectionTimestamp?: number;
-    isConnecting?: boolean;
-    lastErrorTime?: number;
-    reconnectAttempts?: number;
-  };
+interface GlobalMongoose {
+  conn: typeof mongoose | null;
+  promise: Promise<void> | null;
+  connectionTimestamp?: number;
+  isConnecting?: boolean;
+  lastErrorTime?: number;
+  reconnectAttempts?: number;
 }
 
-export {};
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoose: GlobalMongoose;
+}
 
+// Export the interface for use in other files
+export type { GlobalMongoose };

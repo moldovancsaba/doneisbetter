@@ -190,23 +190,23 @@ export class APIError extends Error {
 
     // Add details if available
     if (this.details && Object.keys(this.details).length > 0) {
-      result.error = {
-        ...result.error,
-        ...this.details
-      };
+       result.error = {
+         ...(typeof result.error === 'object' && result.error !== null ? result.error : {}),
+         ...this.details
+       };
     }
 
     // In development, include the stack trace
     if (process.env.NODE_ENV === 'development') {
       result.error = {
-        ...result.error,
+        ...(typeof result.error === 'object' && result.error !== null ? result.error : {}),
         stack: this.stack
       };
 
       // Include original error information if available
       if (this.cause instanceof Error) {
         result.error = {
-          ...result.error,
+          ...(typeof result.error === 'object' && result.error !== null ? result.error : {}),
           cause: {
             name: this.cause.name,
             message: this.cause.message,

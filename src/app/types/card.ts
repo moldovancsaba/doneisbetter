@@ -13,6 +13,11 @@ export interface Card {
   content: string;
 
   /**
+   * Detailed description of the card
+   */
+  description?: string;
+
+  /**
    * Current status of the card in the workflow
    * @default "TODO"
    */
@@ -40,10 +45,32 @@ export interface Card {
   urgency?: boolean;
 
   /**
+   * Priority level of the card
+   */
+  priority?: 'HIGH' | 'MEDIUM' | 'LOW';
+
+  /**
    * Timestamp when the card was created
    * Stored as ISO 8601 string for serialization
    */
   createdAt?: string; 
+
+  /**
+   * Due date for the card
+   * Stored as ISO 8601 string for serialization
+   */
+  dueDate?: string;
+
+  /**
+   * Timestamp when the card was deleted
+   * Stored as ISO 8601 string for serialization
+   */
+  deletedAt?: string;
+
+  /**
+   * Whether the card has been deleted (soft-delete)
+   */
+  isDeleted?: boolean;
 
   /** Optional name of the user who created the card (populated in 'All Cards' view) */
   userName?: string;

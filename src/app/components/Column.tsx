@@ -13,7 +13,10 @@ export interface ColumnProps {
   isLoading?: boolean;
   onCardClick?: (card: Card) => void;
   isReadOnly?: boolean;
-  onCardDelete?: (cardId: string) => void;
+  onCardDelete?: (cardId: string) => Promise<void>;
+  bgColor?: string; // Added custom background color
+  borderColor?: string; // Added custom border color
+  isDeletedView?: boolean; // Added for deleted cards view
 }
 
 // Color mapping
@@ -46,6 +49,9 @@ const Column: React.FC<ColumnProps> = ({
   onCardClick,
   isReadOnly = false,
   onCardDelete,
+  bgColor,
+  borderColor,
+  isDeletedView = false,
 }) => {
   // Filter cards for this column
   const filteredCards = cards.filter(card => {
@@ -56,10 +62,10 @@ const Column: React.FC<ColumnProps> = ({
 
   return (
     <section
-      className={`flex flex-col h-full min-h-[300px] border rounded-lg ${colorClasses[color]} overflow-hidden`}
+      className={`flex flex-col h-full min-h-[300px] border rounded-lg ${bgColor || colorClasses[color]} ${borderColor || ''} overflow-hidden`}
       aria-labelledby={`column-${status}-heading`}
     >
-      <header className={`p-3 font-semibold ${headerColors[color]} border-b ${colorClasses[color].replace('bg-', 'border-')}`}>
+      <header className={`p-3 font-semibold ${headerColors[color]} border-b ${borderColor || colorClasses[color].replace('bg-', 'border-')}`}>
         <h2 id={`column-${status}-heading`} className="flex justify-between items-center text-sm uppercase tracking-wide">
           {title}
           <span className="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-gray-200 text-gray-700">
@@ -121,7 +127,7 @@ const Column: React.FC<ColumnProps> = ({
                             <div className="text-gray-800 text-sm mb-1 break-words">{card.content}</div> {/* Content */}
                             {card.createdAt && <small className="text-xs text-gray-500 block mt-1">🕒 {card.createdAt}</small>} {/* Timestamp */}
                           </div>
-                          {!isReadOnly && ( // Delete Button
+                          {!isReadOnly && !isDeletedView && ( // Delete Button
                             <button
                               className="p-1 text-gray-400 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 rounded-full flex-shrink-0 ml-1"
                               onClick={(e) => { e.stopPropagation(); if (onCardDelete) onCardDelete(card.id); }}

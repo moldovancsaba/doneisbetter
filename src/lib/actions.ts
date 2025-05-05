@@ -1,6 +1,6 @@
 'use server';
 
-import { connectDB } from '@/lib/db';
+import { connectToDatabase } from '@/lib/db';
 import CardModel, { CardDocument, getCardModel } from '@/lib/models/Card';
 import { revalidatePath } from 'next/cache';
 import { CardStatus, Card } from '@/app/types/card'; // Ensure types are imported
@@ -32,7 +32,7 @@ function documentToCard(doc: MongoDocument): Card {
 // Simplified: Get all non-deleted cards (no user filtering)
 export async function getCards(userId?: string): Promise<Card[]> { // userId param kept for compatibility, but ignored
   try {
-    await connectDB();
+    await connectToDatabase();
     const CardModel = await getCardModel();
     const cards = await CardModel.find({ isDeleted: { $ne: true } })
       .sort({ order: 1, createdAt: -1 }); // Sort by order, then by creation date
@@ -48,7 +48,7 @@ export async function getCards(userId?: string): Promise<Card[]> { // userId par
 // Simplified: Get all deleted cards (no user filtering)
 export async function getDeletedCards(userId?: string): Promise<Card[]> { // userId param kept for compatibility, but ignored
   try {
-    await connectDB();
+    await connectToDatabase();
     const CardModel = await getCardModel();
     const cards = await CardModel.find({ isDeleted: true })
       .sort({ deletedAt: -1 }); // Sort by deletion date
@@ -71,7 +71,7 @@ export async function updateCardStatus(
   urgency?: boolean
 ): Promise<Card> {
   try {
-    await connectDB();
+    await connectToDatabase();
     const CardModel = await getCardModel();
     const updateData: Partial<CardDocument> = { status: newStatus };
     if (newOrder !== undefined) {
@@ -134,7 +134,7 @@ export async function createCard(
   }
 
   try {
-    await connectDB();
+    await connectToDatabase();
     const CardModel = await getCardModel();
 
     // Calculate the order for the new card (e.g., place it at the beginning)
@@ -181,7 +181,7 @@ export async function createCard(
 // Simplified: Soft delete card (no user check)
 export async function softDeleteCard(cardId: string, userId?: string): Promise<{ success: boolean }> { // userId ignored
   try {
-    await connectDB();
+    await connectToDatabase();
     const CardModel = await getCardModel();
     const result = await CardModel.findByIdAndUpdate(cardId, {
       isDeleted: true,

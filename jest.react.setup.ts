@@ -10,8 +10,7 @@ configure({
   asyncUtilTimeout: 5000,
   // Default wait time (ms)
   defaultHidden: true,
-  // Don't suppress console errors during tests
-  suppressErrorOutput: false,
+  // suppressErrorOutput is not a valid option in this version of Testing Library
 });
 
 // Mock global browser APIs used in components

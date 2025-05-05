@@ -11,7 +11,7 @@ export interface KanbanBoardProps {
   onCardClick?: (card: Card) => void;
   onCardUpdate?: (updatedCard: Card) => void;
   isReadOnly?: boolean;
-  onCardDelete?: (cardId: string) => void;
+  onCardDelete?: (cardId: string) => Promise<void>;
   viewType?: 'kanban' | 'matrix';
 }
 
