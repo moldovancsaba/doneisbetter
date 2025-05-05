@@ -34,7 +34,15 @@ interface MongooseConnection {
  * Global connection object that maintains the mongoose connection across requests
  */
 declare global {
-  var mongoose: MongooseConnection;
+  // eslint-disable-next-line no-var
+  var mongoose: {
+    conn: Mongoose | null;
+    promise: Promise<Mongoose> | null;
+    connectionTimestamp?: number;
+    isConnecting?: boolean;
+    lastErrorTime?: number;
+    reconnectAttempts?: number;
+  };
 }
 
 // Initialize global connection object if not exists

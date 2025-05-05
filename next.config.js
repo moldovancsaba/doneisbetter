@@ -2,11 +2,20 @@
 const nextConfig = {
   experimental: {
     serverActions: true,
-    // TEMPORARY: Add flag to potentially show more detailed server errors in prod build
-    serverComponentsExternalPackages: ['mongoose'], // May help trace DB errors
+    serverComponentsExternalPackages: ['mongoose'],
+    swcMinify: true,
   },
   reactStrictMode: true,
   swcMinify: true,
-}
+  // Handle font loading
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.(woff|woff2|eot|ttf|otf)$/i,
+      issuer: { and: [/\.[jt]sx?$/] },
+      type: 'asset/resource',
+    });
+    return config;
+  }
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
