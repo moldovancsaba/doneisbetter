@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateRequest } from '@/lib/middleware/validateRequest';
 import { withDatabase } from '@/lib/db';
-import { getCardModel, CardDocument } from '@/lib/models/Card';
+import { getCardModel } from '@/lib/models/Card';
 import { DatabaseError, DatabaseErrorType } from '@/lib/errors/DatabaseError';
-import mongoose, { Types, SortOrder } from 'mongoose';
+import { SortOrder } from 'mongoose';
 import { APIError, withErrorHandler, withMethodHandler } from '@/lib/middleware/errorHandler';
 import { z } from 'zod';
 import { 
@@ -88,18 +88,23 @@ const handleGetCards = validateRequest(getCardsQuerySchema, async (req, data) =>
     // Get total count for pagination
     const totalCount = await CardModel.countDocuments(filter);
     
-    // Convert to clean card objects
+    // Convert to clean card objects with safe property access
     const formattedCards = cards.map(card => ({
-      id: card._id ? card._id.toString() : '',
-      content: card.content,
-      status: card.status,
-      order: card.order,
-      importance: card.importance,
-      urgency: card.urgency,
-      createdAt: card.createdAt instanceof Date ? card.createdAt.toISOString() : card.createdAt,
-      updatedAt: card.updatedAt instanceof Date ? card.updatedAt.toISOString() : card.updatedAt,
-      isDeleted: card.isDeleted || false,
-      deletedAt: card.deletedAt instanceof Date ? card.deletedAt.toISOString() : card.deletedAt
+      id: String(card._id || ''),
+      content: String(card.content || ''),
+      status: String(card.status || 'TODO'),
+      order: Number(card.order || 0),
+      importance: Boolean(card.importance),
+      urgency: Boolean(card.urgency),
+      createdAt: card.createdAt instanceof Date ? card.createdAt.toISOString() : 
+                 typeof card.createdAt === 'string' ? card.createdAt : 
+                 new Date().toISOString(),
+      updatedAt: card.updatedAt instanceof Date ? card.updatedAt.toISOString() : 
+                 typeof card.updatedAt === 'string' ? card.updatedAt : 
+                 new Date().toISOString(),
+      isDeleted: Boolean(card.isDeleted),
+      deletedAt: card.deletedAt instanceof Date ? card.deletedAt.toISOString() : 
+                 typeof card.deletedAt === 'string' ? card.deletedAt : null
     }));
     
     return NextResponse.json({
@@ -149,23 +154,23 @@ const handleCreateCard = validateRequest(createCardSchema, async (req, data) => 
     // Revalidate routes that display cards
     revalidatePath('/');
     
-    // Type assertion to ensure proper type safety
-    const typedCard = newCard as unknown as CardDocument & Document;
+    // Safe access to document properties with runtime checks
+    const cardData = {
+      id: String(newCard._id),
+      content: String(newCard.content || ''),
+      status: String(newCard.status || 'TODO'),
+      order: Number(newCard.order || 0),
+      importance: Boolean(newCard.importance),
+      urgency: Boolean(newCard.urgency),
+      createdAt: newCard.createdAt instanceof Date ? newCard.createdAt.toISOString() : new Date().toISOString(),
+      updatedAt: newCard.updatedAt instanceof Date ? newCard.updatedAt.toISOString() : new Date().toISOString()
+    };
     
     // Return created card
     return NextResponse.json({
       success: true,
       message: 'Card created successfully',
-      data: {
-        id: typedCard._id.toString(),
-        content: typedCard.content,
-        status: typedCard.status,
-        order: typedCard.order,
-        importance: typedCard.importance,
-        urgency: typedCard.urgency,
-        createdAt: typedCard.createdAt instanceof Date ? typedCard.createdAt.toISOString() : new Date().toISOString(),
-        updatedAt: typedCard.updatedAt instanceof Date ? typedCard.updatedAt.toISOString() : new Date().toISOString()
-      }
+      data: cardData
     }, { status: 201 });
   });
 });
@@ -214,23 +219,23 @@ const handleUpdateCard = validateRequest(updateCardSchema, async (req, data) => 
     // Revalidate routes that display cards
     revalidatePath('/');
     
-    // Type assertion to ensure proper type safety
-    const typedCard = updatedCard as unknown as CardDocument & Document;
+    // Safe access to document properties with runtime checks
+    const cardData = {
+      id: String(updatedCard._id),
+      content: String(updatedCard.content || ''),
+      status: String(updatedCard.status || 'TODO'),
+      order: Number(updatedCard.order || 0),
+      importance: Boolean(updatedCard.importance),
+      urgency: Boolean(updatedCard.urgency),
+      createdAt: updatedCard.createdAt instanceof Date ? updatedCard.createdAt.toISOString() : new Date().toISOString(),
+      updatedAt: updatedCard.updatedAt instanceof Date ? updatedCard.updatedAt.toISOString() : new Date().toISOString()
+    };
     
     // Return updated card
     return NextResponse.json({
       success: true,
       message: 'Card updated successfully',
-      data: {
-        id: typedCard._id.toString(),
-        content: updatedCard.content,
-        status: updatedCard.status,
-        order: updatedCard.order,
-        importance: updatedCard.importance,
-        urgency: updatedCard.urgency,
-        createdAt: updatedCard.createdAt instanceof Date ? updatedCard.createdAt.toISOString() : new Date().toISOString(),
-        updatedAt: updatedCard.updatedAt instanceof Date ? updatedCard.updatedAt.toISOString() : new Date().toISOString()
-      }
+      data: cardData
     });
   });
 });
@@ -263,14 +268,17 @@ const handleDeleteCard = validateRequest(deleteCardSchema, async (req, data) => 
     revalidatePath('/');
     revalidatePath('/?view=deleted');
     
+    // Safe access to document properties with runtime checks
+    const cardData = {
+      id: String(result._id),
+      deletedAt: result.deletedAt instanceof Date ? result.deletedAt.toISOString() : new Date().toISOString()
+    };
+    
     // Return deleted card details
     return NextResponse.json({
       success: true,
       message: 'Card deleted successfully',
-      data: {
-        id: result._id instanceof Types.ObjectId ? result._id.toString() : String(result._id),
-        deletedAt: result.deletedAt instanceof Date ? result.deletedAt.toISOString() : new Date().toISOString()
-      }
+      data: cardData
     });
   });
 });
