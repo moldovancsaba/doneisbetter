@@ -72,8 +72,9 @@ const handleGetCards = validateRequest(getCardsQuerySchema, async (req, data) =>
     }
     
     // Pagination options
-    const limit = data.limit || 50;
-    const skip = data.page ? (data.page - 1) * limit : 0;
+    const limit = data.limit !== undefined ? data.limit : 50;
+    const page = data.page !== undefined ? data.page : 1;
+    const skip = (page - 1) * limit;
     
     // Sorting options
     let sort: Record<string, number> = { order: 1, createdAt: -1 };
@@ -113,7 +114,7 @@ const handleGetCards = validateRequest(getCardsQuerySchema, async (req, data) =>
       data: formattedCards,
       pagination: {
         total: totalCount,
-        page: data.page || 1,
+        page,
         limit,
         pages: Math.ceil(totalCount / limit)
       }
