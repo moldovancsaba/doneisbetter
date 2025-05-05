@@ -264,14 +264,19 @@ const handleDeleteCard = validateRequest(deleteCardSchema, async (req, data) => 
       { new: true }
     );
     
+    // Check if the card was found and updated
+    if (!result) {
+      throw APIError.notFound('Card', cardId);
+    }
+    
     // Revalidate routes that display cards
     revalidatePath('/');
     revalidatePath('/?view=deleted');
     
     // Safe access to document properties with runtime checks
     const cardData = {
-      id: String(result._id),
-      deletedAt: result.deletedAt instanceof Date ? result.deletedAt.toISOString() : new Date().toISOString()
+      id: String(result?._id || ''),
+      deletedAt: result?.deletedAt instanceof Date ? result.deletedAt.toISOString() : new Date().toISOString()
     };
     
     // Return deleted card details
