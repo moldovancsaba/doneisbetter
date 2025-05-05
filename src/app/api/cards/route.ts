@@ -223,13 +223,13 @@ const handleUpdateCard = validateRequest(updateCardSchema, async (req, data) => 
       message: 'Card updated successfully',
       data: {
         id: typedCard._id.toString(),
-        content: typedCard.content,
-        status: typedCard.status,
-        order: typedCard.order,
-        importance: typedCard.importance,
-        urgency: typedCard.urgency,
-        createdAt: typedCard.createdAt instanceof Date ? typedCard.createdAt.toISOString() : new Date().toISOString(),
-        updatedAt: typedCard.updatedAt instanceof Date ? typedCard.updatedAt.toISOString() : new Date().toISOString()
+        content: updatedCard.content,
+        status: updatedCard.status,
+        order: updatedCard.order,
+        importance: updatedCard.importance,
+        urgency: updatedCard.urgency,
+        createdAt: updatedCard.createdAt instanceof Date ? updatedCard.createdAt.toISOString() : new Date().toISOString(),
+        updatedAt: updatedCard.updatedAt instanceof Date ? updatedCard.updatedAt.toISOString() : new Date().toISOString()
       }
     });
   });
@@ -263,15 +263,13 @@ const handleDeleteCard = validateRequest(deleteCardSchema, async (req, data) => 
     revalidatePath('/');
     revalidatePath('/?view=deleted');
     
-    // Type safe document handling
-    const typedCard = result as CardDocument;
-    
+    // Return deleted card details
     return NextResponse.json({
       success: true,
       message: 'Card deleted successfully',
       data: {
-        id: typedCard._id ? typedCard._id.toString() : '',
-        deletedAt: typedCard.deletedAt instanceof Date ? typedCard.deletedAt.toISOString() : new Date().toISOString()
+        id: result._id instanceof Types.ObjectId ? result._id.toString() : String(result._id),
+        deletedAt: result.deletedAt instanceof Date ? result.deletedAt.toISOString() : new Date().toISOString()
       }
     });
   });
