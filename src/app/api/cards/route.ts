@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateRequest } from '@/lib/middleware/validateRequest';
 import { withDatabase } from '@/lib/db';
-import { CardModel, getCardModel } from '@/lib/models/Card';
+import { getCardModel } from '@/lib/models/Card';
 import { DatabaseError, DatabaseErrorType } from '@/lib/errors/DatabaseError';
 import { APIError, withErrorHandler, withMethodHandler } from '@/lib/middleware/errorHandler';
 import { z } from 'zod';
