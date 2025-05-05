@@ -24,6 +24,20 @@ export interface Card {
    * @default 0
    */
   order?: number;
+  
+  /**
+   * Whether the task is important
+   * Used for Eisenhower Matrix positioning
+   * @default false
+   */
+  importance?: boolean;
+  
+  /**
+   * Whether the task is urgent
+   * Used for Eisenhower Matrix positioning
+   * @default false
+   */
+  urgency?: boolean;
 
   /**
    * Timestamp when the card was created
@@ -38,9 +52,20 @@ export interface Card {
   userImage?: string;
 }
 /**
- * Available card statuses for Kanban workflow
+ * Available card statuses for workflow
+ * 
+ * Traditional Kanban statuses:
+ * - TODO: Tasks that need to be done
+ * - IN_PROGRESS: Tasks currently being worked on
+ * - DONE: Completed tasks
+ * 
+ * Eisenhower Matrix quadrants:
+ * - Q1: Urgent & Important tasks
+ * - Q2: Important but Not Urgent tasks
+ * - Q3: Urgent but Not Important tasks
+ * - Q4: Neither Urgent nor Important tasks
  */
-export type CardStatus = "TODO" | "IN_PROGRESS" | "DONE";
+export type CardStatus = "TODO" | "IN_PROGRESS" | "DONE" | "Q1" | "Q2" | "Q3" | "Q4";
 
 /**
  * Column properties for the Kanban board
@@ -59,7 +84,7 @@ export interface ColumnData {
   /**
    * Color scheme for the column (used for borders, headers)
    */
-  color: "blue" | "amber" | "green";
+  color: "blue" | "amber" | "green" | "red" | "purple" | "orange" | "gray";
   
   /**
    * Unique ID used as droppableId for the column

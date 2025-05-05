@@ -1,11 +1,24 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import { CardStatus } from '@/app/types/card'; // Assuming CardStatus type is defined here
 
+// Enum for card statuses
+export enum CardStatusEnum {
+  TODO = 'TODO',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DONE = 'DONE',
+  Q1 = 'Q1',
+  Q2 = 'Q2',
+  Q3 = 'Q3',
+  Q4 = 'Q4',
+}
+
 // Extend mongoose Document
 export interface CardDocument extends Document {
   content: string;
   status: CardStatus;
   order: number;
+  importance: boolean;
+  urgency: boolean;
   // Removed user field
   createdAt: Date;
   updatedAt: Date;
@@ -22,13 +35,23 @@ const CardSchema = new Schema<CardDocument>(
     },
     status: {
       type: String,
-      enum: Object.values(CardStatus), // Use enum values from CardStatus type
-      default: CardStatus.TODO,
+      enum: Object.values(CardStatusEnum), // Use enum values from CardStatusEnum
+      default: CardStatusEnum.TODO,
       required: true,
     },
     order: {
       type: Number,
       default: 0, // Default order
+    },
+    importance: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    urgency: {
+      type: Boolean,
+      default: false,
+      required: true,
     },
     // Removed user reference:
     // user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
