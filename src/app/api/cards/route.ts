@@ -16,11 +16,29 @@ import { revalidatePath } from 'next/cache';
 // Schema for GET request query parameters
 const getCardsQuerySchema = z.object({
   status: z.string().optional(),
-  deleted: z.string().transform(val => val === 'true').optional(),
-  importance: z.string().transform(val => val === 'true').optional(),
-  urgency: z.string().transform(val => val === 'true').optional(),
-  limit: z.string().transform(val => parseInt(val, 10)).optional(),
-  page: z.string().transform(val => parseInt(val, 10)).optional(),
+  deleted: z.preprocess(
+    // Convert 'true'/'false' strings to boolean
+    val => val === 'true' ? true : val === 'false' ? false : val,
+    z.boolean().optional()
+  ),
+  importance: z.preprocess(
+    val => val === 'true' ? true : val === 'false' ? false : val,
+    z.boolean().optional()
+  ),
+  urgency: z.preprocess(
+    val => val === 'true' ? true : val === 'false' ? false : val,
+    z.boolean().optional()
+  ),
+  limit: z.preprocess(
+    // Convert string to number for limit
+    val => val ? parseInt(String(val), 10) : val,
+    z.number().positive().optional()
+  ),
+  page: z.preprocess(
+    // Convert string to number for page
+    val => val ? parseInt(String(val), 10) : val,
+    z.number().positive().optional()
+  ),
   sort: z.string().optional(),
 });
 
