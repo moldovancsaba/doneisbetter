@@ -4,6 +4,30 @@ import { connectDB } from '@/lib/db';
 import CardModel, { CardDocument, getCardModel } from '@/lib/models/Card';
 import { revalidatePath } from 'next/cache';
 import { CardStatus, Card } from '@/app/types/card'; // Ensure types are imported
+import { Document } from 'mongoose';
+
+// Helper type for MongoDB document with _id
+type MongoDocument = Document & {
+  _id: { toString(): string };
+  [key: string]: any;
+};
+
+// Helper function to safely convert MongoDB document to Card type
+function documentToCard(doc: MongoDocument): Card {
+  return {
+    id: doc._id.toString(),
+    content: doc.content || '',
+    status: doc.status || 'TODO',
+    order: typeof doc.order === 'number' ? doc.order : 0,
+    importance: Boolean(doc.importance),
+    urgency: Boolean(doc.urgency),
+    createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : 
+               typeof doc.createdAt === 'string' ? doc.createdAt : 
+               new Date().toISOString(),
+    userName: doc.userName || undefined,
+    userImage: doc.userImage || undefined
+  };
+}
 
 // Simplified: Get all non-deleted cards (no user filtering)
 export async function getCards(userId?: string): Promise<Card[]> { // userId param kept for compatibility, but ignored
@@ -11,19 +35,10 @@ export async function getCards(userId?: string): Promise<Card[]> { // userId par
     await connectDB();
     const CardModel = await getCardModel();
     const cards = await CardModel.find({ isDeleted: { $ne: true } })
-      .sort({ order: 1, createdAt: -1 }) // Sort by order, then by creation date
-      .lean();
+      .sort({ order: 1, createdAt: -1 }); // Sort by order, then by creation date
 
-    return cards.map(card => ({
-      id: card._id.toString(),
-      content: card.content || '',
-      status: card.status || 'TODO',
-      order: card.order || 0,
-      importance: card.importance || false,
-      urgency: card.urgency || false,
-      createdAt: card.createdAt?.toISOString() || '',
-      // user field removed
-    }));
+    // Use type assertion to ensure proper typing
+    return cards.map(card => documentToCard(card as unknown as MongoDocument));
   } catch (error) {
     console.error("Error fetching cards:", error);
     throw new Error("Failed to fetch cards.");
@@ -36,19 +51,10 @@ export async function getDeletedCards(userId?: string): Promise<Card[]> { // use
     await connectDB();
     const CardModel = await getCardModel();
     const cards = await CardModel.find({ isDeleted: true })
-      .sort({ deletedAt: -1 }) // Sort by deletion date
-      .lean();
+      .sort({ deletedAt: -1 }); // Sort by deletion date
 
-    return cards.map(card => ({
-      id: card._id.toString(),
-      content: card.content || '',
-      status: card.status || 'TODO',
-      order: card.order || 0,
-      importance: card.importance || false,
-      urgency: card.urgency || false,
-      createdAt: card.createdAt?.toISOString() || '',
-      // user field removed
-    }));
+    // Use type assertion to ensure proper typing
+    return cards.map(card => documentToCard(card as unknown as MongoDocument));
   } catch (error) {
     console.error("Error fetching deleted cards:", error);
     throw new Error("Failed to fetch deleted cards.");
@@ -99,22 +105,17 @@ export async function updateCardStatus(
       cardId,
       updateData,
       { new: true, runValidators: true }
-    ).lean();
-
+    );
+    
+    // Handle non-existent document
     if (!updatedCard) {
       throw new Error("Card not found");
     }
 
     revalidatePath('/');
-    return {
-      id: updatedCard._id.toString(),
-      content: updatedCard.content || '',
-      status: updatedCard.status || 'TODO',
-      order: updatedCard.order || 0,
-      importance: updatedCard.importance || false,
-      urgency: updatedCard.urgency || false,
-      createdAt: updatedCard.createdAt?.toISOString() || '',
-    };
+    
+    // Convert to proper Card type
+    return documentToCard(updatedCard as unknown as MongoDocument);
   } catch (error) {
     console.error("Error updating card status:", error);
     throw new Error("Failed to update card status.");
@@ -152,6 +153,7 @@ export async function createCard(
       initialStatus = 'Q4'; // Not Urgent, Not Important
     }
 
+    // Create the new card
     const newCard = await CardModel.create({
       content: content.trim(),
       status: initialStatus,
@@ -161,16 +163,15 @@ export async function createCard(
       // user field removed
     });
 
+    // Type safety check for Mongoose document
+    if (!newCard || !newCard._id) {
+      throw new Error("Failed to create card properly");
+    }
+
     revalidatePath('/');
-    return {
-      id: newCard._id.toString(),
-      content: newCard.content,
-      status: newCard.status,
-      order: newCard.order,
-      importance: newCard.importance,
-      urgency: newCard.urgency,
-      createdAt: newCard.createdAt.toISOString(),
-    };
+    
+    // Convert to proper Card type
+    return documentToCard(newCard as unknown as MongoDocument);
   } catch (error) {
     console.error("Error creating card:", error);
     throw new Error("Failed to create card.");
