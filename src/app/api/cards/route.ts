@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateRequest } from '@/lib/middleware/validateRequest';
 import { withDatabase } from '@/lib/db';
-import { getCardModel } from '@/lib/models/Card';
+import { getCardModel, CardDocument } from '@/lib/models/Card';
 import { DatabaseError, DatabaseErrorType } from '@/lib/errors/DatabaseError';
-import type { SortOrder } from 'mongoose';
+import type { SortOrder, Document } from 'mongoose';
 import { APIError, withErrorHandler, withMethodHandler } from '@/lib/middleware/errorHandler';
 import { z } from 'zod';
 import { 
@@ -149,19 +149,22 @@ const handleCreateCard = validateRequest(createCardSchema, async (req, data) => 
     // Revalidate routes that display cards
     revalidatePath('/');
     
+    // Type assertion to ensure proper type safety
+    const typedCard = newCard as unknown as CardDocument & Document;
+    
     // Return created card
     return NextResponse.json({
       success: true,
       message: 'Card created successfully',
       data: {
-        id: newCard._id.toString(),
-        content: newCard.content,
-        status: newCard.status,
-        order: newCard.order,
-        importance: newCard.importance,
-        urgency: newCard.urgency,
-        createdAt: newCard.createdAt.toISOString(),
-        updatedAt: newCard.updatedAt.toISOString()
+        id: typedCard._id.toString(),
+        content: typedCard.content,
+        status: typedCard.status,
+        order: typedCard.order,
+        importance: typedCard.importance,
+        urgency: typedCard.urgency,
+        createdAt: typedCard.createdAt instanceof Date ? typedCard.createdAt.toISOString() : new Date().toISOString(),
+        updatedAt: typedCard.updatedAt instanceof Date ? typedCard.updatedAt.toISOString() : new Date().toISOString()
       }
     }, { status: 201 });
   });
@@ -211,19 +214,22 @@ const handleUpdateCard = validateRequest(updateCardSchema, async (req, data) => 
     // Revalidate routes that display cards
     revalidatePath('/');
     
+    // Type assertion to ensure proper type safety
+    const typedCard = updatedCard as unknown as CardDocument & Document;
+    
     // Return updated card
     return NextResponse.json({
       success: true,
       message: 'Card updated successfully',
       data: {
-        id: updatedCard._id.toString(),
-        content: updatedCard.content,
-        status: updatedCard.status,
-        order: updatedCard.order,
-        importance: updatedCard.importance,
-        urgency: updatedCard.urgency,
-        createdAt: updatedCard.createdAt.toISOString(),
-        updatedAt: updatedCard.updatedAt.toISOString()
+        id: typedCard._id.toString(),
+        content: typedCard.content,
+        status: typedCard.status,
+        order: typedCard.order,
+        importance: typedCard.importance,
+        urgency: typedCard.urgency,
+        createdAt: typedCard.createdAt instanceof Date ? typedCard.createdAt.toISOString() : new Date().toISOString(),
+        updatedAt: typedCard.updatedAt instanceof Date ? typedCard.updatedAt.toISOString() : new Date().toISOString()
       }
     });
   });
@@ -257,12 +263,15 @@ const handleDeleteCard = validateRequest(deleteCardSchema, async (req, data) => 
     revalidatePath('/');
     revalidatePath('/?view=deleted');
     
+    // Type assertion to ensure proper type safety
+    const typedResult = result as unknown as CardDocument & Document;
+    
     return NextResponse.json({
       success: true,
       message: 'Card deleted successfully',
       data: {
-        id: result._id.toString(),
-        deletedAt: result.deletedAt.toISOString()
+        id: typedResult._id.toString(),
+        deletedAt: typedResult.deletedAt instanceof Date ? typedResult.deletedAt.toISOString() : new Date().toISOString()
       }
     });
   });
