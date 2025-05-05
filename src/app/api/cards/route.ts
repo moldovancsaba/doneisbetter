@@ -29,23 +29,8 @@ const getCardsQuerySchema = z.object({
     val => val === 'true' ? true : val === 'false' ? false : val,
     z.boolean().optional()
   ),
-  limit: z.union([
-    z.string().transform(val => {
-      const parsed = parseInt(val, 10);
-      return isNaN(parsed) ? 50 : parsed;
-    }),
-    z.number().positive(),
-    z.undefined().transform(() => 50)
-  ]).default(50),
-  
-  page: z.union([
-    z.string().transform(val => {
-      const parsed = parseInt(val, 10);
-      return isNaN(parsed) ? 1 : parsed;
-    }),
-    z.number().positive(),
-    z.undefined().transform(() => 1)
-  ]).default(1),
+  limit: z.coerce.number().positive().default(50),
+  page: z.coerce.number().positive().default(1),
   sort: z.string().optional(),
 });
 
@@ -78,9 +63,9 @@ const handleGetCards = validateRequest(getCardsQuerySchema, async (req, data) =>
       filter.urgency = data.urgency;
     }
     
-    // Pagination options with defaults already handled by schema
-    const limit = data.limit;
-    const page = data.page;
+    // Pagination options with explicit type assertions
+    const limit = Number(data.limit);
+    const page = Number(data.page);
     const skip = (page - 1) * limit;
     
     // Sorting options
