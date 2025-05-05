@@ -11,6 +11,7 @@ import { Card, CardStatus } from '../types/card';
 import { updateCardStatus, getCards, getDeletedCards, softDeleteCard } from '@/lib/actions';
 
 type ViewMode = 'myCards' | 'allCards' | 'deleted';
+type LayoutMode = 'kanban' | 'matrix';
 
 export default function HomePageClient() {
   const [cards, setCards] = useState<Card[]>([]);
@@ -18,6 +19,7 @@ export default function HomePageClient() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('myCards');
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>('kanban');
 
   const { data: session, status } = useSession({ required: true });
   const searchParams = useSearchParams();
@@ -36,7 +38,13 @@ export default function HomePageClient() {
     } else {
       if (viewMode !== 'myCards') setViewMode('myCards');
     }
-  }, [searchParams, session, router, viewMode]);
+    
+    // Set layout mode from URL as well
+    const layout = searchParams?.get('layout') as LayoutMode | null;
+    if (layout && ['kanban', 'matrix'].includes(layout)) {
+      if (layoutMode !== layout) setLayoutMode(layout);
+    }
+  }, [searchParams, session, router, viewMode, layoutMode]);
 
   // Effect to load cards
   useEffect(() => {
@@ -91,7 +99,11 @@ export default function HomePageClient() {
       toast.error("Admin access required.");
       return;
     }
-    router.push(`/?view=${newMode}`, { scroll: false });
+    router.push(`/?view=${newMode}${layoutMode !== 'kanban' ? `&layout=${layoutMode}` : ''}`, { scroll: false });
+  };
+  
+  const handleLayoutChange = (newLayout: LayoutMode) => {
+    router.push(`/?view=${viewMode}&layout=${newLayout}`, { scroll: false });
   };
 
   const handleCardCreated = (newCard: Card): void => {
@@ -157,19 +169,80 @@ export default function HomePageClient() {
 
   return (
     <>
-      <div className="mb-6 flex justify-end">
+      <div className="mb-6 flex justify-between items-center">
+        {/* Layout Toggle */}
         <div className="flex space-x-2 border border-gray-300 rounded p-1">
-          <button onClick={() => handleViewChange('myCards')} disabled={viewMode === 'myCards'} className={`px-3 py-1 text-sm rounded ${viewMode === 'myCards' ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'}`} aria-pressed={viewMode === 'myCards'}>My Cards</button>
+          <button 
+            onClick={() => handleLayoutChange('kanban')} 
+            disabled={layoutMode === 'kanban'} 
+            className={`px-3 py-1 text-sm rounded flex items-center ${
+              layoutMode === 'kanban' ? 'bg-purple-600 text-white' : 'bg-white hover:bg-gray-100'
+            }`} 
+            aria-pressed={layoutMode === 'kanban'}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+            Kanban
+          </button>
+          <button 
+            onClick={() => handleLayoutChange('matrix')} 
+            disabled={layoutMode === 'matrix'} 
+            className={`px-3 py-1 text-sm rounded flex items-center ${
+              layoutMode === 'matrix' ? 'bg-purple-600 text-white' : 'bg-white hover:bg-gray-100'
+            }`} 
+            aria-pressed={layoutMode === 'matrix'}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            Matrix
+          </button>
+        </div>
+        
+        {/* View Toggle */}
+        <div className="flex space-x-2 border border-gray-300 rounded p-1">
+          <button 
+            onClick={() => handleViewChange('myCards')} 
+            disabled={viewMode === 'myCards'} 
+            className={`px-3 py-1 text-sm rounded ${
+              viewMode === 'myCards' ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'
+            }`} 
+            aria-pressed={viewMode === 'myCards'}
+          >
+            My Cards
+          </button>
           {session?.user?.role === 'admin' && (
-            <button onClick={() => handleViewChange('allCards')} disabled={viewMode === 'allCards'} className={`px-3 py-1 text-sm rounded ${viewMode === 'allCards' ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'}`} aria-pressed={viewMode === 'allCards'}>All Cards</button>
+            <button 
+              onClick={() => handleViewChange('allCards')} 
+              disabled={viewMode === 'allCards'} 
+              className={`px-3 py-1 text-sm rounded ${
+                viewMode === 'allCards' ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'
+              }`} 
+              aria-pressed={viewMode === 'allCards'}
+            >
+              All Cards
+            </button>
           )}
-          <button onClick={() => handleViewChange('deleted')} disabled={viewMode === 'deleted'} className={`px-3 py-1 text-sm rounded ${viewMode === 'deleted' ? 'bg-red-600 text-white' : 'bg-white hover:bg-gray-100'}`} aria-pressed={viewMode === 'deleted'}>Deleted</button>
+          <button 
+            onClick={() => handleViewChange('deleted')} 
+            disabled={viewMode === 'deleted'} 
+            className={`px-3 py-1 text-sm rounded ${
+              viewMode === 'deleted' ? 'bg-red-600 text-white' : 'bg-white hover:bg-gray-100'
+            }`} 
+            aria-pressed={viewMode === 'deleted'}
+          >
+            Deleted
+          </button>
         </div>
       </div>
 
       {viewMode === 'myCards' && (
         <div className="mb-6">
-          <Input onCardCreated={handleCardCreated} />
+          <Input 
+            onCardCreated={handleCardCreated} 
+            matrixMode={layoutMode === 'matrix'}
+          />
         </div>
       )}
 
@@ -187,6 +260,9 @@ export default function HomePageClient() {
           onCardClick={viewMode === 'myCards' ? handleCardClick : undefined}
           onCardUpdate={viewMode === 'myCards' ? handleCardUpdate : undefined}
           onCardDelete={viewMode === 'myCards' ? handleCardDelete : undefined}
+          viewType={layoutMode}
         />
+      </div>
     </>
-);
+  );
+}

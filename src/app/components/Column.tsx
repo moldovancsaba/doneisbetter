@@ -9,7 +9,7 @@ export interface ColumnProps {
   status: CardStatus;
   id: string; // Droppable ID
   cards: Card[];
-  color?: 'blue' | 'amber' | 'green';
+  color?: 'blue' | 'amber' | 'green' | 'red' | 'purple' | 'orange' | 'gray';
   isLoading?: boolean;
   onCardClick?: (card: Card) => void;
   isReadOnly?: boolean;
@@ -21,11 +21,19 @@ const colorClasses = {
   blue: 'border-blue-300 bg-blue-50',
   amber: 'border-amber-300 bg-amber-50',
   green: 'border-green-300 bg-green-50',
+  red: 'border-red-300 bg-red-50',
+  purple: 'border-purple-300 bg-purple-50',
+  orange: 'border-orange-300 bg-orange-50',
+  gray: 'border-gray-300 bg-gray-50',
 };
 const headerColors = {
   blue: 'bg-blue-100 text-blue-800',
   amber: 'bg-amber-100 text-amber-800',
   green: 'bg-green-100 text-green-800',
+  red: 'bg-red-100 text-red-800',
+  purple: 'bg-purple-100 text-purple-800',
+  orange: 'bg-orange-100 text-orange-800',
+  gray: 'bg-gray-100 text-gray-800',
 };
 
 const Column: React.FC<ColumnProps> = ({

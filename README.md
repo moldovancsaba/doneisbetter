@@ -2,8 +2,8 @@
 
 A minimalist Kanban-style task management application with Google Authentication and MongoDB integration.
 
-**Status**: 🟢 Google Auth Integrated
-**Version**: v1.7.1
+**Status**: 🟢 Server-Side Validation Implemented
+**Version**: v1.18.0
 **Live**: [doneisbetter-cvypuh09x-narimato.vercel.app](https://doneisbetter-cvypuh09x-narimato.vercel.app)
 
 ## Quick Start
@@ -48,10 +48,13 @@ A minimalist Kanban-style task management application with Google Authentication
     -   `SessionProvider.tsx` - NextAuth session wrapper (Client)
     -   `Providers.tsx` - Wrapper for client-side providers (e.g., Toaster) (Client)
 -   `src/lib/`: Shared utilities, configuration, and data models
-    -   `db.ts` - MongoDB connection helper
+    -   `db.ts` - MongoDB connection helper with enhanced error handling
     -   `authOptions.ts` - NextAuth.js configuration
     -   `models/User.ts` - Mongoose User schema/model
     -   `models/Card.ts` - Mongoose Card schema/model
+    -   `validations/` - Zod schema validation
+    -   `middleware/` - Request validation middleware
+    -   `errors/` - Custom error handling
 -   `src/app/types/`: TypeScript type definitions
     -   `card.ts` - Types related to cards and columns
     -   `auth.ts` - Types related to NextAuth session/JWT
@@ -69,6 +72,7 @@ A minimalist Kanban-style task management application with Google Authentication
 -   **Styling:** Tailwind CSS
 -   **Database:** MongoDB with Mongoose
 -   **Authentication:** NextAuth.js (v4) with Google Provider
+-   **Validation:** Zod with custom middleware
 -   **Drag-and-Drop:** `@hello-pangea/dnd`
 -   **Notifications:** `react-hot-toast`
 -   **Deployment:** Vercel
@@ -81,10 +85,14 @@ A minimalist Kanban-style task management application with Google Authentication
 -   Input field to add new task cards.
 -   Cards stored persistently in MongoDB.
 -   3-column Kanban layout ('TODO', 'IN_PROGRESS', 'DONE').
+-   Eisenhower Matrix view (importance/urgency quadrants).
 -   Drag-and-Drop cards between columns (updates status persistently).
 -   Drag-and-Drop cards within columns to reorder (updates order persistently).
+-   Server-side validation using Zod for all data operations.
+-   Comprehensive error handling with categorized error types.
+-   RESTful API with proper validation and error responses.
+-   Enhanced database connection management for serverless environments.
 -   Toast notifications for card actions (creation, movement).
--   Basic error handling and loading states.
 -   Responsive design.
 
 ## Environment Variables
@@ -111,8 +119,8 @@ Authentication is handled using NextAuth.js with the Google OAuth provider.
 
 -   Requires Google OAuth credentials and MongoDB connection string setup.
 -   Basic styling (functional, not heavily designed).
--   Limited error handling feedback in the UI (mostly console logs).
--   No card editing or deletion functionality yet.
+-   Some UI components still need to be updated to utilize the improved error handling.
+-   No card editing functionality yet.
 
 ## Documentation
 
