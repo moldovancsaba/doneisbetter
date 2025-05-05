@@ -31,12 +31,20 @@ const getCardsQuerySchema = z.object({
   ),
   limit: z.preprocess(
     // Convert string to number for limit
-    val => val ? parseInt(String(val), 10) : val,
+    (val): number | undefined => {
+      if (val === undefined || val === null) return undefined;
+      const parsed = parseInt(String(val), 10);
+      return isNaN(parsed) ? undefined : parsed;
+    },
     z.number().positive().optional()
   ),
   page: z.preprocess(
     // Convert string to number for page
-    val => val ? parseInt(String(val), 10) : val,
+    (val): number | undefined => {
+      if (val === undefined || val === null) return undefined;
+      const parsed = parseInt(String(val), 10);
+      return isNaN(parsed) ? undefined : parsed;
+    },
     z.number().positive().optional()
   ),
   sort: z.string().optional(),
@@ -71,10 +79,10 @@ const handleGetCards = validateRequest(getCardsQuerySchema, async (req, data) =>
       filter.urgency = data.urgency;
     }
     
-    // Pagination options
-    const limit = data.limit !== undefined ? data.limit : 50;
-    const page = data.page !== undefined ? data.page : 1;
-    const skip = (page - 1) * limit;
+    // Pagination options with explicit type safety
+    const limit: number = data.limit !== undefined ? data.limit : 50;
+    const page: number = data.page !== undefined ? data.page : 1;
+    const skip: number = (page - 1) * limit;
     
     // Sorting options
     let sort: Record<string, number> = { order: 1, createdAt: -1 };
