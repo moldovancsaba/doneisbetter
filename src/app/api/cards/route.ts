@@ -3,7 +3,7 @@ import { validateRequest } from '@/lib/middleware/validateRequest';
 import { withDatabase } from '@/lib/db';
 import { getCardModel, CardDocument } from '@/lib/models/Card';
 import { DatabaseError, DatabaseErrorType } from '@/lib/errors/DatabaseError';
-import type { SortOrder, Document } from 'mongoose';
+import mongoose, { Types, SortOrder } from 'mongoose';
 import { APIError, withErrorHandler, withMethodHandler } from '@/lib/middleware/errorHandler';
 import { z } from 'zod';
 import { 
@@ -90,7 +90,7 @@ const handleGetCards = validateRequest(getCardsQuerySchema, async (req, data) =>
     
     // Convert to clean card objects
     const formattedCards = cards.map(card => ({
-      id: card._id.toString(),
+      id: card._id ? card._id.toString() : '',
       content: card.content,
       status: card.status,
       order: card.order,
@@ -263,15 +263,15 @@ const handleDeleteCard = validateRequest(deleteCardSchema, async (req, data) => 
     revalidatePath('/');
     revalidatePath('/?view=deleted');
     
-    // Type assertion to ensure proper type safety
-    const typedResult = result as unknown as CardDocument & Document;
+    // Type safe document handling
+    const typedCard = result as CardDocument;
     
     return NextResponse.json({
       success: true,
       message: 'Card deleted successfully',
       data: {
-        id: typedResult._id.toString(),
-        deletedAt: typedResult.deletedAt instanceof Date ? typedResult.deletedAt.toISOString() : new Date().toISOString()
+        id: typedCard._id ? typedCard._id.toString() : '',
+        deletedAt: typedCard.deletedAt instanceof Date ? typedCard.deletedAt.toISOString() : new Date().toISOString()
       }
     });
   });
