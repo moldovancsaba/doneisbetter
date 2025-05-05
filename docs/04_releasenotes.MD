@@ -1,4 +1,33 @@
-## [v1.15.0] - Admin Functions for All Cards View - 2025-04-25
+## [v1.17.1] - Complete Eisenhower Matrix Implementation - 2025-05-05
+
+### Features
+- **Eisenhower Matrix UI:** Added 2x2 grid layout showing task priorities by urgency and importance
+- **Task Classification:** Tasks now include importance and urgency flags for quadrant placement
+- **Layout Toggle:** Added toggle between traditional Kanban and Eisenhower Matrix views 
+- **Visual Indicators:** Color-coded quadrants with descriptions of each priority level
+- **Smart Input:** New task creation with importance/urgency toggles and quadrant preview
+- **Adaptive Card Movement:** Cards moved between quadrants automatically update importance/urgency values
+
+### Technical Implementation
+- **Type-Safe MongoDB Integration:** Added helper utilities for type-safe document handling 
+- **Responsive Grid Layout:** Implemented mobile-friendly 2x2 matrix grid using CSS Grid
+- **Component Extensions:** Updated Input, KanbanBoard, and Column components to support both views
+- **State Management:** Added layout mode state with URL persistence
+- **Performance Optimization:** Improved document mapping to prevent excessive type conversions
+
+### UI/UX Improvements
+- **Quadrant Guide:** Added informational section explaining Eisenhower Matrix methodology
+- **Toggle Switches:** Custom-styled importance and urgency toggle controls
+- **Quadrant Preview:** Real-time preview of which quadrant a new task will be placed in
+- **Visual Hierarchy:** Color-coded quadrants (red: urgent+important, purple: important, orange: urgent, gray: neither)
+
+### Deployment
+- **Commit:** `fix(types): add proper type safety for MongoDB documents`
+- **Platform:** Vercel
+- **URL:** `https://doneisbetter-9k9udqt02-narimato.vercel.app`
+- **Deployment Date:** 2025-05-05
+
+## [v1.17.0] - Eisenhower Matrix Data Model - 2025-05-05
 
 ### Features
 - **Admin All Cards View:** Enhanced the "All Cards" view to be fully functional for administrators
