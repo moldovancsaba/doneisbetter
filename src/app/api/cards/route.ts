@@ -265,14 +265,6 @@ export const PATCH = withErrorHandler(handleUpdateCard);
 export const PUT = withErrorHandler(handleUpdateCard); // Alias PUT to PATCH for flexibility
 export const DELETE = withErrorHandler(handleDeleteCard);
 
-/**
- * Fallback handler for unsupported methods
- */
-export default withMethodHandler({
-  GET: handleGetCards,
-  POST: handleCreateCard,
-  PATCH: handleUpdateCard,
-  PUT: handleUpdateCard,
-  DELETE: handleDeleteCard
-});
+// Note: For Next.js App Router, we can't use a default export for route handlers
+// Instead, we can implement method-not-allowed handling in each method's handler if needed
 
