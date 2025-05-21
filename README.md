@@ -1,140 +1,49 @@
-# Done Is Better ✍️
+# DONEISBETTER — Swipe-based Decision Prototype
 
-A minimalist Kanban-style task management application with Google Authentication and MongoDB integration.
+## 📌 Project Overview
 
-**Status**: 🟢 Server-Side Validation Implemented
-**Version**: v1.18.0
-**Live**: [doneisbetter-cvypuh09x-narimato.vercel.app](https://doneisbetter-cvypuh09x-narimato.vercel.app)
+**doneisbetter** is a swipe-based Progressive Web App (PWA) prototype built for rapid feedback collection through card-based interactions. Users can swipe **right (like)** or **left (dislike)** on individual cards that are loaded from MongoDB Atlas. Once the card stack is exhausted, the app displays a final "Thank you" card to indicate completion.
 
-## Quick Start
+## 🧠 Concept Summary
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/moldovancsaba/doneisbetter.git
-    cd doneisbetter
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Set up Environment Variables:**
-    Create a `.env.local` file in the root directory and add the following variables (get credentials from Google Cloud Console, MongoDB Atlas, and generate a secret):
-    ```bash
-    MONGODB_URI="your_mongodb_connection_string"
-    GOOGLE_CLIENT_ID="your_google_client_id"
-    GOOGLE_CLIENT_SECRET="your_google_client_secret"
-    NEXTAUTH_URL="http://localhost:3000" # For local development
-    NEXTAUTH_SECRET="your_strong_secret_key" # Generate with: openssl rand -base64 32
-    ```
-4.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
-    Open [http://localhost:3000](http://localhost:3000) in your browser.
+- **Purpose**: Collect swipe-based user input on textual cards.
+- **Mechanism**: Users interact via swipe gestures; input is not stored in this prototype.
+- **Target Output**: Fully functional, mobile-first prototype deployed to Vercel.
 
-## Project Structure
+## 🎯 Core Requirements
 
--   `src/app/`: Next.js application core (App Router)
-    -   `layout.tsx` - Root layout (Server Component)
-    -   `page.tsx` - Main application entry point (Client Component for interactivity)
-    -   `actions.ts` - Server Actions for database operations (user-specific)
-    -   `globals.css` - Global styles (Tailwind base)
-    -   `api/auth/[...nextauth]/route.ts` - NextAuth.js API route handler
--   `src/components/`: React components
-    -   `KanbanBoard.tsx` - Main board logic (Client)
-    -   `Column.tsx` - Column rendering (Client)
-    -   `Input.tsx` - New card input (Client)
-    -   `AuthButtons.tsx` - Login/Logout UI (Client)
-    -   `SessionProvider.tsx` - NextAuth session wrapper (Client)
-    -   `Providers.tsx` - Wrapper for client-side providers (e.g., Toaster) (Client)
--   `src/lib/`: Shared utilities, configuration, and data models
-    -   `db.ts` - MongoDB connection helper with enhanced error handling
-    -   `authOptions.ts` - NextAuth.js configuration
-    -   `models/User.ts` - Mongoose User schema/model
-    -   `models/Card.ts` - Mongoose Card schema/model
-    -   `validations/` - Zod schema validation
-    -   `middleware/` - Request validation middleware
-    -   `errors/` - Custom error handling
--   `src/app/types/`: TypeScript type definitions
-    -   `card.ts` - Types related to cards and columns
-    -   `auth.ts` - Types related to NextAuth session/JWT
--   `docs/`: Project documentation (Roadmap, Dev Diary, Release Notes, Rules, etc.)
--   `public/`: Static assets
--   `package.json`: Dependencies and scripts
--   `next.config.js`: Next.js configuration
--   `postcss.config.js`, `tailwind.config.ts`: CSS processing configuration
+| Area         | Description                                                                 |
+|--------------|-----------------------------------------------------------------------------|
+| Admin Panel  | Add/delete text cards stored in MongoDB Atlas                               |
+| User UI      | Swipe left/right on full-screen cards with responsive text resizing         |
+| No More Cards| Show “Thank you” message when cards are exhausted                           |
+| Deployment   | Vercel-hosted app with GitHub-based CI/CD                                   |
 
-## Tech Stack
+## 🔧 Technology Stack (fixed)
+- **Frontend**: Next.js
+- **Backend**: Next.js API Routes + Mongoose
+- **Database**: MongoDB Atlas
+- **Realtime**: Socket.io
+- **Hosting**: Vercel
+- **Version Control**: GitHub
 
--   **Framework:** Next.js 14.0.4 (App Router)
--   **Language:** TypeScript
--   **UI Library:** React 18
--   **Styling:** Tailwind CSS
--   **Database:** MongoDB with Mongoose
--   **Authentication:** NextAuth.js (v4) with Google Provider
--   **Validation:** Zod with custom middleware
--   **Drag-and-Drop:** `@hello-pangea/dnd`
--   **Notifications:** `react-hot-toast`
--   **Deployment:** Vercel
--   **Version Control:** Git / GitHub
+## 📂 Folder Structure
 
-## Features
+```
+/doneisbetter
+├── frontend (Next.js PWA)
+├── backend  (API, MongoDB, Socket.io)
+├── docs     (all markdown documentation)
+```
 
--   User Authentication via Google Sign-In.
--   User-specific task management (cards belong to users).
--   Input field to add new task cards.
--   Cards stored persistently in MongoDB.
--   3-column Kanban layout ('TODO', 'IN_PROGRESS', 'DONE').
--   Eisenhower Matrix view (importance/urgency quadrants).
--   Drag-and-Drop cards between columns (updates status persistently).
--   Drag-and-Drop cards within columns to reorder (updates order persistently).
--   Server-side validation using Zod for all data operations.
--   Comprehensive error handling with categorized error types.
--   RESTful API with proper validation and error responses.
--   Enhanced database connection management for serverless environments.
--   Toast notifications for card actions (creation, movement).
--   Responsive design.
+## 🔒 Security & Auth
+No authentication in the prototype phase. Admin panel is accessible via direct route.
 
-## Environment Variables
+## ✅ Rules Applied
+- “**Done is Better Than Perfect**” principle
+- Strictly follows AI usage, documentation, and deployment rules
+- All files written in full — no placeholders, no omissions
 
-The following environment variables are required. Create a `.env.local` file for local development. For production, configure these in your Vercel project settings.
+## 👤 Maintainer
+Moldován Csaba — Product Owner & Developer
 
--   `MONGODB_URI`: Your MongoDB connection string (e.g., from Atlas).
--   `GOOGLE_CLIENT_ID`: Your Google OAuth Client ID.
--   `GOOGLE_CLIENT_SECRET`: Your Google OAuth Client Secret.
--   `NEXTAUTH_URL`: The canonical URL of your deployment.
-    -   Local Development: `http://localhost:3000`
-    -   Production: Your Vercel deployment URL (e.g., `https://your-app-name.vercel.app`)
--   `NEXTAUTH_SECRET`: A strong secret key used to encrypt session tokens. Generate one using `openssl rand -base64 32`. **Required for production.**
-
-## Authentication
-
-Authentication is handled using NextAuth.js with the Google OAuth provider.
--   Users sign in via the Google button.
--   A User document is created/retrieved in MongoDB upon successful sign-in.
--   The user's MongoDB `_id` is stored in the session and used for all user-specific database operations.
--   Session state is managed using JWT strategy.
-
-## Known Limitations
-
--   Requires Google OAuth credentials and MongoDB connection string setup.
--   Basic styling (functional, not heavily designed).
--   Some UI components still need to be updated to utilize the improved error handling.
--   No card editing functionality yet.
-
-## Documentation
-
-### Project Documentation
-- [Development Timeline](docs/05_50FirstDates.MD)
-- [Release History](docs/04_releasenotes.MD)
-- [Implementation Insights](docs/03_lessonslearned.MD)
-- [Project Roadmap](docs/01_roadmap.MD)
-- [Technical Details](docs/06_technology.MD)
-
-### AI Development Guidelines
-- [Definition of Done](docs/07_Definition_of_Done_AI_Warp.MD)
-- [One Function Rule](docs/08_One_Function_At_A_Time_Rule.MD)
-- [Autopilot Consent](docs/09_Autopilot_Consent_Project_Access.MD)
-- [AI Knowledge Rules](docs/10_AI_Knowledge_Rules.MD)
-- [AI Truthfulness](docs/11_AI_Truthfulness_and_Verification.MD)
-- [Execution Protocol](docs/12_AI_Execution_Protocol.MD)

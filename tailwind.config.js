@@ -1,14 +1,10 @@
-// tailwind.config.js
-/** @type {import('tailwindcss').Config} */
 module.exports = {
-  // Keep content paths
   content: [
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}"
   ],
-  // Remove theme extensions for font
   theme: {
     extend: {},
   },
   plugins: [],
-};
+}
