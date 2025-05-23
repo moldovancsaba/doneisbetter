@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { VoteCard } from "./VoteCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const VoteArena = ({ card1, card2, onVote, loading }) => {
   const [selectedCard, setSelectedCard] = useState(null);
@@ -25,6 +25,30 @@ export const VoteArena = ({ card1, card2, onVote, loading }) => {
       setAnimatingOut(false);
     }, 500);
   };
+
+  // Handle keyboard controls
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (loading || animatingOut) return;
+
+      if (event.key === "ArrowLeft") {
+        handleCardSelect(card1._id);
+        if (selectedCard === card1._id) {
+          handleVoteSubmit(card1._id);
+        }
+      } else if (event.key === "ArrowRight") {
+        handleCardSelect(card2._id);
+        if (selectedCard === card2._id) {
+          handleVoteSubmit(card2._id);
+        }
+      } else if (event.key === "Enter" && selectedCard) {
+        handleVoteSubmit(selectedCard);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedCard, loading, animatingOut, card1._id, card2._id]);
 
   return (
     <div className="w-full">
@@ -73,7 +97,7 @@ export const VoteArena = ({ card1, card2, onVote, loading }) => {
         className="flex justify-center -mt-4 mb-4"
       >
         <div className="bg-gray-200 dark:bg-gray-700 rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg text-gray-700 dark:text-gray-300">
-          VS
+          🆚
         </div>
       </motion.div>
 
@@ -86,60 +110,14 @@ export const VoteArena = ({ card1, card2, onVote, loading }) => {
         >
           <button
             onClick={() => handleVoteSubmit(selectedCard)}
-            className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200 font-medium"
+            className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
             disabled={animatingOut || loading}
           >
-            {loading ? "Loading..." : animatingOut ? "Recording Vote..." : "Confirm Vote"}
+            {loading ? "⏳ Loading..." : animatingOut ? "✨ Recording Vote..." : "✅ Confirm Vote"}
+            <span className="text-sm opacity-75">(or press Enter)</span>
           </button>
         </motion.div>
       )}
     </div>
   );
-  return (
-    <div className="flex flex-col items-center">
-      <div className="grid grid-cols-2 gap-4 w-full mb-8">
-        <motion.div
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.98 }}
-          className={`col-span-1 ${selectedCard === card1._id ? 'ring-4 ring-primary-500 ring-offset-2' : ''}`}
-        >
-          <VoteCard
-            content={card1}
-            position="left"
-            selected={selectedCard === card1._id}
-            onSelect={() => handleCardSelect(card1._id)}
-          />
-        </motion.div>
-        
-        <motion.div
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.98 }}
-          className={`col-span-1 ${selectedCard === card2._id ? 'ring-4 ring-primary-500 ring-offset-2' : ''}`}
-        >
-          <VoteCard
-            content={card2}
-            position="right"
-            selected={selectedCard === card2._id}
-            onSelect={() => handleCardSelect(card2._id)}
-          />
-        </motion.div>
-      </div>
-      
-      <VoteControls
-        onVote={handleVoteSubmit}
-        disabled={!selectedCard || loading}
-        loading={loading}
-      />
-      
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-6 text-sm text-center text-gray-500"
-      >
-        Select the option you prefer, then click Vote
-      </motion.div>
-    </div>
-  );
 };
-

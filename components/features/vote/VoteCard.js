@@ -29,29 +29,34 @@ export const VoteCard = ({ card, isSelected, onSelect, position = "left", disabl
         
         <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {isSelected ? "Selected" : "Click to select"}
+            {isSelected ? "✨ Selected" : `Press ${position === "left" ? "←" : "→"} to select`}
           </p>
         </div>
       </div>
 
       {/* Selection Badge */}
       {isSelected && (
-        <div className="absolute top-3 right-3 bg-primary-500 text-white p-2 rounded-full">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-        </div>
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="absolute top-3 right-3 bg-primary-500 text-white p-2 rounded-full"
+        >
+          ✨
+        </motion.div>
       )}
 
       {/* Position Indicator */}
-      <div className={`
-        absolute bottom-3 ${position === "left" ? "left-3" : "right-3"}
-        bg-gray-200 dark:bg-gray-700
-        text-gray-800 dark:text-gray-200
-        text-xs px-2 py-1 rounded-full
-      `}>
-        {position === "left" ? "Option A" : "Option B"}
-      </div>
+      <motion.div
+        className={`
+          absolute bottom-3 ${position === "left" ? "left-3" : "right-3"}
+          bg-gray-200 dark:bg-gray-700
+          text-gray-800 dark:text-gray-200
+          text-xs px-2 py-1 rounded-full
+        `}
+        whileHover={{ scale: 1.05 }}
+      >
+        {position === "left" ? "⬅️ Option A" : "Option B ➡️"}
+      </motion.div>
     </motion.div>
   );
 };
