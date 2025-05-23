@@ -9,12 +9,42 @@ import io from "socket.io-client";
 
 export default function AdminPage() {
   const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingCards, setLoadingCards] = useState(true);
   const [newCardText, setNewCardText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [socket, setSocket] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState('Connecting...');
   const { addToast } = useToast();
 
+  // Fetch cards through HTTP fallback if socket is slow
+  useEffect(() => {
+    // Fallback HTTP method to get cards if socket is slow
+    const fetchCards = async () => {
+      try {
+        const response = await fetch('/api/cards');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setCards(data.data);
+            setLoadingCards(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching cards:', error);
+      }
+    };
+
+    // Wait a bit for socket, then use HTTP fallback
+    const timer = setTimeout(() => {
+      if (loadingCards) {
+        fetchCards();
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [loadingCards]);
+
+  // Socket.io setup
   useEffect(() => {
     const initSocket = async () => {
       try {
@@ -26,13 +56,18 @@ export default function AdminPage() {
         });
 
         newSocket.on("connect", () => {
+          setConnectionStatus('Connected');
           addToast("Connected to server", "success");
           newSocket.emit("get-cards");
         });
 
+        newSocket.on("disconnect", () => {
+          setConnectionStatus('Disconnected');
+        });
+
         newSocket.on("cards", (data) => {
           setCards(data);
-          setLoading(false);
+          setLoadingCards(false);
         });
 
         newSocket.on("card-created", (newCard) => {
@@ -47,8 +82,8 @@ export default function AdminPage() {
 
         setSocket(newSocket);
       } catch (err) {
+        setConnectionStatus('Failed to connect');
         addToast("Failed to connect to server", "error");
-        setLoading(false);
       }
     };
 
@@ -61,27 +96,74 @@ export default function AdminPage() {
     };
   }, []);
 
+  // Handle form submission with fallback
   const handleCreateCard = async (e) => {
     e.preventDefault();
-    if (!newCardText.trim() || isSubmitting || !socket) return;
+    if (!newCardText.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
-      socket.emit("create-card", { text: newCardText.trim() });
-      setNewCardText("");
+      // If socket is connected, use it
+      if (socket && socket.connected) {
+        socket.emit("create-card", { text: newCardText.trim() });
+        setNewCardText("");
+      } else {
+        // Fallback to HTTP request
+        const response = await fetch('/api/cards', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text: newCardText.trim() }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            // Add the new card to the list
+            setCards(prev => [...prev, data.data]);
+            setNewCardText("");
+            addToast("Card created successfully", "success");
+          } else {
+            addToast(data.error || "Failed to create card", "error");
+          }
+        } else {
+          addToast("Failed to create card", "error");
+        }
+      }
     } catch (error) {
+      console.error('Error creating card:', error);
       addToast("Failed to create card", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDeleteCard = (cardId) => {
-    if (!socket) return;
-    socket.emit("delete-card", cardId);
-  };
+  // Handle card deletion with fallback
+  const handleDeleteCard = async (cardId) => {
+    try {
+      // If socket is connected, use it
+      if (socket && socket.connected) {
+        socket.emit("delete-card", cardId);
+      } else {
+        // Fallback to HTTP request
+        const response = await fetch(`/api/cards?id=${cardId}`, {
+          method: 'DELETE',
+        });
 
-  if (loading) return <LoadingScreen />;
+        if (response.ok) {
+          // Remove the card from the list
+          setCards(prev => prev.filter(card => card._id !== cardId));
+          addToast("Card deleted successfully", "success");
+        } else {
+          addToast("Failed to delete card", "error");
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting card:', error);
+      addToast("Failed to delete card", "error");
+    }
+  };
 
   return (
     <PageWrapper>
@@ -100,7 +182,7 @@ export default function AdminPage() {
           </div>
 
           <div className="px-4 py-2 rounded-full bg-primary-500/10 text-primary-500">
-            {socket?.connected ? "Connected" : "Disconnected"}
+            {connectionStatus}
           </div>
         </motion.div>
 
@@ -111,9 +193,9 @@ export default function AdminPage() {
           className="grid grid-cols-1 sm:grid-cols-3 gap-4"
         >
           {[
-            { label: "Total Cards", value: cards.length, icon: "📚" },
-            { label: "Active Cards", value: cards.filter(c => !c.archived).length, icon: "✨" },
-            { label: "Archived Cards", value: cards.filter(c => c.archived).length, icon: "📦" }
+            { label: "Total Cards", value: loadingCards ? "..." : cards.length, icon: "📚" },
+            { label: "Active Cards", value: loadingCards ? "..." : cards.filter(c => !c.archived).length, icon: "✨" },
+            { label: "Archived Cards", value: loadingCards ? "..." : cards.filter(c => c.archived).length, icon: "📦" }
           ].map((stat, index) => (
             <Card key={index} className="p-6">
               <div className="flex items-center justify-between">
@@ -192,8 +274,8 @@ export default function AdminPage() {
                         </p>
                       </Card>
                     </motion.div>
-                  ))}
-                </AnimatePresence>
+                    ))}
+                  </AnimatePresence>
               </div>
             </Card>
           </div>

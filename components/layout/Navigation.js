@@ -12,6 +12,7 @@ export const Navigation = () => {
   const navigationItems = [
     { href: "/", label: "Home", icon: "🏠" },
     { href: "/swipe", label: "Swipe", icon: "🔄" },
+    { href: "/vote", label: "Vote", icon: "🗳️" },
     { href: "/admin", label: "Admin", icon: "⚙️" },
   ];
 

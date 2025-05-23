@@ -16,6 +16,7 @@ export const Header = () => {
   const navigationItems = [
     { href: "/", label: "Home" },
     { href: "/swipe", label: "Swipe" },
+    { href: "/vote", label: "Vote" },
     { href: "/admin", label: "Admin" },
   ];
 
@@ -42,10 +43,13 @@ export const Header = () => {
 
             <div className="hidden md:flex items-center gap-2">
               {navigationItems.map((item) => (
-                <Link key={item.href} href={item.href}>
-                  <motion.a
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                <motion.div
+                  key={item.href}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link 
+                    href={item.href}
                     className={`
                       px-4 py-2 rounded-lg font-medium transition-colors
                       ${router.pathname === item.href
@@ -55,8 +59,8 @@ export const Header = () => {
                     `}
                   >
                     {item.label}
-                  </motion.a>
-                </Link>
+                  </Link>
+                </motion.div>
               ))}
 
               {mounted && (

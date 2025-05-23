@@ -33,9 +33,10 @@ export const MobileNav = () => {
       <div className="glass-card border-t border-gray-200/50 dark:border-gray-700/50">
         <div className="flex items-center justify-around px-2">
           {navItems.map((item) => (
-            <Link href={item.href} key={item.href}>
-              <motion.a
-                whileTap={{ scale: 0.9 }}
+            <motion.div whileTap={{ scale: 0.9 }}>
+              <Link 
+                href={item.href} 
+                key={item.href}
                 className={`
                   relative flex flex-col items-center justify-center
                   p-3 w-20 rounded-lg
@@ -56,8 +57,8 @@ export const MobileNav = () => {
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
-              </motion.a>
-            </Link>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </div>
