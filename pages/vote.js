@@ -13,7 +13,35 @@ export default function VotePage() {
   const [submitting, setSubmitting] = useState(false);
   const [voteHistory, setVoteHistory] = useState([]);
   const [error, setError] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
   const { addToast } = useToast();
+  
+  // Helper function to safely extract card ID
+  const getCardId = (card) => {
+    if (!card) {
+      console.error("Card is null or undefined");
+      return null;
+    }
+    
+    // Log card structure to debug
+    console.log("Card structure:", card);
+    
+    // Handle various card ID formats
+    if (typeof card === 'string') {
+      return card; // Card is already an ID string
+    }
+    
+    if (card._id) {
+      return typeof card._id === 'string' ? card._id : card._id.toString();
+    }
+    
+    if (card.id) {
+      return typeof card.id === 'string' ? card.id : card.id.toString();
+    }
+    
+    console.error("Could not extract ID from card:", card);
+    return null;
+  };
 
   // Fetch a new pair of cards for voting
   const fetchVotingPair = async () => {
@@ -27,6 +55,18 @@ export default function VotePage() {
       
       const data = await response.json();
       if (data.success) {
+        // Log the voting pair data structure
+        console.log("Voting pair data:", data.data);
+        
+        // Verify card data is valid
+        if (!data.data.card1 || !data.data.card2) {
+          throw new Error("Invalid card data received from server");
+        }
+        
+        // Log card ID extraction to verify
+        console.log("Card 1 ID:", getCardId(data.data.card1));
+        console.log("Card 2 ID:", getCardId(data.data.card2));
+        
         setVotingPair(data.data);
       } else {
         throw new Error(data.error || "Failed to fetch voting pair");
@@ -40,22 +80,50 @@ export default function VotePage() {
   };
 
   // Submit vote
-  const submitVote = async (winningCardId, losingCardId) => {
+  const submitVote = async (winningCard, losingCard) => {
     if (submitting) return;
+    
+    // Validate that we have a sessionId
+    if (!sessionId) {
+      const errorMsg = "Session ID not found. Please refresh the page and try again.";
+      setError(errorMsg);
+      addToast(errorMsg, "error");
+      return;
+    }
+    
+    // Extract card IDs safely
+    const winnerId = getCardId(winningCard);
+    const loserId = getCardId(losingCard);
+    
+    // Validate card IDs
+    if (!winnerId || !loserId) {
+      const errorMsg = "Invalid card data. Please refresh and try again.";
+      setError(errorMsg);
+      addToast(errorMsg, "error");
+      console.error("Invalid card IDs:", { winningCard, losingCard });
+      return;
+    }
     
     setSubmitting(true);
     try {
+      console.log(`Submitting vote with sessionId: ${sessionId}`);
+      console.log(`Winner ID: ${winnerId}, Loser ID: ${loserId}`);
+      
+      const voteData = {
+        sessionId: sessionId, // Use the sessionId from localStorage
+        winnerId: winnerId,
+        loserId: loserId,
+        type: votingPair.type
+      };
+      
+      console.log("Vote submission data:", voteData);
+      
       const response = await fetch('/api/vote/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          sessionId: votingPair.sessionId,
-          winnerId: winningCardId,
-          loserId: losingCardId,
-          type: votingPair.type
-        }),
+        body: JSON.stringify(voteData),
       });
 
       if (!response.ok) {
@@ -68,8 +136,8 @@ export default function VotePage() {
         // Add to vote history
         setVoteHistory(prev => [
           {
-            winner: votingPair.card1._id === winningCardId ? votingPair.card1 : votingPair.card2,
-            loser: votingPair.card1._id === losingCardId ? votingPair.card1 : votingPair.card2,
+            winner: getCardId(votingPair.card1) === winnerId ? votingPair.card1 : votingPair.card2,
+            loser: getCardId(votingPair.card1) === loserId ? votingPair.card1 : votingPair.card2,
             timestamp: new Date()
           },
           ...prev.slice(0, 9) // Keep last 10 votes
@@ -90,18 +158,40 @@ export default function VotePage() {
     }
   };
 
+  // Get or create session ID from localStorage
+  useEffect(() => {
+    // Try to get existing session ID from localStorage
+    const storedSessionId = localStorage.getItem('voteSessionId');
+    if (storedSessionId) {
+      console.log("Using existing session ID:", storedSessionId);
+      setSessionId(storedSessionId);
+    } else {
+      // Create a new random session ID using a timestamp and random number
+      const newSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      console.log("Created new session ID:", newSessionId);
+      localStorage.setItem('voteSessionId', newSessionId);
+      setSessionId(newSessionId);
+    }
+  }, []);
+
   // Initial fetch
   useEffect(() => {
     fetchVotingPair();
   }, []);
 
-  // Format date
-  const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  // Format date to ISO string
+  const formatISODate = (date) => {
+    return new Date(date).toISOString();
   };
+
+  // Check if session ID is missing after initial load
+  useEffect(() => {
+    if (!loading && !sessionId) {
+      const errorMsg = "Session ID not found. Please refresh the page or clear your browser cache.";
+      setError(errorMsg);
+      addToast(errorMsg, "error");
+    }
+  }, [loading, sessionId]);
 
   if (loading && !votingPair) {
     return <LoadingScreen />;
@@ -151,6 +241,9 @@ export default function VotePage() {
                    votingPair.type === "ranking" ? "New Card Ranking" :
                    "Rank Refinement"}
                 </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  Session ID: {sessionId ? sessionId.substring(0, 8) + '...' : 'Not found'}
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -162,8 +255,8 @@ export default function VotePage() {
                   <Card 
                     className="p-6 flex flex-col h-full cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
                     onClick={() => submitVote(
-                      votingPair.card1._id || votingPair.card1, 
-                      votingPair.card2._id || votingPair.card2
+                      votingPair.card1, 
+                      votingPair.card2
                     )}
                   >
                     <div className="flex-1">
@@ -206,8 +299,8 @@ export default function VotePage() {
                   <Card 
                     className="p-6 flex flex-col h-full cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
                     onClick={() => submitVote(
-                      votingPair.card2._id || votingPair.card2, 
-                      votingPair.card1._id || votingPair.card1
+                      votingPair.card2, 
+                      votingPair.card1
                     )}
                   >
                     <div className="flex-1">
@@ -248,6 +341,9 @@ export default function VotePage() {
               <p className="text-gray-600 dark:text-gray-300">
                 No cards available for voting. Try again later.
               </p>
+              <div className="text-xs text-gray-500 mt-2 mb-4">
+                Session ID: {sessionId ? sessionId.substring(0, 8) + '...' : 'Not found'}
+              </div>
               <Button 
                 onClick={fetchVotingPair} 
                 className="mt-4"
@@ -282,7 +378,7 @@ export default function VotePage() {
                           over <span className="text-red-500 dark:text-red-400">{vote.loser.text?.substring(0, 30)}...</span>
                         </p>
                       </div>
-                      <span className="text-xs text-gray-500">{formatTime(vote.timestamp)}</span>
+                      <span className="text-xs text-gray-500">{formatISODate(vote.timestamp)}</span>
                     </motion.div>
                   ))}
                 </AnimatePresence>

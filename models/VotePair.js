@@ -16,6 +16,15 @@ const votePairSchema = new mongoose.Schema({
     ref: 'Card',
     required: true
   },
+  sessionId: {
+    type: String,
+    required: true
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  },
   timestamp: {
     type: Date,
     default: Date.now

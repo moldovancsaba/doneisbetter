@@ -13,6 +13,7 @@ export const Navigation = () => {
     { href: "/", label: "Home", icon: "🏠" },
     { href: "/swipe", label: "Swipe", icon: "🔄" },
     { href: "/vote", label: "Vote", icon: "🗳️" },
+    { href: "/rankings", label: "Rankings", icon: "🏆" },
     { href: "/admin", label: "Admin", icon: "⚙️" },
   ];
 

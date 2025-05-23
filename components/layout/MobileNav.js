@@ -17,6 +17,16 @@ export const MobileNav = () => {
       icon: "🔄",
     },
     {
+      href: "/vote",
+      label: "Vote",
+      icon: "🗳️",
+    },
+    {
+      href: "/rankings",
+      label: "Rankings",
+      icon: "🏆",
+    },
+    {
       href: "/admin",
       label: "Admin",
       icon: "⚙️",
@@ -33,10 +43,9 @@ export const MobileNav = () => {
       <div className="glass-card border-t border-gray-200/50 dark:border-gray-700/50">
         <div className="flex items-center justify-around px-2">
           {navItems.map((item) => (
-            <motion.div whileTap={{ scale: 0.9 }}>
+            <motion.div whileTap={{ scale: 0.9 }} key={item.href}>
               <Link 
-                href={item.href} 
-                key={item.href}
+                href={item.href}
                 className={`
                   relative flex flex-col items-center justify-center
                   p-3 w-20 rounded-lg

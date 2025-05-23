@@ -1,8 +1,9 @@
-import dbConnect from '../../lib/dbConnect';
-import Card from '../../models/Card';
+import dbConnect from '../../../lib/dbConnect';
+import Card from '../../../models/Card';
 
 export default async function handler(req, res) {
   const { method } = req;
+  const { id } = req.query;
 
   // Connect to database
   try {
@@ -13,19 +14,24 @@ export default async function handler(req, res) {
   }
 
   switch (method) {
-    // GET - Fetch all cards
+    // GET - Fetch a specific card
     case 'GET':
       try {
-        const cards = await Card.find({}).sort({ createdAt: -1 });
-        res.status(200).json({ success: true, data: cards });
+        const card = await Card.findById(id);
+        
+        if (!card) {
+          return res.status(404).json({ success: false, error: 'Card not found' });
+        }
+        
+        res.status(200).json({ success: true, data: card });
       } catch (error) {
-        console.error('GET cards error:', error);
-        res.status(500).json({ success: false, error: 'Failed to fetch cards' });
+        console.error('GET card error:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch card' });
       }
       break;
 
-    // POST - Create a new card
-    case 'POST':
+    // PUT - Update a card
+    case 'PUT':
       try {
         const { text } = req.body;
         
@@ -37,27 +43,26 @@ export default async function handler(req, res) {
           return res.status(400).json({ success: false, error: 'Card text must be 160 characters or less' });
         }
         
-        const card = await Card.create({ 
-          text,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
-        res.status(201).json({ success: true, data: card });
+        const updatedCard = await Card.findByIdAndUpdate(
+          id, 
+          { text, updatedAt: new Date() }, 
+          { new: true, runValidators: true }
+        );
+        
+        if (!updatedCard) {
+          return res.status(404).json({ success: false, error: 'Card not found' });
+        }
+        
+        res.status(200).json({ success: true, data: updatedCard });
       } catch (error) {
-        console.error('POST card error:', error);
-        res.status(500).json({ success: false, error: 'Failed to create card' });
+        console.error('PUT card error:', error);
+        res.status(500).json({ success: false, error: 'Failed to update card' });
       }
       break;
 
     // DELETE - Delete a card
     case 'DELETE':
       try {
-        const { id } = req.body;
-        
-        if (!id) {
-          return res.status(400).json({ success: false, error: 'Card ID is required' });
-        }
-        
         const deletedCard = await Card.findByIdAndDelete(id);
         
         if (!deletedCard) {
@@ -73,7 +78,7 @@ export default async function handler(req, res) {
 
     // For unsupported methods
     default:
-      res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
+      res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
       res.status(405).json({ success: false, error: `Method ${method} not allowed` });
   }
 }
