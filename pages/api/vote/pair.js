@@ -1,6 +1,7 @@
 import dbConnect from "../../../lib/dbConnect";
 import Card from "../../../models/Card";
 import VoteRank from "../../../models/VoteRank";
+import Interaction from "../../../models/Interaction";
 import { v4 as uuidv4 } from "uuid";
 
 export default async function handler(req, res) {
@@ -20,17 +21,52 @@ export default async function handler(req, res) {
     await dbConnect();
     console.log(`[${requestTime}] Database connected successfully`);
 
-    // Find cards that have not been ranked yet
+    // Get session ID from the request
+    const { sessionId } = req.query;
+    if (!sessionId) {
+      console.log(`[${requestTime}] Missing sessionId parameter`);
+      return res.status(400).json({
+        success: false,
+        error: "Session ID is required to get vote pairs",
+        timestamp: requestTime
+      });
+    }
+
+    console.log(`[${requestTime}] Looking up swiped cards for session: ${sessionId}`);
+    
+    // Find all cards this user has swiped right on
+    const rightSwipedCards = await Interaction.find({
+      sessionId,
+      type: 'swipe',
+      action: 'right'
+    }).distinct('cardId');
+
+    console.log(`[${requestTime}] User has swiped right on ${rightSwipedCards.length} cards`);
+
+    // If the user hasn't swiped right on at least 2 cards, return an error
+    if (rightSwipedCards.length < 2) {
+      console.log(`[${requestTime}] Not enough liked cards for voting`);
+      return res.status(400).json({
+        success: false,
+        error: "Not enough liked cards. Please swipe right on more cards first.",
+        timestamp: requestTime
+      });
+    }
+
+    // Find cards that have not been ranked yet and were swiped right
     const unrankedCards = await Card.find({
       _id: { 
+        $in: rightSwipedCards,
         $nin: await VoteRank.distinct("cardId") 
       }
     }).limit(10);
     
     console.log(`[${requestTime}] Found ${unrankedCards.length} unranked cards`);
 
-    // Get ranked cards
-    const rankedCards = await VoteRank.find()
+    // Get ranked cards that the user has swiped right on
+    const rankedCards = await VoteRank.find({
+      cardId: { $in: rightSwipedCards }
+    })
       .sort({ rank: 1 })
       .populate("cardId")
       .limit(10);

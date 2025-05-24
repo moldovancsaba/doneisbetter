@@ -2,6 +2,7 @@ import dbConnect from '../../lib/dbConnect';
 import VotePair from '../../models/VotePair';
 import VoteRank from '../../models/VoteRank';
 import Card from '../../models/Card';
+import Interaction from '../../models/Interaction';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -25,6 +26,28 @@ export default async function handler(req, res) {
     const query = {};
     if (sessionId) query.sessionId = sessionId;
     if (userId) query.userId = userId;
+    
+    // Find all cards that have been swiped right by this user/session
+    const rightSwipedQuery = sessionId 
+      ? { sessionId, type: 'swipe', action: 'right' }
+      : { userId, type: 'swipe', action: 'right' };
+      
+    console.log(`Finding right-swiped cards with query:`, rightSwipedQuery);
+    
+    const rightSwipedCards = await Interaction.find(rightSwipedQuery)
+      .distinct('cardId');
+    
+    console.log(`Found ${rightSwipedCards.length} cards that were swiped right`);
+    
+    if (rightSwipedCards.length === 0) {
+      // No cards have been swiped right by this user/session
+      return res.status(200).json({
+        success: true,
+        data: [],
+        votesCount: 0,
+        message: "No cards have been swiped right by this user/session"
+      });
+    }
 
     console.log(`Fetching votes for ${sessionId ? 'sessionId: ' + sessionId : 'userId: ' + userId}`);
 
@@ -50,6 +73,9 @@ export default async function handler(req, res) {
     // Get unique card IDs from votes and build a map of cards
     const cardIds = new Set();
     const cardsMap = new Map();
+    
+    // Convert rightSwipedCards to an array of strings for easier comparison
+    const rightSwipedCardIds = rightSwipedCards.map(id => id.toString());
 
     // Add debug logging for first vote pair to examine structure
     if (votePairs.length > 0) {
@@ -80,25 +106,27 @@ export default async function handler(req, res) {
     };
     
     votePairs.forEach(vote => {
-      // Add card1 to map if not already there
+      // Add card1 to map if not already there AND it was swiped right
       const card1Id = vote.card1Id._id.toString();
-      if (!cardsMap.has(card1Id)) {
+      if (!cardsMap.has(card1Id) && rightSwipedCardIds.includes(card1Id)) {
         cardsMap.set(card1Id, {
           _id: vote.card1Id._id,
           cardText: getCardText(vote.card1Id),
           createdAt: vote.card1Id.createdAt || vote.timestamp,
-          lastVoted: vote.timestamp
+          lastVoted: vote.timestamp,
+          wasSwipedRight: true
         });
       }
 
-      // Add card2 to map if not already there
+      // Add card2 to map if not already there AND it was swiped right
       const card2Id = vote.card2Id._id.toString();
-      if (!cardsMap.has(card2Id)) {
+      if (!cardsMap.has(card2Id) && rightSwipedCardIds.includes(card2Id)) {
         cardsMap.set(card2Id, {
           _id: vote.card2Id._id,
           cardText: getCardText(vote.card2Id),
           createdAt: vote.card2Id.createdAt || vote.timestamp,
-          lastVoted: vote.timestamp
+          lastVoted: vote.timestamp,
+          wasSwipedRight: true
         });
       }
 
@@ -106,22 +134,28 @@ export default async function handler(req, res) {
       const card1 = cardsMap.get(card1Id);
       const card2 = cardsMap.get(card2Id);
       
-      if (new Date(vote.timestamp) > new Date(card1.lastVoted)) {
+      if (card1 && new Date(vote.timestamp) > new Date(card1.lastVoted)) {
         card1.lastVoted = vote.timestamp;
       }
       
-      if (new Date(vote.timestamp) > new Date(card2.lastVoted)) {
+      if (card2 && new Date(vote.timestamp) > new Date(card2.lastVoted)) {
         card2.lastVoted = vote.timestamp;
       }
 
-      cardIds.add(card1Id);
-      cardIds.add(card2Id);
+      // Only add cards that were swiped right
+      if (rightSwipedCardIds.includes(card1Id)) {
+        cardIds.add(card1Id);
+      }
+      
+      if (rightSwipedCardIds.includes(card2Id)) {
+        cardIds.add(card2Id);
+      }
     });
 
-    // Convert Set to Array for querying
+    // Convert Set to Array for querying - these are cards both voted on AND swiped right
     const cardIdsArray = Array.from(cardIds);
 
-    console.log(`Found ${cardIdsArray.length} unique cards voted on`);
+    console.log(`Found ${cardIdsArray.length} unique cards that were both voted on AND swiped right`);
 
     // Calculate personal vote statistics for each card
     const personalStats = {};
@@ -190,6 +224,7 @@ export default async function handler(req, res) {
         wins: personalCardStats?.wins || 0,
         totalVotes: personalCardStats?.totalVotes || 0,
         winRate: personalCardStats?.winRate || 0,
+        wasSwipedRight: true, // We're only including cards swiped right
         lastUpdated: globalRanking ? globalRanking.lastUpdated : cardData?.lastVoted || new Date().toISOString(),
         createdAt: cardData?.createdAt || new Date().toISOString(),
         lastVoted: cardData?.lastVoted || new Date().toISOString()
@@ -224,6 +259,7 @@ export default async function handler(req, res) {
       data: formattedRankings,
       votesCount: votePairs.length,
       uniqueCards: cardIdsArray.length,
+      rightSwipedCards: rightSwipedCards.length,
       timestamp: new Date().toISOString()
     });
     

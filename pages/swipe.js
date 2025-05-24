@@ -6,8 +6,7 @@ import { useToast } from "../components/ui/Toast";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/Button";
 import { useModuleTheme } from "../contexts/ModuleThemeContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRedo } from "@fortawesome/free-solid-svg-icons";
+// Remove FontAwesome imports as we're using emojis
 
 export default function SwipePage({ initialCards }) {
   const [cards, setCards] = useState(initialCards || []);
@@ -15,6 +14,7 @@ export default function SwipePage({ initialCards }) {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date().toISOString());
   const [error, setError] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
   const { addToast } = useToast();
   const { theme: moduleTheme } = useModuleTheme();
 
@@ -50,6 +50,22 @@ export default function SwipePage({ initialCards }) {
     }
   };
 
+  // Get or create session ID from localStorage
+  useEffect(() => {
+    // Try to get existing session ID from localStorage
+    const storedSessionId = localStorage.getItem('voteSessionId');
+    if (storedSessionId) {
+      console.log("Using existing session ID:", storedSessionId);
+      setSessionId(storedSessionId);
+    } else {
+      // Create a new random session ID using a timestamp and random number
+      const newSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      console.log("Created new session ID:", newSessionId);
+      localStorage.setItem('voteSessionId', newSessionId);
+      setSessionId(newSessionId);
+    }
+  }, []);
+
   // Set up polling for new cards every 30 seconds
   useEffect(() => {
     // Initial fetch not needed because we have initialCards from SSR
@@ -71,38 +87,63 @@ export default function SwipePage({ initialCards }) {
   };
 
   const handleSwipe = (direction) => {
+    if (!cards.length) return;
+    
     // Log the swipe locally
     console.log(`Card ${cards[0]._id} swiped ${direction === 'right' ? 'liked' : 'disliked'}`);
     
-    // Optional: Send swipe data to server
+    // Validate session ID
+    if (!sessionId) {
+      console.error("No session ID available, cannot record swipe interaction");
+      addToast("Session ID not found. Your swipes may not be tracked correctly.", "error");
+      return;
+    }
+    
+    // Send swipe data to server using the updated Interaction model format
     fetch('/api/interactions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        sessionId: sessionId,
         cardId: cards[0]._id,
-        interaction: direction === 'right' ? 'liked' : 'disliked',
-        timestamp: new Date().toISOString()
+        type: 'swipe',
+        action: direction, // 'left' or 'right' directly
+        createdAt: new Date().toISOString() // ISO 8601 with milliseconds: 2025-04-13T12:34:56.789Z
       }),
-    }).catch(error => console.error('Error logging swipe:', error));
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to record swipe interaction');
+      }
+      
+      // Provide feedback on right swipes since they're important for voting
+      if (direction === 'right') {
+        addToast("Card liked! You can now vote on this card in the Vote section.", "success");
+      }
+    })
+    .catch(error => {
+      console.error('Error logging swipe:', error);
+      addToast("Failed to record your swipe. Please try again.", "error");
+    });
 
     // Remove the swiped card from the stack
     setCards((prev) => prev.slice(1));
   };
 
-  if (loading) return <LoadingScreen message="Loading cards to swipe..." module="swipe" />;
+  if (loading || !sessionId) return <LoadingScreen message="Loading cards to swipe..." module="swipe" />;
 
   return (
     <PageWrapper>
-      <div className="min-h-[80vh] flex flex-col items-center justify-center px-4">
+      <div className={`min-h-[80vh] flex flex-col items-center justify-center px-4 ${moduleTheme.lightBg} ${moduleTheme.darkBg}`}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-lg mx-auto"
+          className="w-full max-w-lg mx-auto space-y-6"
         >
           {/* Stats Bar */}
-          <div className="flex justify-between items-center mb-8">
+          <div className={`flex justify-between items-center p-4 rounded-lg border ${moduleTheme.borderClass} bg-white dark:bg-gray-800`}>
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -111,7 +152,7 @@ export default function SwipePage({ initialCards }) {
               <span className="text-sm text-gray-500 dark:text-gray-400">
                 Cards Left:
               </span>
-              <span className="text-lg font-semibold text-primary-500">
+              <span className={`text-lg font-semibold ${moduleTheme.textClass}`}>
                 {cards.length}
               </span>
             </motion.div>
@@ -124,8 +165,7 @@ export default function SwipePage({ initialCards }) {
               disabled={refreshing}
               className={`flex items-center border-swipe-200 dark:border-swipe-800 hover:bg-swipe-50 dark:hover:bg-swipe-900/20`}
             >
-              <FontAwesomeIcon icon={faRedo} className={`mr-1 text-swipe-500 dark:text-swipe-400`} />
-              Refresh 🔄
+              🔄 Refresh
             </Button>
           </div>
 
@@ -134,32 +174,42 @@ export default function SwipePage({ initialCards }) {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-600 dark:text-red-400"
+              className={`mb-4 p-3 bg-swipe-50/30 dark:bg-swipe-900/20 border ${moduleTheme.borderClass} rounded-lg text-sm ${moduleTheme.textClass}`}
             >
               {error}
               <p className="mt-2">
                 <Button 
                   onClick={handleRefresh} 
-                  variant="secondary"
+                  variant="primary"
                   size="xs"
-                  className={moduleTheme.buttonClass}
+                  className={`${moduleTheme.buttonClass} w-full mt-2`}
                 >
                   Try Again
                 </Button>
               </p>
             </motion.div>
           )}
+          
+          {/* Session Information */}
+          <div className={`mb-4 p-3 bg-swipe-50/30 dark:bg-swipe-900/20 border ${moduleTheme.borderClass} rounded-lg text-xs text-gray-500 dark:text-gray-400`}>
+            Session ID: {sessionId ? `${sessionId.substring(0, 8)}...` : 'Not available'}
+            <p className="mt-1">
+              Swipe right on cards you like to vote on them later!
+            </p>
+          </div>
 
           {/* Card Stack */}
           {cards.length > 0 ? (
-            <CardStack 
-              cards={cards} 
-              onSwipe={handleSwipe} 
-            />
+            <div className={`border ${moduleTheme.borderClass} rounded-xl p-4 hover:bg-swipe-50/30 dark:hover:bg-swipe-900/10 transition-colors duration-200`}>
+              <CardStack 
+                cards={cards} 
+                onSwipe={handleSwipe} 
+              />
+            </div>
           ) : (
             <div className={`p-8 text-center ${moduleTheme.lightBg} ${moduleTheme.darkBg} rounded-xl border ${moduleTheme.borderClass}`}>
               <h3 className={`text-xl font-semibold mb-2 ${moduleTheme.textClass}`}>No Cards Available 🔄</h3>
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className={`${moduleTheme.textClass} text-opacity-70 dark:text-opacity-70`}>
                 Check back later for new cards to review
               </p>
             </div>
@@ -167,7 +217,7 @@ export default function SwipePage({ initialCards }) {
 
           {/* Last Updated */}
           <div className="mt-4 p-2 text-center">
-            <div className={`px-3 py-1 ${moduleTheme.lightBg} ${moduleTheme.darkBg} text-gray-500 dark:text-gray-400 rounded-full text-xs border ${moduleTheme.borderClass}`}>
+            <div className={`px-3 py-1 ${moduleTheme.lightBg} ${moduleTheme.darkBg} ${moduleTheme.textClass} text-opacity-70 dark:text-opacity-70 rounded-full text-xs border ${moduleTheme.borderClass}`}>
               Last updated: {lastUpdate}
             </div>
           </div>
@@ -177,7 +227,7 @@ export default function SwipePage({ initialCards }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-center mt-8"
+            className={`text-center mt-8 p-4 rounded-lg border ${moduleTheme.borderClass} bg-swipe-50/30 dark:bg-swipe-900/10`}
           >
             <p className={`text-sm ${moduleTheme.textClass}`}>
               Swipe right to like 👍, left to pass 👎

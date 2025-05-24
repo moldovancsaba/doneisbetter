@@ -317,7 +317,7 @@ export default function RankingsPage() {
             <p className="text-gray-600 dark:text-gray-300 mt-1">
               {viewMode === 'global' 
                 ? 'See which cards are winning the most votes'
-                : 'Cards you have voted on'
+                : 'Cards you have liked (swiped right)'
               }
             </p>
           </div>
@@ -510,23 +510,23 @@ export default function RankingsPage() {
                 <div className="text-center py-8">
                   <p className="text-gray-500 dark:text-gray-400 mb-4">
                     {sessionId 
-                      ? "You haven't voted on any cards yet or your votes haven't been recorded." 
-                      : "Session ID not found. Your votes may not be tracked correctly."}
+                      ? "You haven't liked any cards yet (swiped right) or your interactions haven't been recorded." 
+                      : "Session ID not found. Your swipes and votes may not be tracked correctly."}
                   </p>
                   <div className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                     <p>If you've recently voted but don't see your rankings:</p>
                     <ul className="list-disc list-inside mt-2 mx-auto max-w-md text-left">
                       <li>Try refreshing the rankings using the button below</li>
-                      <li>Check that you're using the same browser session as when you voted</li>
+                      <li>Go to the Swipe page and swipe right on cards you like</li>
+                      <li>Check that you're using the same browser session as when you swiped</li>
                       <li>Your session ID: <span className="font-mono">{sessionId ? sessionId.substring(0, 12) + '...' : 'Not found'}</span></li>
                       <li>Last check time: <span className="font-mono">{new Date().toISOString()}</span></li>
                     </ul>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-center gap-3">
-                    <Link href="/vote">
+                    <Link href="/swipe">
                       <Button variant="primary" className={moduleTheme.buttonClass}>
-                        <FontAwesomeIcon icon={faExchangeAlt} className="mr-2" />
-                        Go Vote on Cards 🗳️
+                        Go Swipe Some Cards 🔄
                       </Button>
                     </Link>
                     <Button 
