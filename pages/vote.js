@@ -49,8 +49,22 @@ export default function VotePage() {
   // Fetch a new pair of cards for voting
   const fetchVotingPair = async () => {
     setLoading(true);
+    
+    // Verify session ID is available
+    if (!sessionId) {
+      console.error("Attempting to fetch voting pair without a valid session ID");
+      setLoading(false);
+      setError("Session ID is required to get vote pairs. Please refresh the page or try again.");
+      addToast("Session ID is missing. Please refresh the page.", "error");
+      return;
+    }
+    
     try {
-      const response = await fetch('/api/vote/pair');
+      // Include sessionId as a query parameter
+      const url = `/api/vote/pair?sessionId=${encodeURIComponent(sessionId)}`;
+      console.log(`Fetching voting pair with URL: ${url}`);
+      
+      const response = await fetch(url);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch voting pair");
@@ -180,10 +194,15 @@ export default function VotePage() {
     }
   }, []);
 
-  // Initial fetch
+  // Initial fetch - only after sessionId is available
   useEffect(() => {
-    fetchVotingPair();
-  }, []);
+    if (sessionId) {
+      console.log("Session ID available, fetching initial voting pair");
+      fetchVotingPair();
+    } else {
+      console.log("Waiting for session ID before fetching voting pair");
+    }
+  }, [sessionId]);
 
   // Keyboard controls
   useEffect(() => {
