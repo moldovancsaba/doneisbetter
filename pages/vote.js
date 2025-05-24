@@ -17,6 +17,7 @@ export default function VotePage() {
   const [sessionId, setSessionId] = useState(null);
   const { addToast } = useToast();
   const [keyboardEnabled, setKeyboardEnabled] = useState(true);
+  const [hasSwipedCards, setHasSwipedCards] = useState(true); // Initially assume true, will be verified
   const { theme: moduleTheme } = useModuleTheme();
   
   // Helper function to safely extract card ID
@@ -46,6 +47,32 @@ export default function VotePage() {
     return null;
   };
 
+  // Check if user has swiped cards
+  const checkUserHasSwipedCards = async () => {
+    if (!sessionId) {
+      console.error("Cannot check swiped cards without sessionId");
+      return false;
+    }
+    
+    try {
+      const url = `/api/user-votes?sessionId=${encodeURIComponent(sessionId)}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        console.error("Failed to fetch user votes:", response.status);
+        return false;
+      }
+      
+      const data = await response.json();
+      const hasSwiped = data.success && Array.isArray(data.data) && data.data.length > 0;
+      console.log("User has swiped cards:", hasSwiped, "Count:", data.data?.length || 0);
+      return hasSwiped;
+    } catch (err) {
+      console.error("Error checking if user has swiped cards:", err);
+      return false;
+    }
+  };
+
   // Fetch a new pair of cards for voting
   const fetchVotingPair = async () => {
     setLoading(true);
@@ -56,6 +83,16 @@ export default function VotePage() {
       setLoading(false);
       setError("Session ID is required to get vote pairs. Please refresh the page or try again.");
       addToast("Session ID is missing. Please refresh the page.", "error");
+      return;
+    }
+    
+    // Check if user has swiped cards first
+    const hasCards = await checkUserHasSwipedCards();
+    setHasSwipedCards(hasCards);
+    
+    if (!hasCards) {
+      setLoading(false);
+      setError("You need to swipe on some cards first before you can vote!");
       return;
     }
     
@@ -258,12 +295,6 @@ export default function VotePage() {
               Choose which card you prefer
             </p>
           </div>
-
-          <div className="flex space-x-3">
-            <Link href="/rankings" className={`inline-block px-4 py-2 rounded-lg ${moduleTheme.buttonClass}`}>
-              View Rankings 🏆
-            </Link>
-          </div>
         </motion.div>
 
         {/* Voting Area */}
@@ -271,13 +302,39 @@ export default function VotePage() {
           {error ? (
             <div className={`${moduleTheme.lightBg} border ${moduleTheme.borderClass} rounded-lg p-4`}>
               <p className="text-red-800 dark:text-red-200">{error}</p>
-              <Button 
-                onClick={fetchVotingPair} 
-                className={`mt-4 ${moduleTheme.buttonClass}`}
-                variant="primary"
-              >
-                Try Again
-              </Button>
+              
+              {!hasSwipedCards ? (
+                <div className="mt-4">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    You need to swipe some cards before you can vote on them! Head to the swipe page to get started.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Link href="/swipe">
+                      <Button 
+                        className="bg-swipe-600 hover:bg-swipe-700 text-white"
+                        variant="primary"
+                      >
+                        Go to Swipe Page 🔄
+                      </Button>
+                    </Link>
+                    <Button 
+                      onClick={fetchVotingPair} 
+                      className={moduleTheme.buttonClass}
+                      variant="secondary"
+                    >
+                      Check Again
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button 
+                  onClick={fetchVotingPair} 
+                  className={`mt-4 ${moduleTheme.buttonClass}`}
+                  variant="primary"
+                >
+                  Try Again
+                </Button>
+              )}
             </div>
           ) : votingPair ? (
             <>
@@ -393,18 +450,46 @@ export default function VotePage() {
           ) : (
             <Card className={`p-6 text-center border ${moduleTheme.borderClass}`}>
               <p className={moduleTheme.textClass}>
-                No cards available for voting 🗳️ Try again later.
+                No cards available for voting 🗳️
               </p>
-              <div className="text-xs text-gray-500 mt-2 mb-4">
-                Session ID: {sessionId ? sessionId.substring(0, 8) + '...' : 'Not found'}
-              </div>
-              <Button 
-                onClick={fetchVotingPair} 
-                className={`mt-4 ${moduleTheme.buttonClass}`}
-                variant="primary"
-              >
-                Refresh 🔄
-              </Button>
+              
+              {!hasSwipedCards ? (
+                <div className="mt-4">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    You need to swipe right on some cards before you can vote on them. Head to the swipe page to get started!
+                  </p>
+                  <div className="flex flex-col sm:flex-row justify-center gap-3">
+                    <Link href="/swipe">
+                      <Button 
+                        className="bg-swipe-600 hover:bg-swipe-700 text-white"
+                        variant="primary"
+                      >
+                        Go to Swipe Page 🔄
+                      </Button>
+                    </Link>
+                    <Button 
+                      onClick={fetchVotingPair} 
+                      className={moduleTheme.buttonClass}
+                      variant="secondary"
+                    >
+                      Check Again
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="text-xs text-gray-500 mt-2 mb-4">
+                    Session ID: {sessionId ? sessionId.substring(0, 8) + '...' : 'Not found'}
+                  </div>
+                  <Button 
+                    onClick={fetchVotingPair} 
+                    className={`mt-4 ${moduleTheme.buttonClass}`}
+                    variant="primary"
+                  >
+                    Refresh 🔄
+                  </Button>
+                </>
+              )}
             </Card>
           )}
         </div>

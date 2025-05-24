@@ -578,13 +578,26 @@ export default function RankingsPage() {
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
                 <p className="text-red-800 dark:text-red-200">{error}</p>
-                <Button 
-                  onClick={() => fetchRankings()} 
-                  className={`mt-4 ${moduleTheme.buttonClass}`}
-                  variant="primary"
-                >
-                  Try Again
-                </Button>
+                <p className="text-gray-600 dark:text-gray-300 mt-2 mb-2">
+                  New here? You might need to swipe or vote on some cards first before you can see your rankings.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                  <Button 
+                    onClick={() => fetchRankings()} 
+                    className={`${moduleTheme.buttonClass}`}
+                    variant="primary"
+                  >
+                    Try Again
+                  </Button>
+                  <Link href="/swipe">
+                    <Button 
+                      className={`bg-swipe-600 hover:bg-swipe-700 text-white`}
+                      variant="primary"
+                    >
+                      Go to Swipe Page 🔄
+                    </Button>
+                  </Link>
+                </div>
               </div>
             )}
             
