@@ -86,50 +86,90 @@ export default function SwipePage({ initialCards }) {
     addToast("Refreshing cards", "info");
   };
 
-  const handleSwipe = (direction) => {
+  const handleSwipe = async (direction) => {
     if (!cards.length) return;
     
+    // Get the current card being swiped
+    const currentCard = cards[0];
+    
+    // Create a reference to the card for logging even if we remove it from the state
+    const cardId = currentCard._id;
+    const cardText = currentCard.text || 'Unknown card';
+    
     // Log the swipe locally
-    console.log(`Card ${cards[0]._id} swiped ${direction === 'right' ? 'liked' : 'disliked'}`);
+    console.log(`Card ${cardId} swiped ${direction === 'right' ? 'liked' : 'disliked'}`);
     
     // Validate session ID
     if (!sessionId) {
       console.error("No session ID available, cannot record swipe interaction");
       addToast("Session ID not found. Your swipes may not be tracked correctly.", "error");
+      
+      // Remove the swiped card anyway to not block the UI
+      setCards((prev) => prev.slice(1));
       return;
     }
     
-    // Send swipe data to server using the updated Interaction model format
-    fetch('/api/interactions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        sessionId: sessionId,
-        cardId: cards[0]._id,
-        type: 'swipe',
-        action: direction, // 'left' or 'right' directly
-        createdAt: new Date().toISOString() // ISO 8601 with milliseconds: 2025-04-13T12:34:56.789Z
-      }),
-    })
-    .then(response => {
+    // Validate card ID
+    if (!cardId) {
+      console.error("Card ID is missing, cannot record swipe interaction");
+      addToast("Card data is incomplete. Your swipe may not be tracked correctly.", "error");
+      
+      // Remove the swiped card anyway to not block the UI
+      setCards((prev) => prev.slice(1));
+      return;
+    }
+    
+    // Prepare interaction data
+    const interactionData = {
+      sessionId: sessionId,
+      cardId: cardId,
+      type: 'swipe',
+      action: direction, // 'left' or 'right'
+      createdAt: new Date().toISOString() // ISO 8601 with milliseconds
+    };
+    
+    // Remove the card from the stack immediately for better UX
+    setCards((prev) => prev.slice(1));
+    
+    try {
+      // Send swipe data to server
+      const response = await fetch('/api/interactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(interactionData),
+      });
+      
+      // Parse the response
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Failed to record swipe interaction');
+        // Handle specific error messages from the server
+        const errorMessage = data.error || 'Failed to record swipe interaction';
+        console.error('API error:', errorMessage, data);
+        throw new Error(errorMessage);
       }
       
       // Provide feedback on right swipes since they're important for voting
       if (direction === 'right') {
-        addToast("Card liked! You can now vote on this card in the Vote section.", "success");
+        addToast(`Card liked! You can now vote on "${cardText.substring(0, 30)}..." in the Vote section.`, "success");
       }
-    })
-    .catch(error => {
+      
+      console.log('Swipe recorded successfully:', data);
+      
+    } catch (error) {
       console.error('Error logging swipe:', error);
-      addToast("Failed to record your swipe. Please try again.", "error");
-    });
-
-    // Remove the swiped card from the stack
-    setCards((prev) => prev.slice(1));
+      
+      // Provide more specific error messages when possible
+      if (error.message.includes('Card not found')) {
+        addToast("Card not found in database. Please refresh the page.", "error");
+      } else if (error.message.includes('Validation')) {
+        addToast("Data validation error. Please try again.", "error");
+      } else {
+        addToast("Failed to record your swipe. Please try again later.", "error");
+      }
+    }
   };
 
   if (loading || !sessionId) return <LoadingScreen message="Loading cards to swipe..." module="swipe" />;
