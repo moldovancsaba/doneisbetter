@@ -16,30 +16,52 @@ export const CardStack = ({ cards, onSwipe }) => {
   const handleSwipe = (direction) => {
     if (!cards || currentIndex >= cards.length) return;
     
+    // Always set the swipe direction for visual feedback
     setSwipeDirection(direction);
+    console.log("Swipe direction set:", direction);
     
     // Update x motion value for smooth animation
     const targetX = direction === "right" ? 500 : -500;
     x.set(targetX);
+    console.log("X motion value set to:", targetX);
     
-    // Delay to allow animation to complete
+    // Ensure indicator is visible for at least 300ms
     setTimeout(() => {
+      // Notify parent component of swipe
       onSwipe?.(direction);
+      
+      // Move to next card
       setCurrentIndex(prev => prev + 1);
+      
+      // Reset states for next card
       setSwipeDirection(null);
       x.set(0); // Reset position for next card
     }, 300);
   };
 
   // Add keyboard event listeners
+  // Add visual feedback for keyboard swipes
+  const handleKeyboardSwipe = (direction) => {
+    // Set direction for visual feedback
+    setSwipeDirection(direction);
+    
+    // Move the card for better visual feedback
+    x.set(direction === "right" ? 100 : -100);
+    
+    // Trigger the actual swipe after a short delay for feedback
+    setTimeout(() => {
+      handleSwipe(direction);
+    }, 300);
+  };
+  
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!cards || currentIndex >= cards.length) return;
       
       if (e.key === "ArrowLeft") {
-        handleSwipe("left");
+        handleKeyboardSwipe("left");
       } else if (e.key === "ArrowRight") {
-        handleSwipe("right");
+        handleKeyboardSwipe("right");
       }
     };
 
@@ -79,7 +101,12 @@ export const CardStack = ({ cards, onSwipe }) => {
             whileDrag={{ scale: 1.02 }}
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, x: swipeDirection === "right" ? 500 : -500 }}
+            exit={{ 
+              opacity: 0, 
+              scale: 0.95, 
+              x: swipeDirection === "right" ? 500 : -500,
+              transition: { duration: 0.3 }
+            }}
             transition={{ type: "spring", stiffness: 180, damping: 20 }}
           >
             <div className={`
@@ -131,6 +158,17 @@ export const CardStack = ({ cards, onSwipe }) => {
             >
               👎 NOPE
             </motion.div>
+            
+            {/* Debug display for swipe value - helps diagnose animation triggers */}
+            <div className="absolute bottom-4 left-0 right-0 text-center text-xs text-gray-500 opacity-60">
+              {isDragging && (
+                <div>
+                  Swipe value: {Math.round(x.get())}
+                  {x.get() < -50 && " (LEFT)"}
+                  {x.get() > 50 && " (RIGHT)"}
+                </div>
+              )}
+            </div>
           </motion.div>
         ) : (
           <motion.div

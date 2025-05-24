@@ -19,54 +19,96 @@ export default async function handler(req, res) {
     });
   }
 
+  // Add request timestamp for consistent logging
+  const requestTime = new Date().toISOString();
+  console.log(`[${requestTime}] User votes request received with sessionId: ${sessionId || 'none'}, userId: ${userId || 'none'}`);
+  
   try {
+    console.log(`[${requestTime}] Connecting to database...`);
     await dbConnect();
+    console.log(`[${requestTime}] Database connected successfully`);
 
     // Build query based on provided parameters
     const query = {};
     if (sessionId) query.sessionId = sessionId;
     if (userId) query.userId = userId;
     
+    console.log(`[${requestTime}] Query parameters:`, query);
+    
     // Find all cards that have been swiped right by this user/session
     const rightSwipedQuery = sessionId 
       ? { sessionId, type: 'swipe', action: 'right' }
       : { userId, type: 'swipe', action: 'right' };
       
-    console.log(`Finding right-swiped cards with query:`, rightSwipedQuery);
+    console.log(`[${requestTime}] Finding right-swiped cards with query:`, rightSwipedQuery);
     
-    const rightSwipedCards = await Interaction.find(rightSwipedQuery)
-      .distinct('cardId');
-    
-    console.log(`Found ${rightSwipedCards.length} cards that were swiped right`);
+    try {
+      const rightSwipedCards = await Interaction.find(rightSwipedQuery)
+        .distinct('cardId');
+      
+      console.log(`[${requestTime}] Found ${rightSwipedCards.length} cards that were swiped right`);
+      
+      // Log the first few card IDs for debugging
+      if (rightSwipedCards.length > 0) {
+        console.log(`[${requestTime}] Sample right-swiped cards:`, 
+          rightSwipedCards.slice(0, 3).map(id => id.toString()));
+      }
     
     if (rightSwipedCards.length === 0) {
       // No cards have been swiped right by this user/session
+      console.log(`[${requestTime}] No cards have been swiped right by this user/session`);
       return res.status(200).json({
         success: true,
         data: [],
         votesCount: 0,
-        message: "No cards have been swiped right by this user/session"
+        message: "No cards have been swiped right by this user/session",
+        timestamp: requestTime
+      });
+    }
+    } catch (interactionError) {
+      console.error(`[${requestTime}] Error fetching right-swiped cards:`, interactionError);
+      // Continue with empty array to handle this gracefully
+      return res.status(200).json({
+        success: true,
+        data: [],
+        votesCount: 0,
+        error: "Error fetching swiped cards",
+        errorDetail: interactionError.message,
+        timestamp: requestTime
       });
     }
 
-    console.log(`Fetching votes for ${sessionId ? 'sessionId: ' + sessionId : 'userId: ' + userId}`);
+    console.log(`[${requestTime}] Fetching votes for ${sessionId ? 'sessionId: ' + sessionId : 'userId: ' + userId}`);
 
     // Get all vote pairs from this user/session
-    const votePairs = await VotePair.find(query)
-      .sort({ timestamp: -1 })
-      .populate('card1Id')
-      .populate('card2Id')
-      .populate('winnerId');
+    let votePairs;
+    try {
+      votePairs = await VotePair.find(query)
+        .sort({ timestamp: -1 })
+        .populate('card1Id')
+        .populate('card2Id')
+        .populate('winnerId');
 
-    console.log(`Found ${votePairs.length} vote pairs for this session`);
+      console.log(`[${requestTime}] Found ${votePairs.length} vote pairs for this session`);
 
-    if (votePairs.length === 0) {
-      // No votes found for this session
-      return res.status(200).json({
-        success: true,
-        data: [],
-        votesCount: 0,
-        message: "No votes found for this session"
+      if (votePairs.length === 0) {
+        // No votes found for this session
+        console.log(`[${requestTime}] No votes found for this session`);
+        return res.status(200).json({
+          success: true,
+          data: [],
+          votesCount: 0,
+          message: "No votes found for this session",
+          timestamp: requestTime
+        });
+      }
+    } catch (votePairsError) {
+      console.error(`[${requestTime}] Error fetching vote pairs:`, votePairsError);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to fetch vote pairs",
+        errorDetail: votePairsError.message,
+        timestamp: requestTime
       });
     }
 
@@ -74,17 +116,31 @@ export default async function handler(req, res) {
     const cardIds = new Set();
     const cardsMap = new Map();
     
-    // Convert rightSwipedCards to an array of strings for easier comparison
-    const rightSwipedCardIds = rightSwipedCards.map(id => id.toString());
+    // Handle cases where rightSwipedCards is undefined or not an array
+    let rightSwipedCardIds = [];
+    try {
+      if (Array.isArray(rightSwipedCards)) {
+        rightSwipedCardIds = rightSwipedCards.map(id => id.toString());
+        console.log(`[${requestTime}] Converted ${rightSwipedCardIds.length} right-swiped card IDs to strings`);
+      } else {
+        console.error(`[${requestTime}] rightSwipedCards is not an array:`, rightSwipedCards);
+      }
+    } catch (mapError) {
+      console.error(`[${requestTime}] Error converting right-swiped cards to strings:`, mapError);
+    }
 
     // Add debug logging for first vote pair to examine structure
     if (votePairs.length > 0) {
-      console.log('First vote pair structure sample:', JSON.stringify({
-        card1Id: votePairs[0].card1Id._id.toString(),
-        card1Fields: Object.keys(votePairs[0].card1Id._doc || votePairs[0].card1Id),
-        card2Id: votePairs[0].card2Id._id.toString(),
-        card2Fields: Object.keys(votePairs[0].card2Id._doc || votePairs[0].card2Id)
-      }));
+      try {
+        console.log(`[${requestTime}] First vote pair structure sample:`, JSON.stringify({
+          card1Id: votePairs[0].card1Id._id.toString(),
+          card1Fields: Object.keys(votePairs[0].card1Id._doc || votePairs[0].card1Id),
+          card2Id: votePairs[0].card2Id._id.toString(),
+          card2Fields: Object.keys(votePairs[0].card2Id._doc || votePairs[0].card2Id)
+        }));
+      } catch (structureError) {
+        console.error(`[${requestTime}] Error logging vote pair structure:`, structureError);
+      }
     }
     
     // Helper function to get card text safely
@@ -92,17 +148,22 @@ export default async function handler(req, res) {
       // Check various possible field names for the card text
       if (!card) return 'Unknown Card';
       
-      // Debug the card structure
-      console.log('Card fields:', Object.keys(card._doc || card));
-      
-      // Try different possible field names
-      if (card.text !== undefined) return card.text;
-      if (card.cardText !== undefined) return card.cardText;
-      if (card.content !== undefined) return card.content;
-      if (card.title !== undefined) return card.title;
-      
-      // If no text field is found, return a placeholder
-      return 'Card #' + card._id.toString().substring(0, 6);
+      try {
+        // Debug the card structure
+        console.log(`[${requestTime}] Card fields:`, Object.keys(card._doc || card));
+        
+        // Try different possible field names
+        if (card.text !== undefined) return card.text;
+        if (card.cardText !== undefined) return card.cardText;
+        if (card.content !== undefined) return card.content;
+        if (card.title !== undefined) return card.title;
+        
+        // If no text field is found, return a placeholder
+        return 'Card #' + card._id.toString().substring(0, 6);
+      } catch (error) {
+        console.error(`[${requestTime}] Error getting card text:`, error, 'Card:', card);
+        return 'Error reading card';
+      }
     };
     
     votePairs.forEach(vote => {
@@ -155,7 +216,21 @@ export default async function handler(req, res) {
     // Convert Set to Array for querying - these are cards both voted on AND swiped right
     const cardIdsArray = Array.from(cardIds);
 
-    console.log(`Found ${cardIdsArray.length} unique cards that were both voted on AND swiped right`);
+    console.log(`[${requestTime}] Found ${cardIdsArray.length} unique cards that were both voted on AND swiped right`);
+    
+    // If no cards were found, return an empty array immediately
+    if (cardIdsArray.length === 0) {
+      console.log(`[${requestTime}] No cards found that were both voted on AND swiped right`);
+      return res.status(200).json({
+        success: true,
+        data: [],
+        votesCount: votePairs.length,
+        uniqueCards: 0,
+        rightSwipedCards: rightSwipedCardIds.length,
+        message: "No cards found that meet the criteria",
+        timestamp: requestTime
+      });
+    }
 
     // Calculate personal vote statistics for each card
     const personalStats = {};
@@ -254,22 +329,36 @@ export default async function handler(req, res) {
       console.log('No formatted rankings to return');
     }
 
+    console.log(`[${requestTime}] Successfully processed user votes, returning ${formattedRankings.length} rankings`);
     return res.status(200).json({
       success: true,
       data: formattedRankings,
       votesCount: votePairs.length,
       uniqueCards: cardIdsArray.length,
-      rightSwipedCards: rightSwipedCards.length,
-      timestamp: new Date().toISOString()
+      rightSwipedCards: rightSwipedCardIds.length,
+      timestamp: requestTime
     });
     
   } catch (error) {
-    console.error('Error getting user votes:', error);
+    console.error(`[${requestTime}] Error getting user votes:`, error);
+    console.error(`[${requestTime}] Error stack:`, error.stack);
+    
+    // Determine if this is a database error
+    let errorType = "unknown";
+    if (error.name === "MongoError" || error.name === "MongooseError") {
+      errorType = "database";
+    } else if (error.name === "ValidationError") {
+      errorType = "validation";
+    } else if (error.name === "CastError") {
+      errorType = "cast";
+    }
+    
     return res.status(500).json({ 
       success: false, 
       error: 'Failed to get user votes',
+      errorType: errorType,
       errorMessage: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: requestTime
     });
   }
 }
