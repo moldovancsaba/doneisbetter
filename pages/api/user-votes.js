@@ -43,6 +43,7 @@ export default async function handler(req, res) {
     console.log(`[${requestTime}] Finding right-swiped cards with query:`, rightSwipedQuery);
     
     let rightSwipedCards = [];
+    let rightSwipedCardData = []; // Move declaration outside try-catch for proper scope
     try {
       rightSwipedCards = await Interaction.find(rightSwipedQuery)
         .distinct('cardId');
@@ -71,7 +72,7 @@ export default async function handler(req, res) {
       const rightSwipedCardIds = rightSwipedCards.map(id => id.toString());
       
       // Fetch the actual card data for all right-swiped cards
-      const rightSwipedCardData = await Card.find({
+      rightSwipedCardData = await Card.find({
         _id: { $in: rightSwipedCards }
       });
       
@@ -125,7 +126,8 @@ export default async function handler(req, res) {
     
     // First, add ALL right-swiped cards to the cardsMap
     // This ensures we include all right-swiped cards even if they weren't voted on
-    rightSwipedCardData.forEach(card => {
+    if (rightSwipedCardData && rightSwipedCardData.length > 0) {
+      rightSwipedCardData.forEach(card => {
       const cardId = card._id.toString();
       cardsMap.set(cardId, {
         _id: card._id,
@@ -139,6 +141,7 @@ export default async function handler(req, res) {
         winRate: 0
       });
     });
+    }
     
     console.log(`[${requestTime}] Added ${cardsMap.size} right-swiped cards to the cards map`);
 
@@ -233,7 +236,7 @@ export default async function handler(req, res) {
         data: [],
         votesCount: votePairs ? votePairs.length : 0,
         uniqueCards: 0,
-        rightSwipedCards: rightSwipedCardData.length,
+        rightSwipedCards: rightSwipedCardData ? rightSwipedCardData.length : 0,
         message: "No cards found that were swiped right",
         timestamp: requestTime
       });
@@ -311,7 +314,7 @@ export default async function handler(req, res) {
       data: formattedRankings,
       votesCount: votePairs ? votePairs.length : 0,
       uniqueCards: cardIdsArray.length,
-      rightSwipedCards: rightSwipedCardData.length,
+      rightSwipedCards: rightSwipedCardData ? rightSwipedCardData.length : 0,
       timestamp: requestTime
     });
     
