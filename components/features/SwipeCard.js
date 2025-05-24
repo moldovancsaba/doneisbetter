@@ -1,8 +1,10 @@
 import { motion, useAnimation, useMotionValue, useTransform } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const SwipeCard = ({ content, onSwipe }) => {
   const [exitX, setExitX] = useState(0);
+  const [showLeftBubble, setShowLeftBubble] = useState(false);
+  const [showRightBubble, setShowRightBubble] = useState(false);
   const controls = useAnimation();
   
   // Motion values for interactive animations
@@ -14,9 +16,34 @@ export const SwipeCard = ({ content, onSwipe }) => {
     [0, 1, 1, 1, 0]
   );
 
-  // Visual feedback based on swipe direction
-  const likeScale = useTransform(x, [0, 150], [1, 1.1]);
-  const nopeScale = useTransform(x, [-150, 0], [1.1, 1]);
+  const handleSwipeAnimation = async (direction) => {
+    const targetX = direction === "right" ? 200 : -200;
+    setExitX(targetX);
+
+    // Show appropriate bubble
+    if (direction === "left") {
+      setShowLeftBubble(true);
+      setShowRightBubble(false);
+    } else {
+      setShowLeftBubble(false);
+      setShowRightBubble(true);
+    }
+
+    // Animate card
+    await controls.start({
+      x: direction === "right" ? 1000 : -1000,
+      rotate: direction === "right" ? 45 : -45,
+      transition: { duration: 0.3 }
+    });
+
+    // Hide bubbles after animation
+    setTimeout(() => {
+      setShowLeftBubble(false);
+      setShowRightBubble(false);
+    }, 300);
+
+    onSwipe(direction);
+  };
 
   const handleDragEnd = async (_, info) => {
     const offset = info.offset.x;
@@ -24,14 +51,7 @@ export const SwipeCard = ({ content, onSwipe }) => {
 
     if (Math.abs(offset) > 100 || Math.abs(velocity) > 800) {
       const direction = offset > 0 ? "right" : "left";
-      setExitX(offset > 0 ? 200 : -200);
-      
-      await controls.start({
-        x: offset > 0 ? 1000 : -1000,
-        transition: { duration: 0.2 }
-      });
-      
-      onSwipe(direction);
+      await handleSwipeAnimation(direction);
     } else {
       controls.start({
         x: 0,
@@ -40,20 +60,41 @@ export const SwipeCard = ({ content, onSwipe }) => {
     }
   };
 
+  // Handle keyboard controls
+  useEffect(() => {
+    const handleKeyDown = async (event) => {
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        const direction = event.key === "ArrowRight" ? "right" : "left";
+        await handleSwipeAnimation(direction);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <div className="relative w-full max-w-md mx-auto">
       {/* Like/Nope Indicators */}
       <motion.div
         className="absolute top-8 right-8 bg-green-500/90 text-white px-6 py-2 rounded-full font-semibold z-10"
-        style={{ scale: likeScale, opacity: useTransform(x, [0, 100], [0, 1]) }}
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ 
+          opacity: showRightBubble ? 1 : 0,
+          scale: showRightBubble ? 1.1 : 0.8
+        }}
       >
-        LIKE
+        👍 LIKE
       </motion.div>
       <motion.div
         className="absolute top-8 left-8 bg-red-500/90 text-white px-6 py-2 rounded-full font-semibold z-10"
-        style={{ scale: nopeScale, opacity: useTransform(x, [-100, 0], [1, 0]) }}
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ 
+          opacity: showLeftBubble ? 1 : 0,
+          scale: showLeftBubble ? 1.1 : 0.8
+        }}
       >
-        NOPE
+        👎 NOPE
       </motion.div>
 
       {/* Card */}
@@ -81,7 +122,7 @@ export const SwipeCard = ({ content, onSwipe }) => {
           
           <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-              Swipe right to like, left to pass
+              Swipe or use ← → arrow keys
             </p>
           </div>
         </div>

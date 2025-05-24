@@ -1,4 +1,4 @@
-# Code of Conduct [2025-05-22T10:41:29.933652+02:00]
+# Code of Conduct [2025-05-24T03:04:04.789Z]
 
 ## Our Pledge
 
@@ -101,16 +101,32 @@ This Code of Conduct applies both within project spaces and in public spaces whe
 * Use inclusive language
 * Follow project standards
 
+### Documentation Standards
+* Use ISO 8601 timestamp format with milliseconds (YYYY-MM-DDThh:mm:ss.SSSZ)
+* Follow the numbered documentation system (00-24)
+* Keep documentation up-to-date with code changes
+* Cross-reference related documents
+* Include version history in all documentation
+
+### Component Consistency
+* Maintain consistent navigation across all components
+* Follow established UI patterns and conventions
+* Use standardized emoji set for UI elements
+* Verify cross-component consistency before deployment
+* Document UI component changes in system documentation
+
 ### Collaboration
 * Work together constructively
 * Share knowledge
 * Help others learn
 * Give credit where due
+* Ensure consistent implementation across components
+* Update documentation when making code changes
 
 ## Version Control
 
-- Documentation Version: 1.0.0
-- Last Updated: 2025-05-22T10:41:29.933652+02:00
+- Documentation Version: 1.1.0
+- Last Updated: 2025-05-24T03:04:04.789Z
 - Update Frequency: Annual or as needed
 
 ## Attribution
@@ -121,4 +137,9 @@ This Code of Conduct is adapted from the [Contributor Covenant](https://www.cont
 - [17_contributing_guidelines.md](17_contributing_guidelines.md)
 - [05_Definition_of_Done.md](05_Definition_of_Done.md)
 - [00_documentation_index.md](00_documentation_index.md)
+- [24_system_documentation.md](24_system_documentation.md)
+
+## Version History
+- Initial code of conduct: 2025-05-22T10:41:29.789Z
+- Updated with documentation standards and component consistency: 2025-05-24T03:04:04.789Z
 

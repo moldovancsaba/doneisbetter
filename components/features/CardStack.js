@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const CardStack = ({ cards, onSwipe }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -15,6 +15,25 @@ export const CardStack = ({ cards, onSwipe }) => {
       setSwipeDirection(null);
     }, 300);
   };
+
+  // Add keyboard event listeners
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!cards || currentIndex >= cards.length) return;
+      
+      if (e.key === "ArrowLeft") {
+        handleSwipe("left");
+      } else if (e.key === "ArrowRight") {
+        handleSwipe("right");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [cards, currentIndex]);
 
   return (
     <div className="relative w-full max-w-md mx-auto">
@@ -49,22 +68,33 @@ export const CardStack = ({ cards, onSwipe }) => {
                 <div className="text-center mt-4 text-sm text-gray-500 dark:text-gray-400">
                   Swipe right to like, left to pass
                 </div>
+                <div className="text-center mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  Use ← / → arrows to control
+                </div>
               </div>
             </div>
 
-            {/* Swipe Indicators */}
-            <motion.div
-              className="absolute top-4 right-4 px-4 py-2 rounded-full bg-green-500/90 text-white font-semibold"
-              animate={{ opacity: swipeDirection === "right" ? 1 : 0 }}
-            >
-              LIKE
-            </motion.div>
-            <motion.div
-              className="absolute top-4 left-4 px-4 py-2 rounded-full bg-red-500/90 text-white font-semibold"
-              animate={{ opacity: swipeDirection === "left" ? 1 : 0 }}
-            >
-              NOPE
-            </motion.div>
+            {/* Swipe Indicators - Only show one bubble at a time */}
+            {swipeDirection === "right" && (
+              <motion.div
+                className="absolute top-4 right-4 px-4 py-2 rounded-full bg-green-500/90 text-white font-semibold"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                LIKE
+              </motion.div>
+            )}
+            {swipeDirection === "left" && (
+              <motion.div
+                className="absolute top-4 left-4 px-4 py-2 rounded-full bg-red-500/90 text-white font-semibold"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                NOPE
+              </motion.div>
+            )}
           </motion.div>
         ) : (
           <motion.div

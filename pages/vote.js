@@ -15,6 +15,7 @@ export default function VotePage() {
   const [error, setError] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const { addToast } = useToast();
+  const [keyboardEnabled, setKeyboardEnabled] = useState(true);
   
   // Helper function to safely extract card ID
   const getCardId = (card) => {
@@ -82,6 +83,7 @@ export default function VotePage() {
   // Submit vote
   const submitVote = async (winningCard, losingCard) => {
     if (submitting) return;
+    setKeyboardEnabled(false);
     
     // Validate that we have a sessionId
     if (!sessionId) {
@@ -147,6 +149,7 @@ export default function VotePage() {
         
         // Fetch a new pair
         fetchVotingPair();
+        setKeyboardEnabled(true);
       } else {
         throw new Error(data.error || "Failed to submit vote");
       }
@@ -155,6 +158,7 @@ export default function VotePage() {
       addToast(err.message, "error");
     } finally {
       setSubmitting(false);
+      setKeyboardEnabled(true);
     }
   };
 
@@ -178,6 +182,27 @@ export default function VotePage() {
   useEffect(() => {
     fetchVotingPair();
   }, []);
+
+  // Keyboard controls
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!keyboardEnabled || !votingPair || submitting) return;
+      
+      if (e.key === "ArrowLeft") {
+        // Select left card (card1)
+        submitVote(votingPair.card1, votingPair.card2);
+      } else if (e.key === "ArrowRight") {
+        // Select right card (card2)
+        submitVote(votingPair.card2, votingPair.card1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [votingPair, submitting, keyboardEnabled]);
 
   // Format date to ISO string
   const formatISODate = (date) => {
@@ -247,6 +272,12 @@ export default function VotePage() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Keyboard instructions */}
+                <div className="col-span-1 md:col-span-2 text-center mb-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Press ← for left card, → for right card
+                  </p>
+                </div>
                 {/* Card 1 */}
                 <motion.div
                   whileHover={{ scale: 1.02 }}
@@ -285,7 +316,7 @@ export default function VotePage() {
                         disabled={submitting}
                         isLoading={submitting}
                       >
-                        Select This Card
+                        Select This Card (←)
                       </Button>
                     </div>
                   </Card>
@@ -329,7 +360,7 @@ export default function VotePage() {
                         disabled={submitting}
                         isLoading={submitting}
                       >
-                        Select This Card
+                        Select This Card (→)
                       </Button>
                     </div>
                   </Card>

@@ -1,6 +1,22 @@
-# Release Notes
+# Release Notes [2025-05-24T02:52:45.789Z]
 
-## Version 1.18.0 - 2025-05-22T10:32:49.456631+02:00
+## Version 1.19.0 - 2025-05-24T02:52:45.789Z
+### Navigation and Documentation Improvements
+- Added Rankings menu item to top navigation with trophy emoji 🏆
+- Added consistent emojis to all navigation items
+- Created comprehensive system documentation
+- Updated all documents to use ISO 8601 format with milliseconds
+- Fixed inconsistencies between navigation components
+- Documented ELO-inspired ranking algorithm in detail
+- Added complete database schema documentation
+
+### Technical Improvements
+- Replaced Socket.io with HTTP polling for better reliability
+- Enhanced timestamp formatting across all documentation
+- Improved component consistency across mobile and desktop views
+- Updated roadmap to reflect current progress
+
+## Version 1.18.0 - 2025-05-22T10:32:49.456Z
 ### UI Modernization Complete
 - Implemented modern component architecture
 - Added Framer Motion animations
@@ -61,5 +77,5 @@
 - Performance optimizations
 
 ## Note
-All timestamps follow the format: YYYY-MM-DDThh:mm:ss.SSSSSS+hh:mm
+All timestamps follow ISO 8601 format with milliseconds: YYYY-MM-DDThh:mm:ss.SSSZ
 Changes are logged in sequential order with the most recent at the top.

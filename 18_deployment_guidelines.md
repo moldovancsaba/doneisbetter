@@ -1,4 +1,4 @@
-# Deployment Guidelines [2025-05-22T10:45:32.646035+02:00]
+# Deployment Guidelines [2025-05-24T03:04:04.789Z]
 
 ## Overview
 
@@ -9,7 +9,7 @@ This document outlines the deployment process for DoneisBetter using Vercel, inc
 ### Infrastructure
 - Vercel (Frontend & API)
 - MongoDB Atlas (Database)
-- Socket.io (Real-time)
+- HTTP Polling (Real-time data updates)
 
 ### Environments
 1. Development
@@ -39,8 +39,8 @@ MONGODB_DB=doneisbetter
 NEXT_PUBLIC_SITE_URL=https://doneisbetter.com
 NODE_ENV=production
 
-# Sockets
-SOCKET_PATH=/api/socketio
+# Polling
+HTTP_POLLING_INTERVAL=5000
 ```
 
 ### Vercel Configuration
@@ -63,10 +63,16 @@ SOCKET_PATH=/api/socketio
 
 ### Pre-deployment Checklist
 - [ ] All tests passing
-- [ ] Documentation updated
+- [ ] Documentation updated with ISO 8601 timestamps
+- [ ] System documentation (24_system_documentation.md) updated if applicable
 - [ ] Environment variables set
 - [ ] Dependencies updated
 - [ ] Performance verified
+- [ ] Navigation components consistency verified:
+  - [ ] Header.js menu items match Navigation.js and MobileNav.js
+  - [ ] Menu emojis consistent across all components
+  - [ ] Menu ordering consistent
+  - [ ] Dark/light mode toggle functioning
 
 ### Deployment Steps
 1. Code Review
@@ -91,14 +97,17 @@ SOCKET_PATH=/api/socketio
 1. Smoke Tests
    - Homepage loading
    - Authentication
-   - Socket connection
+   - HTTP polling functionality
    - Database operations
+   - Navigation menu functionality
+   - Cross-component consistency
 
 2. Performance Checks
    - Page load times
    - API response times
-   - Socket latency
+   - Polling efficiency
    - Database queries
+   - Navigation responsiveness
 
 ## Monitoring
 
@@ -114,10 +123,11 @@ SOCKET_PATH=/api/socketio
    - Error rates
    - Success rates
 
-2. Socket Connection
-   - Connection status
-   - Event handling
-   - Latency metrics
+2. HTTP Polling
+   - Response status
+   - Data freshness
+   - Polling frequency
+   - Error handling
 
 3. Database
    - Query performance
@@ -172,7 +182,8 @@ module.exports = {
 - Feature releases: As completed
 - Bug fixes: As needed
 - Security updates: Immediate
-- Documentation: With code changes
+- Documentation: With code changes (with ISO 8601 timestamps)
+- Navigation updates: After cross-component verification
 
 ### Maintenance Windows
 - Scheduled: Monthly
@@ -196,15 +207,38 @@ module.exports = {
    - Check analytics
    - Review metrics
    - Optimize code
+   - Verify polling efficiency
+
+4. Navigation Inconsistencies
+   - Check Header.js implementation
+   - Verify MobileNav.js consistency
+   - Confirm Navigation.js alignment
+   - Test across device sizes
 
 ## Version Control
 
-- Documentation Version: 1.0.0
-- Last Updated: 2025-05-22T10:45:32.646035+02:00
+- Documentation Version: 1.1.0
+- Last Updated: 2025-05-24T03:04:04.789Z
 - Update Frequency: With each deployment change
 
 ## Related Documentation
 - [19_monitoring_setup.md](19_monitoring_setup.md)
 - [12_deployment_log.md](12_deployment_log.md)
 - [15_architecture_and_design.md](15_architecture_and_design.md)
+- [24_system_documentation.md](24_system_documentation.md)
+
+## Documentation Verification Checklist
+
+Prior to deployment, verify that:
+
+- [ ] All documentation has been updated with ISO 8601 timestamp format (YYYY-MM-DDThh:mm:ss.SSSZ)
+- [ ] System documentation reflects current architecture and components
+- [ ] Navigation component structure is documented correctly
+- [ ] Component emoji standards are documented
+- [ ] Deployment log is prepared to record the new deployment
+- [ ] Version histories are updated in all modified documents
+
+## Version History
+- Initial deployment guidelines: 2025-05-22T10:45:32.789Z
+- Updated with navigation consistency checks and HTTP polling: 2025-05-24T03:04:04.789Z
 

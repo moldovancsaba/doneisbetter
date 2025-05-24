@@ -1,4 +1,4 @@
-# Contributing Guidelines [2025-05-22T10:45:32.646035+02:00]
+# Contributing Guidelines [2025-05-24T03:04:04.789Z]
 
 ## Overview
 
@@ -44,7 +44,7 @@ npm run dev
 
 2. Commit Messages
    ```
-   type: descriptive message [timestamp]
+   type: descriptive message [YYYY-MM-DDThh:mm:ss.SSSZ]
    
    - Detailed description
    - Additional context
@@ -85,8 +85,9 @@ npm run dev
 ### Integration Tests
 - Feature workflows
 - API integrations
-- Socket.io functionality
+- HTTP polling functionality
 - Database operations
+- Navigation consistency
 
 ### E2E Tests
 - Critical user paths
@@ -101,6 +102,7 @@ npm run dev
 - Type definitions
 - Function descriptions
 - Component props
+- Navigation component consistency
 
 ### Feature Documentation
 - User documentation
@@ -111,9 +113,17 @@ npm run dev
 ### Update Process
 1. Identify changes needed
 2. Update relevant docs
-3. Include timestamps
+3. Include ISO 8601 timestamps with milliseconds (YYYY-MM-DDThh:mm:ss.SSSZ)
 4. Cross-reference docs
 5. Update index
+6. Update system documentation (24_system_documentation.md) if applicable
+
+### Timestamp Standard
+- Use ISO 8601 format with milliseconds: `YYYY-MM-DDThh:mm:ss.SSSZ`
+- Example: `2025-05-24T03:04:04.789Z`
+- Include in document headers as: `# Document Title [2025-05-24T03:04:04.789Z]`
+- Include in version history sections
+- Use for all dates and times throughout documentation
 
 ## Quality Standards
 
@@ -122,12 +132,28 @@ npm run dev
 - Error handling
 - Type safety
 - Performance optimization
+- Cross-component consistency verification
 
 ### UI/UX Standards
 - Mobile-first design
 - Accessibility (WCAG)
 - Performance metrics
 - Consistent styling
+
+### UI Component Standards
+- Navigation components must maintain consistency:
+  - Header.js
+  - MobileNav.js
+  - Navigation.js
+- Use standardized emoji set for menu items:
+  - Home 🏠
+  - Rankings 🏆
+  - Swipe 🔄
+  - Vote 🗳️
+  - Admin ⚙️
+- Verify cross-component consistency before deployment
+- Follow the established menu ordering
+- Document UI component changes in system documentation
 
 ### Security Standards
 - Input validation
@@ -146,9 +172,12 @@ npm run dev
 ### Review Checklist
 - [ ] Follows guidelines
 - [ ] Tests included
-- [ ] Documentation updated
+- [ ] Documentation updated with ISO 8601 timestamps
+- [ ] System documentation updated if applicable
 - [ ] Performance verified
 - [ ] Security checked
+- [ ] Navigation consistency verified across all components
+- [ ] Cross-component functionality tested
 
 ## Deployment
 
@@ -180,12 +209,16 @@ npm run dev
 
 ## Version Control
 
-- Documentation Version: 1.0.0
-- Last Updated: 2025-05-22T10:45:32.646035+02:00
+- Documentation Version: 1.1.0
+- Last Updated: 2025-05-24T03:04:04.789Z
 - Update Frequency: As needed
 
 ## Related Documentation
 - [16_code_of_conduct.md](16_code_of_conduct.md)
 - [05_Definition_of_Done.md](05_Definition_of_Done.md)
 - [14_license_and_guidelines.md](14_license_and_guidelines.md)
+- [24_system_documentation.md](24_system_documentation.md)
 
+## Version History
+- Initial guidelines: 2025-05-22T10:45:32.789Z
+- Updated with ISO 8601 timestamp format and component standards: 2025-05-24T03:04:04.789Z

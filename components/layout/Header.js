@@ -14,10 +14,11 @@ export const Header = () => {
   }, []);
 
   const navigationItems = [
-    { href: "/", label: "Home" },
-    { href: "/swipe", label: "Swipe" },
-    { href: "/vote", label: "Vote" },
-    { href: "/admin", label: "Admin" },
+    { href: "/", label: "Home 🏠" },
+    { href: "/rankings", label: "Rankings 🏆" },
+    { href: "/swipe", label: "Swipe 🔄" },
+    { href: "/vote", label: "Vote 🗳️" },
+    { href: "/admin", label: "Admin ⚙️" },
   ];
 
   return (
