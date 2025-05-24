@@ -7,13 +7,12 @@ import { useTheme } from "next-themes";
 export const Navigation = () => {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const [isOpen, setIsOpen] = useState(false);
 
   const navigationItems = [
     { href: "/", label: "Home", icon: "🏠" },
+    { href: "/rankings", label: "Rankings", icon: "🏆" },
     { href: "/swipe", label: "Swipe", icon: "🔄" },
     { href: "/vote", label: "Vote", icon: "🗳️" },
-    { href: "/rankings", label: "Rankings", icon: "🏆" },
     { href: "/admin", label: "Admin", icon: "⚙️" },
   ];
 
@@ -40,14 +39,15 @@ export const Navigation = () => {
                     key={item.href}
                     href={item.href}
                     className={`
-                      px-4 py-2 rounded-lg font-medium transition-colors duration-200
+                      px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2
                       ${router.pathname === item.href
                         ? "bg-primary-500 text-white"
                         : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                       }
                     `}
                   >
-                    {item.label}
+                    <span>{item.icon}</span>
+                    <span>{item.label}</span>
                   </Link>
                 ))}
                 
