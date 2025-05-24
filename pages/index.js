@@ -34,7 +34,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         className="text-4xl font-bold mb-10 text-center bg-clip-text text-transparent bg-gradient-to-r from-home-500 to-home-700"
       >
-        doneisbetter 🏠
+        DoneisBetter 🏠
       </motion.h1>
       
       <div className="flex flex-col w-full max-w-xs gap-6">
@@ -56,9 +56,9 @@ export default function Home() {
               />
               <button 
                 type="submit"
-                className="w-full bg-home-600 hover:bg-home-700 text-white font-semibold py-3 px-6 rounded-lg text-lg text-center transition-colors duration-200 shadow-md hover:shadow-lg"
+                className="w-full bg-home-600 hover:bg-home-700 text-white font-semibold py-3 px-6 rounded-lg text-lg text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-home-700/20"
               >
-                Continue
+                Continue 🚀
               </button>
             </div>
           </motion.form>
@@ -80,7 +80,7 @@ export default function Home() {
             </div>
             
             {/* Navigation Cards */}
-            <div className="grid gap-4">
+            <div className="grid gap-4 mt-6">
               {Object.entries(allThemes).map(([moduleName, theme]) => (
                 <motion.div
                   key={moduleName}
@@ -90,14 +90,15 @@ export default function Home() {
                   <Link 
                     href={moduleName === 'home' ? '/' : `/${moduleName}`}
                     className={`
-                      block bg-gradient-to-r ${theme.gradient} text-white
-                      font-semibold py-5 px-6 rounded-lg text-xl text-center
+                      block border ${theme.borderClass}
+                      bg-white dark:bg-gray-800 hover:bg-${moduleName}-50/30 dark:hover:bg-${moduleName}-900/20
+                      font-semibold py-5 px-6 rounded-lg text-xl
                       transition-all duration-200 shadow-md hover:shadow-lg
                       flex items-center justify-center gap-3
                     `}
                   >
-                    <span className="text-2xl">{theme.name.split(' ')[1]}</span>
-                    <span>{theme.name.split(' ')[0]}</span>
+                    <span className={`text-2xl ${theme.iconClass}`}>{theme.name.split(' ')[1]}</span>
+                    <span className={theme.textClass}>{theme.name.split(' ')[0]}</span>
                   </Link>
                 </motion.div>
               ))}

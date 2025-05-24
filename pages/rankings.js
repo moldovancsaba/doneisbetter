@@ -46,13 +46,26 @@ export default function RankingsPage() {
     // Try to get existing session ID from localStorage
     const storedSessionId = localStorage.getItem('voteSessionId');
     if (storedSessionId) {
+      console.log("Using existing session ID:", storedSessionId);
       setSessionId(storedSessionId);
     } else {
       // Create a new random session ID using a timestamp and random number
       const newSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      console.log("Created new session ID:", newSessionId);
       localStorage.setItem('voteSessionId', newSessionId);
       setSessionId(newSessionId);
     }
+    
+    // Add listener to track session ID changes
+    const handleStorageChange = (e) => {
+      if (e.key === 'voteSessionId' && e.newValue !== sessionId) {
+        console.log("Session ID changed in another tab, updating");
+        setSessionId(e.newValue);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   // Fetch global rankings data
@@ -91,6 +104,8 @@ export default function RankingsPage() {
     if (!sessionId) {
       console.error("No session ID available, cannot fetch personal rankings");
       addToast("Session ID not found. Your votes may not be tracked correctly.", "error");
+      setError("Session ID is required to view your personal rankings");
+      setLoadingPersonal(false);
       return;
     }
     
@@ -108,10 +123,25 @@ export default function RankingsPage() {
       // Clear any previous errors
       setError(null);
       
-      const endpoint = `/api/user-votes?sessionId=${encodeURIComponent(sessionId)}`;
+      // Ensure we're using the latest session ID
+      const currentSessionId = localStorage.getItem('voteSessionId');
+      const effectiveSessionId = currentSessionId || sessionId;
+      
+      if (currentSessionId !== sessionId) {
+        console.warn("Session ID mismatch. Using more recent ID from localStorage.");
+        setSessionId(currentSessionId);
+      }
+      
+      const endpoint = `/api/user-votes?sessionId=${encodeURIComponent(effectiveSessionId)}`;
       console.log(`Making fetch request to: ${endpoint}`);
       
-      const response = await fetch(endpoint);
+      // Add a timeout to handle hanging requests
+      const fetchPromise = fetch(endpoint);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timed out')), 10000)
+      );
+      
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
       console.log(`Response status: ${response.status}`);
       
       if (!response.ok) {
@@ -123,23 +153,32 @@ export default function RankingsPage() {
       console.log(`Personal rankings data received, success: ${data.success}, items: ${data.data?.length || 0}`);
       
       if (data.success) {
-        // Add vote status to each card (liked, disliked, or not voted)
-        const rankedCards = Array.isArray(data.data) ? data.data.map(card => ({
+        // Verify that we have a data array
+        if (!Array.isArray(data.data)) {
+          console.error("Response data is not an array:", data);
+          throw new Error("Invalid response format: expected an array of cards");
+        }
+        
+        // Add vote status to each card (right-swiped cards are "liked")
+        const rankedCards = data.data.map(card => ({
           ...card,
-          voteStatus: card.wins > 0 ? 'liked' : 'disliked'
-        })) : [];
+          voteStatus: 'liked', // All cards are right-swiped (wasSwipedRight should be true)
+          wasSwipedRight: true // Ensure this field is present
+        }));
         
         console.log(`Processed ${rankedCards.length} personal ranking cards`);
+        console.log(`Card example:`, rankedCards.length > 0 ? rankedCards[0] : 'No cards');
+        
         setPersonalRankings(rankedCards);
         
         if (rankedCards.length === 0) {
           console.log("No personal rankings found, but request was successful");
           if (showRefreshing) {
-            addToast("No voted cards found. Try voting on some cards first!", "info");
+            addToast("No cards found. Try swiping right on some cards first!", "info");
           }
         } else {
           if (showRefreshing) {
-            addToast(`Successfully loaded ${rankedCards.length} voted cards`, "success");
+            addToast(`Successfully loaded ${rankedCards.length} cards you've liked`, "success");
           }
         }
       } else {
@@ -317,7 +356,7 @@ export default function RankingsPage() {
             <p className="text-gray-600 dark:text-gray-300 mt-1">
               {viewMode === 'global' 
                 ? 'See which cards are winning the most votes'
-                : 'Cards you have liked (swiped right)'
+                : 'Cards you have liked (swiped right on)'
               }
             </p>
           </div>
@@ -510,8 +549,11 @@ export default function RankingsPage() {
                 <div className="text-center py-8">
                   <p className="text-gray-500 dark:text-gray-400 mb-4">
                     {sessionId 
-                      ? "You haven't liked any cards yet (swiped right) or your interactions haven't been recorded." 
+                      ? "You haven't liked any cards yet. Swipe right on cards in the Swipe section to see them here!" 
                       : "Session ID not found. Your swipes and votes may not be tracked correctly."}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                    <span className="font-semibold">Note:</span> Only cards you've swiped right on (liked) will appear in your personal rankings.
                   </p>
                   <div className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                     <p>If you've recently voted but don't see your rankings:</p>
