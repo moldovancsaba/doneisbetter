@@ -127,6 +127,11 @@ export default async function handler(req, res) {
     
     console.log(`[${requestTime}] Creating interaction:`, interactionData);
     
+    // Add additional logging for right swipes (important for rankings)
+    if (type === 'swipe' && action === 'right') {
+      console.log(`[${requestTime}] Recording RIGHT swipe for card: ${cardId}`);
+    }
+    
     const interaction = new Interaction(interactionData);
     await interaction.save();
     

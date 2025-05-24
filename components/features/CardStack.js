@@ -24,12 +24,15 @@ export const CardStack = ({ cards, onSwipe }) => {
   const handleSwipe = (direction) => {
     if (!cards || currentIndex >= cards.length) return;
     
+    // Ensure direction is normalized to 'right' or 'left'
+    const normalizedDirection = direction === "right" || direction === "like" ? "right" : "left";
+    
     // Always set the swipe direction for visual feedback
-    setSwipeDirection(direction);
-    console.log("Swipe direction set:", direction);
+    setSwipeDirection(normalizedDirection);
+    console.log("Swipe direction set:", normalizedDirection);
     
     // Update x motion value for smooth animation
-    const targetX = direction === "right" ? 500 : -500;
+    const targetX = normalizedDirection === "right" ? 500 : -500;
     x.set(targetX);
     console.log("X motion value set to:", targetX);
     
@@ -37,8 +40,8 @@ export const CardStack = ({ cards, onSwipe }) => {
     // 1. First let the card animate out with the swipe direction
     // 2. Then update the index which will trigger a clean reset for the next card
     setTimeout(() => {
-      // Notify parent component of swipe
-      onSwipe?.(direction);
+      // Notify parent component of swipe with normalized direction
+      onSwipe?.(normalizedDirection);
       
       // Move to next card - the useEffect will handle resetting the animation state
       setCurrentIndex(prev => prev + 1);
@@ -109,6 +112,7 @@ export const CardStack = ({ cards, onSwipe }) => {
               setIsDragging(false);
               const swipe = offset.x;
               if (Math.abs(swipe) > 100 || Math.abs(velocity.x) > 800) {
+                // Use normalized direction values 'right' or 'left'
                 handleSwipe(swipe > 0 ? "right" : "left");
               } else {
                 // Reset if not swiped far enough

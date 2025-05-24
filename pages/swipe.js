@@ -119,12 +119,16 @@ export default function SwipePage({ initialCards }) {
       return;
     }
     
+    // Ensure direction value is either "left" or "right" for API compatibility
+    const validDirection = ['left', 'right'].includes(direction) ? direction : (direction === 'like' ? 'right' : 'left');
+    console.log(`Normalized swipe direction: ${validDirection}`);
+    
     // Prepare interaction data
     const interactionData = {
       sessionId: sessionId,
       cardId: cardId,
       type: 'swipe',
-      action: direction, // 'left' or 'right'
+      action: validDirection, // normalized to 'left' or 'right'
       createdAt: new Date().toISOString() // ISO 8601 with milliseconds
     };
     

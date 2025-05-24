@@ -42,6 +42,7 @@ export const SwipeCard = ({ content, onSwipe }) => {
       setShowRightBubble(false);
     }, 300);
 
+    // Pass normalized direction value to the parent handler
     onSwipe(direction);
   };
 
@@ -50,6 +51,7 @@ export const SwipeCard = ({ content, onSwipe }) => {
     const velocity = info.velocity.x;
 
     if (Math.abs(offset) > 100 || Math.abs(velocity) > 800) {
+      // Always use 'right' or 'left' for consistent API interaction
       const direction = offset > 0 ? "right" : "left";
       await handleSwipeAnimation(direction);
     } else {

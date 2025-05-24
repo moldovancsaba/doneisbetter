@@ -19,6 +19,7 @@ export const SwipeCard = ({
     const offset = info.offset.x;
 
     if (Math.abs(offset) > swipeThreshold || Math.abs(velocity) > 500) {
+      // Always use 'right' or 'left' for consistent API interaction
       const direction = offset > 0 ? "right" : "left";
       const swipeAnimation = {
         x: direction === "right" ? 1000 : -1000,
@@ -27,6 +28,7 @@ export const SwipeCard = ({
       };
 
       controls.start(swipeAnimation).then(() => {
+        // Pass normalized direction value to the handler
         onSwipe(direction);
       });
     } else {

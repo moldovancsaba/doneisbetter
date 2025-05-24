@@ -42,8 +42,9 @@ export default async function handler(req, res) {
       
     console.log(`[${requestTime}] Finding right-swiped cards with query:`, rightSwipedQuery);
     
+    let rightSwipedCards = [];
     try {
-      const rightSwipedCards = await Interaction.find(rightSwipedQuery)
+      rightSwipedCards = await Interaction.find(rightSwipedQuery)
         .distinct('cardId');
       
       console.log(`[${requestTime}] Found ${rightSwipedCards.length} cards that were swiped right`);
@@ -54,17 +55,33 @@ export default async function handler(req, res) {
           rightSwipedCards.slice(0, 3).map(id => id.toString()));
       }
     
-    if (rightSwipedCards.length === 0) {
-      // No cards have been swiped right by this user/session
-      console.log(`[${requestTime}] No cards have been swiped right by this user/session`);
-      return res.status(200).json({
-        success: true,
-        data: [],
-        votesCount: 0,
-        message: "No cards have been swiped right by this user/session",
-        timestamp: requestTime
+      if (rightSwipedCards.length === 0) {
+        // No cards have been swiped right by this user/session
+        console.log(`[${requestTime}] No cards have been swiped right by this user/session`);
+        return res.status(200).json({
+          success: true,
+          data: [],
+          votesCount: 0,
+          message: "No cards have been swiped right by this user/session",
+          timestamp: requestTime
+        });
+      }
+      
+      // Convert right-swiped card IDs to strings for easier comparison later
+      const rightSwipedCardIds = rightSwipedCards.map(id => id.toString());
+      
+      // Fetch the actual card data for all right-swiped cards
+      const rightSwipedCardData = await Card.find({
+        _id: { $in: rightSwipedCards }
       });
-    }
+      
+      console.log(`[${requestTime}] Fetched ${rightSwipedCardData.length} card documents for right-swiped cards`);
+      
+      // Create a map for quick lookups
+      const rightSwipedCardsMap = new Map();
+      rightSwipedCardData.forEach(card => {
+        rightSwipedCardsMap.set(card._id.toString(), card);
+      });
     } catch (interactionError) {
       console.error(`[${requestTime}] Error fetching right-swiped cards:`, interactionError);
       // Continue with empty array to handle this gracefully
@@ -90,18 +107,9 @@ export default async function handler(req, res) {
         .populate('winnerId');
 
       console.log(`[${requestTime}] Found ${votePairs.length} vote pairs for this session`);
-
-      if (votePairs.length === 0) {
-        // No votes found for this session
-        console.log(`[${requestTime}] No votes found for this session`);
-        return res.status(200).json({
-          success: true,
-          data: [],
-          votesCount: 0,
-          message: "No votes found for this session",
-          timestamp: requestTime
-        });
-      }
+      
+      // Note: We don't return early if no votes found, because we still want to return right-swiped cards
+      // even if the user hasn't voted on any cards yet
     } catch (votePairsError) {
       console.error(`[${requestTime}] Error fetching vote pairs:`, votePairsError);
       return res.status(500).json({
@@ -112,25 +120,30 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get unique card IDs from votes and build a map of cards
-    const cardIds = new Set();
+    // Initialize our data structure for tracking card information
     const cardsMap = new Map();
     
-    // Handle cases where rightSwipedCards is undefined or not an array
-    let rightSwipedCardIds = [];
-    try {
-      if (Array.isArray(rightSwipedCards)) {
-        rightSwipedCardIds = rightSwipedCards.map(id => id.toString());
-        console.log(`[${requestTime}] Converted ${rightSwipedCardIds.length} right-swiped card IDs to strings`);
-      } else {
-        console.error(`[${requestTime}] rightSwipedCards is not an array:`, rightSwipedCards);
-      }
-    } catch (mapError) {
-      console.error(`[${requestTime}] Error converting right-swiped cards to strings:`, mapError);
-    }
+    // First, add ALL right-swiped cards to the cardsMap
+    // This ensures we include all right-swiped cards even if they weren't voted on
+    rightSwipedCardData.forEach(card => {
+      const cardId = card._id.toString();
+      cardsMap.set(cardId, {
+        _id: card._id,
+        cardText: card.cardText || card.text || card.content || card.title || `Card #${cardId.substring(0, 6)}`,
+        createdAt: card.createdAt || new Date(),
+        lastVoted: card.updatedAt || new Date(),
+        wasSwipedRight: true,
+        // Initialize vote stats (will be updated if the card was voted on)
+        wins: 0,
+        totalVotes: 0,
+        winRate: 0
+      });
+    });
+    
+    console.log(`[${requestTime}] Added ${cardsMap.size} right-swiped cards to the cards map`);
 
-    // Add debug logging for first vote pair to examine structure
-    if (votePairs.length > 0) {
+    // Add debug logging for vote pairs structure
+    if (votePairs && votePairs.length > 0) {
       try {
         console.log(`[${requestTime}] First vote pair structure sample:`, JSON.stringify({
           card1Id: votePairs[0].card1Id._id.toString(),
@@ -149,9 +162,6 @@ export default async function handler(req, res) {
       if (!card) return 'Unknown Card';
       
       try {
-        // Debug the card structure
-        console.log(`[${requestTime}] Card fields:`, Object.keys(card._doc || card));
-        
         // Try different possible field names
         if (card.text !== undefined) return card.text;
         if (card.cardText !== undefined) return card.cardText;
@@ -161,110 +171,73 @@ export default async function handler(req, res) {
         // If no text field is found, return a placeholder
         return 'Card #' + card._id.toString().substring(0, 6);
       } catch (error) {
-        console.error(`[${requestTime}] Error getting card text:`, error, 'Card:', card);
+        console.error(`[${requestTime}] Error getting card text:`, error);
         return 'Error reading card';
       }
     };
     
-    votePairs.forEach(vote => {
-      // Add card1 to map if not already there AND it was swiped right
-      const card1Id = vote.card1Id._id.toString();
-      if (!cardsMap.has(card1Id) && rightSwipedCardIds.includes(card1Id)) {
-        cardsMap.set(card1Id, {
-          _id: vote.card1Id._id,
-          cardText: getCardText(vote.card1Id),
-          createdAt: vote.card1Id.createdAt || vote.timestamp,
-          lastVoted: vote.timestamp,
-          wasSwipedRight: true
-        });
-      }
-
-      // Add card2 to map if not already there AND it was swiped right
-      const card2Id = vote.card2Id._id.toString();
-      if (!cardsMap.has(card2Id) && rightSwipedCardIds.includes(card2Id)) {
-        cardsMap.set(card2Id, {
-          _id: vote.card2Id._id,
-          cardText: getCardText(vote.card2Id),
-          createdAt: vote.card2Id.createdAt || vote.timestamp,
-          lastVoted: vote.timestamp,
-          wasSwipedRight: true
-        });
-      }
-
-      // Update lastVoted time if this vote is more recent
-      const card1 = cardsMap.get(card1Id);
-      const card2 = cardsMap.get(card2Id);
+    // Now process vote pairs to update the vote statistics for cards that have been voted on
+    if (votePairs && votePairs.length > 0) {
+      votePairs.forEach(vote => {
+        const card1Id = vote.card1Id._id.toString();
+        const card2Id = vote.card2Id._id.toString();
+        const winnerId = vote.winnerId._id.toString();
+        
+        // Update card1 voting statistics if it's in our map (was swiped right)
+        const card1 = cardsMap.get(card1Id);
+        if (card1) {
+          card1.totalVotes = (card1.totalVotes || 0) + 1;
+          if (card1Id === winnerId) {
+            card1.wins = (card1.wins || 0) + 1;
+          }
+          
+          // Update lastVoted time if this vote is more recent
+          if (new Date(vote.timestamp) > new Date(card1.lastVoted)) {
+            card1.lastVoted = vote.timestamp;
+          }
+        }
+        
+        // Update card2 voting statistics if it's in our map (was swiped right)
+        const card2 = cardsMap.get(card2Id);
+        if (card2) {
+          card2.totalVotes = (card2.totalVotes || 0) + 1;
+          if (card2Id === winnerId) {
+            card2.wins = (card2.wins || 0) + 1;
+          }
+          
+          // Update lastVoted time if this vote is more recent
+          if (new Date(vote.timestamp) > new Date(card2.lastVoted)) {
+            card2.lastVoted = vote.timestamp;
+          }
+        }
+      });
       
-      if (card1 && new Date(vote.timestamp) > new Date(card1.lastVoted)) {
-        card1.lastVoted = vote.timestamp;
+      // Calculate win rates for all cards that have votes
+      for (const [cardId, cardData] of cardsMap.entries()) {
+        if (cardData.totalVotes > 0) {
+          cardData.winRate = Math.round((cardData.wins / cardData.totalVotes) * 100);
+        }
       }
-      
-      if (card2 && new Date(vote.timestamp) > new Date(card2.lastVoted)) {
-        card2.lastVoted = vote.timestamp;
-      }
+    }
+    
+    // Convert Map to Array for formatting and sorting
+    const cardIdsArray = Array.from(cardsMap.keys());
 
-      // Only add cards that were swiped right
-      if (rightSwipedCardIds.includes(card1Id)) {
-        cardIds.add(card1Id);
-      }
-      
-      if (rightSwipedCardIds.includes(card2Id)) {
-        cardIds.add(card2Id);
-      }
-    });
-
-    // Convert Set to Array for querying - these are cards both voted on AND swiped right
-    const cardIdsArray = Array.from(cardIds);
-
-    console.log(`[${requestTime}] Found ${cardIdsArray.length} unique cards that were both voted on AND swiped right`);
+    console.log(`[${requestTime}] Found ${cardIdsArray.length} unique cards that were swiped right`);
     
     // If no cards were found, return an empty array immediately
     if (cardIdsArray.length === 0) {
-      console.log(`[${requestTime}] No cards found that were both voted on AND swiped right`);
+      console.log(`[${requestTime}] No cards found that were swiped right`);
       return res.status(200).json({
         success: true,
         data: [],
-        votesCount: votePairs.length,
+        votesCount: votePairs ? votePairs.length : 0,
         uniqueCards: 0,
-        rightSwipedCards: rightSwipedCardIds.length,
-        message: "No cards found that meet the criteria",
+        rightSwipedCards: rightSwipedCardData.length,
+        message: "No cards found that were swiped right",
         timestamp: requestTime
       });
     }
-
-    // Calculate personal vote statistics for each card
-    const personalStats = {};
-    
-    // Initialize personal stats for each card
-    cardIdsArray.forEach(cardId => {
-      personalStats[cardId] = {
-        wins: 0,
-        totalVotes: 0,
-        winRate: 0
-      };
-    });
-    
-    // Count personal votes and wins
-    votePairs.forEach(vote => {
-      const card1Id = vote.card1Id._id.toString();
-      const card2Id = vote.card2Id._id.toString();
-      const winnerId = vote.winnerId._id.toString();
-      
-      // Increment total votes for both cards
-      personalStats[card1Id].totalVotes++;
-      personalStats[card2Id].totalVotes++;
-      
-      // Increment wins for the winning card
-      personalStats[winnerId].wins++;
-    });
-    
-    // Calculate win rates
-    Object.keys(personalStats).forEach(cardId => {
-      const stats = personalStats[cardId];
-      stats.winRate = stats.totalVotes > 0 
-        ? Math.round((stats.wins / stats.totalVotes) * 100) 
-        : 0;
-    });
 
     // Get global ranking information for these cards (if available)
     const globalRankings = await VoteRank.find({
@@ -280,10 +253,9 @@ export default async function handler(req, res) {
       };
     });
 
-    // Create the final formatted rankings from all cards user has voted on
+    // Create the final formatted rankings from all cards user has swiped right on
     const formattedRankings = cardIdsArray.map(cardId => {
       const cardData = cardsMap.get(cardId);
-      const personalCardStats = personalStats[cardId];
       const globalRanking = globalRankMap[cardId];
       
       // Validate card data and provide defaults for missing values
@@ -296,9 +268,9 @@ export default async function handler(req, res) {
         cardText: cardData?.cardText || `Card #${cardId.substring(0, 6)}`,
         // Use global rank if available, otherwise null
         rank: globalRanking ? globalRanking.rank : null,
-        wins: personalCardStats?.wins || 0,
-        totalVotes: personalCardStats?.totalVotes || 0,
-        winRate: personalCardStats?.winRate || 0,
+        wins: cardData?.wins || 0,
+        totalVotes: cardData?.totalVotes || 0,
+        winRate: cardData?.winRate || 0,
         wasSwipedRight: true, // We're only including cards swiped right
         lastUpdated: globalRanking ? globalRanking.lastUpdated : cardData?.lastVoted || new Date().toISOString(),
         createdAt: cardData?.createdAt || new Date().toISOString(),
@@ -308,15 +280,19 @@ export default async function handler(req, res) {
 
     // Sort by personal win rate (descending), then by total votes (descending)
     formattedRankings.sort((a, b) => {
-      // First sort by win rate (descending)
-      if (b.winRate !== a.winRate) {
+      // First sort by win rate (descending) - but only if both have votes
+      if (a.totalVotes > 0 && b.totalVotes > 0 && b.winRate !== a.winRate) {
         return b.winRate - a.winRate;
       }
       // Then by total votes (descending)
       if (b.totalVotes !== a.totalVotes) {
         return b.totalVotes - a.totalVotes;
       }
-      // Finally by last voted time (most recent first)
+      // Then by voting status - cards with votes come first
+      if ((a.totalVotes > 0) !== (b.totalVotes > 0)) {
+        return a.totalVotes > 0 ? -1 : 1;
+      }
+      // Finally by last voted/interaction time (most recent first)
       return new Date(b.lastVoted) - new Date(a.lastVoted);
     });
 
@@ -333,9 +309,9 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       data: formattedRankings,
-      votesCount: votePairs.length,
+      votesCount: votePairs ? votePairs.length : 0,
       uniqueCards: cardIdsArray.length,
-      rightSwipedCards: rightSwipedCardIds.length,
+      rightSwipedCards: rightSwipedCardData.length,
       timestamp: requestTime
     });
     
