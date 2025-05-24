@@ -60,8 +60,8 @@ export const Header = () => {
                       className={`
                         px-4 py-2 rounded-lg font-medium transition-colors
                         ${isActive 
-                          ? `bg-${item.module}-600 dark:bg-${item.module}-700 text-white` 
-                          : `text-${item.module}-700 dark:text-${item.module}-300 hover:bg-${item.module}-50 dark:hover:bg-${item.module}-900/20`
+                          ? allThemes[item.module].activeClass 
+                          : allThemes[item.module].inactiveClass
                         }
                       `}
                     >

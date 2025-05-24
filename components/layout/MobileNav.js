@@ -61,25 +61,19 @@ export const MobileNav = () => {
                     relative flex flex-col items-center justify-center
                     p-3 w-20 rounded-lg
                     ${isActive 
-                      ? `bg-${item.module}-600/10 dark:bg-${item.module}-700/20 text-${item.module}-700 dark:text-${item.module}-300`
-                      : `text-gray-600 dark:text-gray-400 hover:bg-${item.module}-50/30 dark:hover:bg-${item.module}-900/10`
+                      ? `${itemTheme.lightBg} ${itemTheme.textClass}`
+                      : `text-gray-600 dark:text-gray-400 hover:${itemTheme.lightBg} dark:hover:${itemTheme.darkBg}`
                     }
                   `}
                 >
-                  <span className={`text-2xl mb-1 ${isActive ? `text-${item.module}-600 dark:text-${item.module}-400` : ""}`}>{item.icon}</span>
+                  <span className={`text-2xl mb-1 ${isActive ? itemTheme.iconClass : ""}`}>{item.icon}</span>
                   <span className="text-xs font-medium">{item.label}</span>
                   
                   {/* Active Indicator */}
                   {isActive && (
                     <motion.div
                       layoutId="mobile-nav-indicator"
-                      className={`absolute -bottom-2 w-1 h-1 rounded-full ${
-                        item.module === 'home' ? 'bg-home-500' :
-                        item.module === 'rankings' ? 'bg-rankings-500' :
-                        item.module === 'swipe' ? 'bg-swipe-500' :
-                        item.module === 'vote' ? 'bg-vote-500' :
-                        'bg-admin-500'
-                      }`}
+                      className={`absolute -bottom-2 w-1 h-1 rounded-full ${itemTheme.iconClass.replace('text', 'bg')}`}
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}

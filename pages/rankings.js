@@ -101,8 +101,15 @@ export default function RankingsPage() {
   
   // Fetch personal rankings data (cards the user has voted on)
   const fetchPersonalRankings = async (showRefreshing = false) => {
+    // Add a unique request ID to track this specific request through logs
+    const requestId = Math.random().toString(36).substring(2, 10);
+    console.log(`[${requestId}] BEGIN fetchPersonalRankings`, {
+      timestamp: new Date().toISOString(),
+      showRefreshing
+    });
+    
     if (!sessionId) {
-      console.error("No session ID available, cannot fetch personal rankings");
+      console.error(`[${requestId}] No session ID available, cannot fetch personal rankings`);
       addToast("Session ID not found. Your votes may not be tracked correctly.", "error");
       setError("Session ID is required to view your personal rankings");
       setLoadingPersonal(false);
@@ -117,7 +124,12 @@ export default function RankingsPage() {
       setLoadingPersonal(true);
     }
     
-    console.log(`Fetching personal rankings with sessionId: ${sessionId}, timestamp: ${new Date().toISOString()}`);
+    console.log(`[${requestId}] Fetching personal rankings with sessionId: ${sessionId}, timestamp: ${new Date().toISOString()}`);
+    
+    // Add debug information to the page for easier debugging
+    window._debug = window._debug || {};
+    window._debug.lastRequestId = requestId;
+    window._debug.sessionId = sessionId;
     
     try {
       // Clear any previous errors
@@ -136,38 +148,111 @@ export default function RankingsPage() {
       console.log(`Making fetch request to: ${endpoint}`);
       
       // Add a timeout to handle hanging requests
-      const fetchPromise = fetch(endpoint);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timed out')), 10000)
-      );
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
       
-      const response = await Promise.race([fetchPromise, timeoutPromise]);
-      console.log(`Response status: ${response.status}`);
+      console.log(`[${requestId}] Sending fetch request to: ${endpoint}`);
       
+      const response = await fetch(endpoint, {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'x-request-id': requestId
+        }
+      });
+      
+      // Clear timeout since we got a response
+      clearTimeout(timeoutId);
+      
+      console.log(`[${requestId}] Response received, status: ${response.status}, ok: ${response.ok}`);
+      console.log(`[${requestId}] Response headers:`, {
+        contentType: response.headers.get('content-type'),
+        contentLength: response.headers.get('content-length')
+      });
+    
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        // Try to get more detailed error information
+        let errorText;
+        let errorData = {};
+        
+        try {
+          // Get raw response text first for debugging
+          errorText = await response.text();
+          console.log(`[${requestId}] Error response raw text:`, errorText);
+          
+          // Try to parse as JSON if possible
+          try {
+            errorData = JSON.parse(errorText);
+            console.log(`[${requestId}] Parsed error data:`, errorData);
+          } catch (parseError) {
+            console.error(`[${requestId}] Failed to parse error response as JSON:`, parseError);
+          }
+        } catch (textError) {
+          console.error(`[${requestId}] Failed to get response text:`, textError);
+        }
+        
         throw new Error(errorData.error || `Failed to fetch personal rankings: HTTP ${response.status}`);
       }
       
-      const data = await response.json();
-      console.log(`Personal rankings data received, success: ${data.success}, items: ${data.data?.length || 0}`);
+      // Get raw response text first for debugging
+      const responseText = await response.text();
+      console.log(`[${requestId}] Raw response text (first 500 chars):`, responseText.substring(0, 500));
+      
+      // Parse the JSON response
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log(`[${requestId}] Personal rankings data received:`, {
+          success: data.success,
+          itemCount: data.data?.length || 0,
+          timestamp: data.timestamp
+        });
+        
+        // Store in debug object
+        window._debug.lastResponse = data;
+      } catch (parseError) {
+        console.error(`[${requestId}] Failed to parse response as JSON:`, parseError);
+        throw new Error(`Failed to parse API response: ${parseError.message}`);
+      }
       
       if (data.success) {
         // Verify that we have a data array
         if (!Array.isArray(data.data)) {
-          console.error("Response data is not an array:", data);
+          console.error(`[${requestId}] Response data is not an array:`, data);
           throw new Error("Invalid response format: expected an array of cards");
         }
         
-        // Add vote status to each card (right-swiped cards are "liked")
-        const rankedCards = data.data.map(card => ({
-          ...card,
-          voteStatus: 'liked', // All cards are right-swiped (wasSwipedRight should be true)
-          wasSwipedRight: true // Ensure this field is present
-        }));
+        console.log(`[${requestId}] Data structure validation:`, {
+          isDataArray: Array.isArray(data.data),
+          dataLength: data.data.length,
+          firstItem: data.data.length > 0 ? Object.keys(data.data[0]) : 'empty'
+        });
         
-        console.log(`Processed ${rankedCards.length} personal ranking cards`);
-        console.log(`Card example:`, rankedCards.length > 0 ? rankedCards[0] : 'No cards');
+        // Add vote status to each card (right-swiped cards are "liked")
+        const rankedCards = data.data.map((card, index) => {
+          // Log the first few cards for debugging
+          if (index < 3) {
+            console.log(`[${requestId}] Card ${index} data:`, card);
+          }
+          
+          return {
+            ...card,
+            voteStatus: 'liked', // All cards are right-swiped (wasSwipedRight should be true)
+            wasSwipedRight: true // Ensure this field is present
+          };
+        });
+        
+        console.log(`[${requestId}] Processed ${rankedCards.length} personal ranking cards`);
+        if (rankedCards.length > 0) {
+          console.log(`[${requestId}] First card example:`, {
+            id: rankedCards[0]._id,
+            text: rankedCards[0].cardText,
+            voteStatus: rankedCards[0].voteStatus,
+            wasSwipedRight: rankedCards[0].wasSwipedRight
+          });
+        } else {
+          console.log(`[${requestId}] No cards found in response`);
+        }
         
         setPersonalRankings(rankedCards);
         
@@ -252,18 +337,37 @@ export default function RankingsPage() {
     if (sessionId) {
       console.log(`Session ID available (${sessionId}), fetching rankings...`);
       
+      // Add this information to the global window object for debugging
+      window._debug = window._debug || {};
+      window._debug.isSessionAvailable = true;
+      window._debug.sessionIdValue = sessionId;
+      
       // First fetch global rankings
-      fetchRankings().then(() => {
-        console.log("Global rankings fetched, now fetching personal rankings");
-        // Then fetch personal rankings to ensure they're both available
-        fetchPersonalRankings();
-      }).catch(err => {
-        console.error("Error in initial rankings fetch sequence:", err);
-        // Still try to fetch personal rankings even if global fails
-        fetchPersonalRankings();
-      });
+      fetchRankings()
+        .then(() => {
+          console.log("Global rankings fetched successfully");
+          
+          // Delay slightly to ensure any background processing completes
+          setTimeout(() => {
+            console.log("Starting personal rankings fetch after global rankings");
+            // Then fetch personal rankings to ensure they're both available
+            fetchPersonalRankings();
+          }, 500);
+        })
+        .catch(err => {
+          console.error("Error in initial rankings fetch sequence:", err);
+          // Still try to fetch personal rankings even if global fails
+          console.log("Global rankings fetch failed, still trying personal rankings");
+          
+          // Add short delay before trying personal rankings
+          setTimeout(() => {
+            fetchPersonalRankings();
+          }, 500);
+        });
     } else {
       console.log("No session ID available yet, waiting before fetching rankings");
+      window._debug = window._debug || {};
+      window._debug.isSessionAvailable = false;
     }
   }, [sessionId]);
   
@@ -306,9 +410,23 @@ export default function RankingsPage() {
       // Format as ISO 8601 with milliseconds: 2025-04-13T12:34:56.789Z
       return new Date(dateString).toISOString();
     } catch (err) {
-      console.error("Error formatting date:", err);
+      console.error("Error formatting date:", err, "Original value:", dateString);
       return "Invalid Date";
     }
+  };
+  
+  // Add a debug button to expose current state values
+  const showDebugInfo = () => {
+    console.group("Rankings Page Debug Info");
+    console.log("Current view mode:", viewMode);
+    console.log("Session ID:", sessionId);
+    console.log("Personal rankings count:", personalRankings.length);
+    console.log("Global rankings count:", rankings.length);
+    console.log("Loading states:", { loading, loadingPersonal, refreshing });
+    console.log("Error state:", error);
+    console.groupEnd();
+    
+    addToast("Debug info logged to console", "info");
   };
 
   // Function to get appropriate badge color based on rank
@@ -393,6 +511,18 @@ export default function RankingsPage() {
               <FontAwesomeIcon icon={faRedo} className="mr-2" />
               Refresh
             </Button>
+            
+            {/* Hidden debug button - only visible in development */}
+            {process.env.NODE_ENV !== 'production' && (
+              <Button
+                onClick={showDebugInfo}
+                variant="secondary"
+                className="ml-2 border-gray-200 dark:border-gray-700 text-xs"
+                size="sm"
+              >
+                Debug
+              </Button>
+            )}
           </div>
         </motion.div>
 
