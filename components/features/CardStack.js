@@ -12,6 +12,14 @@ export const CardStack = ({ cards, onSwipe }) => {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 0, 300], [-15, 0, 15]);
   const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0.5, 0.9, 1, 0.9, 0.5]);
+  
+  // Reset motion values when currentIndex changes
+  useEffect(() => {
+    x.set(0);
+    setSwipeDirection(null);
+    setIsDragging(false);
+    console.log("Reset animation state for new card");
+  }, [currentIndex]);
 
   const handleSwipe = (direction) => {
     if (!cards || currentIndex >= cards.length) return;
@@ -25,33 +33,38 @@ export const CardStack = ({ cards, onSwipe }) => {
     x.set(targetX);
     console.log("X motion value set to:", targetX);
     
-    // Ensure indicator is visible for at least 300ms
+    // Create a two-step animation:
+    // 1. First let the card animate out with the swipe direction
+    // 2. Then update the index which will trigger a clean reset for the next card
     setTimeout(() => {
       // Notify parent component of swipe
       onSwipe?.(direction);
       
-      // Move to next card
+      // Move to next card - the useEffect will handle resetting the animation state
       setCurrentIndex(prev => prev + 1);
-      
-      // Reset states for next card
-      setSwipeDirection(null);
-      x.set(0); // Reset position for next card
     }, 300);
   };
 
   // Add keyboard event listeners
   // Add visual feedback for keyboard swipes
   const handleKeyboardSwipe = (direction) => {
-    // Set direction for visual feedback
-    setSwipeDirection(direction);
+    // First ensure we're starting from a clean state
+    x.set(0);
+    setSwipeDirection(null);
     
-    // Move the card for better visual feedback
-    x.set(direction === "right" ? 100 : -100);
-    
-    // Trigger the actual swipe after a short delay for feedback
+    // Small delay to ensure the reset is applied
     setTimeout(() => {
-      handleSwipe(direction);
-    }, 300);
+      // Set direction for visual feedback
+      setSwipeDirection(direction);
+      
+      // Move the card for better visual feedback
+      x.set(direction === "right" ? 100 : -100);
+      
+      // Trigger the actual swipe after a short delay for feedback
+      setTimeout(() => {
+        handleSwipe(direction);
+      }, 300);
+    }, 50);
   };
   
   useEffect(() => {
@@ -74,7 +87,11 @@ export const CardStack = ({ cards, onSwipe }) => {
 
   return (
     <div className="relative w-full max-w-md mx-auto">
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false} onExitComplete={() => {
+        // Ensure animation values are reset when exit animation completes
+        x.set(0);
+        console.log("Exit animation complete, reset x to 0");
+      }}>
         {cards && currentIndex < cards.length ? (
           <motion.div
             key={cards[currentIndex]._id}
@@ -95,7 +112,12 @@ export const CardStack = ({ cards, onSwipe }) => {
                 handleSwipe(swipe > 0 ? "right" : "left");
               } else {
                 // Reset if not swiped far enough
-                x.set(0);
+                // Use spring animation to reset instead of immediate set
+                const controls = x.getAnimationControls();
+                controls.start({
+                  x: 0,
+                  transition: { type: "spring", stiffness: 400, damping: 30 }
+                });
               }
             }}
             whileDrag={{ scale: 1.02 }}
@@ -105,9 +127,14 @@ export const CardStack = ({ cards, onSwipe }) => {
               opacity: 0, 
               scale: 0.95, 
               x: swipeDirection === "right" ? 500 : -500,
-              transition: { duration: 0.3 }
+              transition: { duration: 0.3, ease: "easeOut" }
             }}
-            transition={{ type: "spring", stiffness: 180, damping: 20 }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 180, 
+              damping: 20,
+              mass: 0.8 // Lower mass for quicker transitions
+            }}
           >
             <div className={`
               w-full aspect-[3/4] rounded-2xl overflow-hidden
