@@ -6,6 +6,7 @@ import { LoadingScreen, LoadingSpinner } from "../components/ui/Loading";
 import { useToast } from "../components/ui/Toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useModuleTheme } from "../contexts/ModuleThemeContext";
 import {
   faTrophy,
   faArrowUp,
@@ -28,6 +29,7 @@ export default function AdminPage() {
   const [editText, setEditText] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const { addToast } = useToast();
+  const { theme: moduleTheme } = useModuleTheme();
 
   // Function to fetch cards via HTTP
   const fetchCards = async (showRefreshing = false) => {
@@ -248,10 +250,10 @@ export default function AdminPage() {
             variant="primary"
             isLoading={refreshing}
             disabled={refreshing}
-            className="flex items-center"
+            className={`flex items-center ${moduleTheme.buttonClass}`}
           >
             <FontAwesomeIcon icon={faRedo} className="mr-2" />
-            Refresh Data
+            Refresh Data 🔄
           </Button>
         </motion.div>
 
@@ -263,32 +265,32 @@ export default function AdminPage() {
         >
           {[
             { 
-              label: "Total Cards", 
+              label: "Total Cards 📊", 
               value: loadingCards ? "..." : cards.length, 
               icon: faChartBar,
-              color: "text-blue-500 dark:text-blue-400"
+              color: "text-admin-500 dark:text-admin-400"
             },
             { 
-              label: "Total Votes", 
+              label: "Total Votes 🗳️", 
               value: loadingStats ? "..." : Object.values(cardStats).reduce((sum, stat) => sum + (stat.totalVotes || 0), 0),
               icon: faArrowUp,
-              color: "text-green-500 dark:text-green-400"
+              color: "text-admin-600 dark:text-admin-300"
             },
             { 
-              label: "Top Win Rate", 
+              label: "Top Win Rate 🏆", 
               value: loadingStats ? "..." : 
                 (Object.values(cardStats).length > 0 ? 
                   `${Math.max(...Object.values(cardStats).map(s => s.winRate || 0))}%` : 
                   "N/A"),
               icon: faTrophy,
-              color: "text-yellow-500 dark:text-yellow-400"
+              color: "text-admin-700 dark:text-admin-200"
             }
           ].map((stat, index) => (
-            <Card key={index} className="p-6">
+            <Card key={index} className={`p-6 border ${moduleTheme.borderClass} hover:shadow-md transition-shadow duration-200`}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
-                  <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                  <p className={`text-3xl font-bold mt-1 ${moduleTheme.textClass}`}>{stat.value}</p>
                 </div>
                 <FontAwesomeIcon icon={stat.icon} className={`text-3xl ${stat.color}`} />
               </div>
@@ -298,18 +300,18 @@ export default function AdminPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Create Card Form */}
-          <Card className="p-6 lg:col-span-1">
-            <h2 className="text-xl font-semibold mb-4">Create New Card</h2>
+          <Card className={`p-6 lg:col-span-1 border ${moduleTheme.borderClass}`}>
+            <h2 className={`text-xl font-semibold mb-4 ${moduleTheme.textClass}`}>Create New Card 📝</h2>
             <form onSubmit={handleCreateCard} className="space-y-4">
               <div>
                 <textarea
                   value={newCardText}
                   onChange={(e) => setNewCardText(e.target.value)}
                   placeholder="Enter card text..."
-                  className="w-full px-4 py-3 rounded-lg resize-none
+                  className={`w-full px-4 py-3 rounded-lg resize-none
                            bg-white dark:bg-gray-800
-                           border border-gray-200 dark:border-gray-700
-                           focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
+                           border ${moduleTheme.borderClass}
+                           focus:ring-2 focus:ring-admin-500/50 focus:border-admin-500`}
                   rows="4"
                   maxLength="160"
                 />
@@ -321,17 +323,17 @@ export default function AdminPage() {
                 type="submit"
                 isLoading={isSubmitting}
                 disabled={!newCardText.trim() || isSubmitting}
-                className="w-full"
+                className={`w-full ${moduleTheme.buttonClass}`}
               >
-                Create Card
+                Create Card 📝
               </Button>
             </form>
           </Card>
 
           {/* Cards List */}
           <div className="lg:col-span-2">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Existing Cards</h2>
+            <Card className={`p-6 border ${moduleTheme.borderClass}`}>
+              <h2 className={`text-xl font-semibold mb-4 ${moduleTheme.textClass}`}>Existing Cards 📋</h2>
               <div className="space-y-4">
                 <AnimatePresence>
                   {cards.map((card) => (
@@ -342,7 +344,7 @@ export default function AdminPage() {
                       exit={{ opacity: 0, x: 20 }}
                       className="group relative"
                     >
-                      <Card className="p-4 hover:bg-gray-50 dark:hover:bg-gray-750">
+                      <Card className={`p-4 hover:bg-admin-50/30 dark:hover:bg-admin-900/10 border ${moduleTheme.borderClass}`}>
                         <div className="flex justify-between items-start">
                           <div className="flex-1 pr-4">
                             <p className="text-sm mb-1">
@@ -367,8 +369,8 @@ export default function AdminPage() {
                                 </p>
                               </div>
                             ) : (
-                              <p className="text-md font-medium mb-2">
-                                Card Name: {card.text}
+                              <p className={`text-md font-medium mb-2 ${moduleTheme.textClass}`}>
+                                {card.text}
                               </p>
                             )}
                           </div>
@@ -383,8 +385,9 @@ export default function AdminPage() {
                                     setEditingCard(null);
                                     setEditText("");
                                   }}
+                                  className={`border-admin-200 dark:border-admin-800 hover:bg-admin-50 dark:hover:bg-admin-900/20`}
                                 >
-                                  <FontAwesomeIcon icon={faTimes} className="mr-1" />
+                                  <FontAwesomeIcon icon={faTimes} className={`mr-1 text-admin-500 dark:text-admin-400`} />
                                   Cancel
                                 </Button>
                                 <Button
@@ -393,6 +396,7 @@ export default function AdminPage() {
                                   onClick={() => saveEditedCard(card._id)}
                                   isLoading={isSubmitting}
                                   disabled={isSubmitting || !editText.trim()}
+                                  className={moduleTheme.buttonClass}
                                 >
                                   <FontAwesomeIcon icon={faSave} className="mr-1" />
                                   Save
@@ -404,6 +408,7 @@ export default function AdminPage() {
                                   variant="primary"
                                   size="sm"
                                   onClick={() => startEditCard(card)}
+                                  className={moduleTheme.buttonClass}
                                 >
                                   <FontAwesomeIcon icon={faEdit} className="mr-1" />
                                   Edit
@@ -412,8 +417,9 @@ export default function AdminPage() {
                                   variant="secondary"
                                   size="sm"
                                   onClick={() => handleDeleteCard(card._id)}
+                                  className={`border-admin-200 dark:border-admin-800 hover:bg-admin-50 dark:hover:bg-admin-900/20`}
                                 >
-                                  <FontAwesomeIcon icon={faTrash} className="mr-1" />
+                                  <FontAwesomeIcon icon={faTrash} className={`mr-1 text-admin-500 dark:text-admin-400`} />
                                   Delete
                                 </Button>
                               </>
@@ -423,7 +429,7 @@ export default function AdminPage() {
                         
                         {/* Card Stats - Only show in view mode */}
                         {editingCard !== card._id && (
-                          <div className="grid grid-cols-3 gap-4 mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                          <div className={`grid grid-cols-3 gap-4 mt-4 p-4 ${moduleTheme.lightBg} ${moduleTheme.darkBg} rounded-lg border ${moduleTheme.borderClass}`}>
                             <div>
                               <p className="text-xs text-gray-500 dark:text-gray-400">Wins</p>
                               <p className="text-base font-semibold">

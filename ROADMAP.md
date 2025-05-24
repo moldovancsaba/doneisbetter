@@ -1,4 +1,123 @@
-# ROADMAP.md — DONEISBETTER [2025-05-24T03:20:54.789Z]
+# Color Themes Implementation Plan [2025-05-24T03:34:19.789Z]
+
+## 🎨 Module Color Theme System
+
+This plan outlines the implementation of a color theme system for different modules in the DoneisBetter application, ensuring consistency across all components and maintaining emoji usage.
+
+### 🎯 Goals
+
+1. Implement distinct color themes for each module:
+   - Home: Burgundy/Red (🏠)
+   - Rankings: Orange/Yellow (🏆)
+   - Swipe: Green (🔄)
+   - Vote: Cyan/Blue (🗳️)
+   - Admin: Deep Blue (⚙️)
+
+2. Apply these color themes consistently across:
+   - Navigation menu items
+   - Page headers
+   - UI components within each module
+   - Buttons and interactive elements
+
+3. Maintain emoji usage with module names everywhere in the application
+
+### 📋 Implementation Steps
+
+#### Phase 1: Theme Configuration (Est. 1 hour)
+
+1. **Update the theme.js file**
+   - Add module-specific color palettes
+   - Define color variables for each module
+
+2. **Update tailwind.config.js**
+   - Add new color definitions to extend the Tailwind theme
+   - Create utility classes for module-specific colors
+
+#### Phase 2: Navigation Component Updates (Est. 2 hours)
+
+1. **Update Header.js component**
+   - Add color mapping for navigation items
+   - Implement consistent coloring for active/hover states
+
+2. **Update MobileNav.js component**
+   - Apply the same color mapping for consistency
+   - Ensure responsive design maintains theme colors
+
+3. **Update home page navigation cards**
+   - Apply module colors to navigation cards
+   - Add consistent emoji usage
+
+#### Phase 3: Module-Specific Page Updates (Est. 3 hours)
+
+1. **Update individual page components**
+   - Apply theme colors to page headers
+   - Update button colors and UI elements
+
+2. **Create reusable themed components**
+   - Module-specific card components
+   - Themed button variants
+
+#### Phase 4: Testing and Refinement (Est. 2 hours)
+
+1. **Cross-browser testing**
+   - Verify color consistency across browsers
+   - Test dark/light mode transitions
+
+2. **Accessibility verification**
+   - Ensure sufficient contrast ratios
+   - Test with screen readers for emoji descriptions
+
+### 🛠️ Technical Approach
+
+1. **Color System Design**
+   ```javascript
+   // Module color mapping
+   const moduleColors = {
+     home: {
+       light: "#c62828", // Burgundy red
+       dark: "#ef5350",
+       gradient: "from-red-700 to-red-500"
+     },
+     rankings: {
+       light: "#f57c00", // Orange
+       dark: "#ffb74d",
+       gradient: "from-orange-600 to-amber-400"
+     },
+     swipe: {
+       light: "#2e7d32", // Green
+       dark: "#66bb6a",
+       gradient: "from-green-700 to-green-500"
+     },
+     vote: {
+       light: "#0288d1", // Cyan/Blue
+       dark: "#4fc3f7",
+       gradient: "from-blue-600 to-cyan-400"
+     },
+     admin: {
+       light: "#1565c0", // Deep Blue
+       dark: "#42a5f5",
+       gradient: "from-blue-800 to-blue-600"
+     }
+   };
+   ```
+
+2. **Component Color Application Strategy**
+   - Use CSS variables for dynamic theming
+   - Implement context-based theming for nested components
+   - Create utility functions for consistent color application
+
+### ✅ Success Criteria
+
+1. All modules have distinct, recognizable color themes
+2. Navigation components consistently reflect module colors
+3. Emojis are used consistently with module names
+4. Dark/light mode works correctly with all color themes
+5. Design is visually appealing and maintains accessibility standards
+
+### 📅 Timeline
+
+- Total estimated time: 8 hours
+- Proposed completion: End of day 2025-05-24
 
 ## 📊 Executive Summary
 

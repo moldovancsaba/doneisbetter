@@ -6,6 +6,7 @@ import { Button } from "../components/ui/Button";
 import { LoadingScreen } from "../components/ui/Loading";
 import { useToast } from "../components/ui/Toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { useModuleTheme } from "../contexts/ModuleThemeContext";
 
 export default function VotePage() {
   const [votingPair, setVotingPair] = useState(null);
@@ -16,6 +17,7 @@ export default function VotePage() {
   const [sessionId, setSessionId] = useState(null);
   const { addToast } = useToast();
   const [keyboardEnabled, setKeyboardEnabled] = useState(true);
+  const { theme: moduleTheme } = useModuleTheme();
   
   // Helper function to safely extract card ID
   const getCardId = (card) => {
@@ -219,7 +221,7 @@ export default function VotePage() {
   }, [loading, sessionId]);
 
   if (loading && !votingPair) {
-    return <LoadingScreen />;
+    return <LoadingScreen message="Loading cards for voting..." module="vote" />;
   }
 
   return (
@@ -239,8 +241,8 @@ export default function VotePage() {
           </div>
 
           <div className="flex space-x-3">
-            <Link href="/rankings" className="inline-block">
-              View Rankings
+            <Link href="/rankings" className={`inline-block px-4 py-2 rounded-lg ${moduleTheme.buttonClass}`}>
+              View Rankings 🏆
             </Link>
           </div>
         </motion.div>
@@ -248,12 +250,12 @@ export default function VotePage() {
         {/* Voting Area */}
         <div className="grid grid-cols-1 gap-8">
           {error ? (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <div className={`${moduleTheme.lightBg} border ${moduleTheme.borderClass} rounded-lg p-4`}>
               <p className="text-red-800 dark:text-red-200">{error}</p>
               <Button 
                 onClick={fetchVotingPair} 
-                className="mt-4"
-                variant="secondary"
+                className={`mt-4 ${moduleTheme.buttonClass}`}
+                variant="primary"
               >
                 Try Again
               </Button>
@@ -261,10 +263,10 @@ export default function VotePage() {
           ) : votingPair ? (
             <>
               <div className="text-center mb-4">
-                <div className="inline-block px-4 py-2 rounded-full bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-100 text-sm font-medium">
-                  {votingPair.type === "initial" ? "Initial Ranking" : 
-                   votingPair.type === "ranking" ? "New Card Ranking" :
-                   "Rank Refinement"}
+                <div className={`inline-block px-4 py-2 rounded-full bg-vote-100 text-vote-800 dark:bg-vote-900/30 dark:text-vote-100 text-sm font-medium`}>
+                  {votingPair.type === "initial" ? "Initial Ranking 🆕" : 
+                   votingPair.type === "ranking" ? "New Card Ranking 🔄" :
+                   "Rank Refinement 📊"}
                 </div>
                 <div className="text-xs text-gray-500 mt-2">
                   Session ID: {sessionId ? sessionId.substring(0, 8) + '...' : 'Not found'}
@@ -274,7 +276,7 @@ export default function VotePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Keyboard instructions */}
                 <div className="col-span-1 md:col-span-2 text-center mb-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className={`text-sm ${moduleTheme.textClass}`}>
                     Press ← for left card, → for right card
                   </p>
                 </div>
@@ -284,27 +286,27 @@ export default function VotePage() {
                   className="flex flex-col h-full"
                 >
                   <Card 
-                    className="p-6 flex flex-col h-full cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                    className={`p-6 flex flex-col h-full cursor-pointer hover:bg-vote-50/30 dark:hover:bg-vote-900/10 transition-colors border ${moduleTheme.borderClass}`}
                     onClick={() => submitVote(
                       votingPair.card1, 
                       votingPair.card2
                     )}
                   >
                     <div className="flex-1">
-                      <p className="text-lg font-medium mb-4">
+                      <p className={`text-lg font-medium mb-4 ${moduleTheme.textClass}`}>
                         {votingPair.card1.text}
                       </p>
                     </div>
                     
                     {votingPair.type !== "initial" && (
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className={`mt-4 pt-4 border-t ${moduleTheme.borderClass}`}>
                         {votingPair.type === "refinement" ? (
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                          <p className={`text-sm font-medium ${moduleTheme.textClass}`}>
                             Current Rank: #{votingPair.rank1}
                           </p>
                         ) : (
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                            New Card
+                          <p className={`text-sm font-medium ${moduleTheme.textClass}`}>
+                            New Card 🆕
                           </p>
                         )}
                       </div>
@@ -312,9 +314,10 @@ export default function VotePage() {
                     
                     <div className="mt-6">
                       <Button 
-                        className="w-full" 
+                        className={`w-full ${moduleTheme.buttonClass}`} 
                         disabled={submitting}
                         isLoading={submitting}
+                        module="vote"
                       >
                         Select This Card (←)
                       </Button>
@@ -328,26 +331,26 @@ export default function VotePage() {
                   className="flex flex-col h-full"
                 >
                   <Card 
-                    className="p-6 flex flex-col h-full cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                    className={`p-6 flex flex-col h-full cursor-pointer hover:bg-vote-50/30 dark:hover:bg-vote-900/10 transition-colors border ${moduleTheme.borderClass}`}
                     onClick={() => submitVote(
                       votingPair.card2, 
                       votingPair.card1
                     )}
                   >
                     <div className="flex-1">
-                      <p className="text-lg font-medium mb-4">
+                      <p className={`text-lg font-medium mb-4 ${moduleTheme.textClass}`}>
                         {votingPair.card2.text}
                       </p>
                     </div>
                     
                     {votingPair.type !== "initial" && (
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className={`mt-4 pt-4 border-t ${moduleTheme.borderClass}`}>
                         {votingPair.type === "refinement" ? (
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                          <p className={`text-sm font-medium ${moduleTheme.textClass}`}>
                             Current Rank: #{votingPair.rank2}
                           </p>
                         ) : (
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                          <p className={`text-sm font-medium ${moduleTheme.textClass}`}>
                             Current Rank: #{votingPair.currentRank}
                           </p>
                         )}
@@ -356,9 +359,10 @@ export default function VotePage() {
                     
                     <div className="mt-6">
                       <Button 
-                        className="w-full" 
+                        className={`w-full ${moduleTheme.buttonClass}`}
                         disabled={submitting}
                         isLoading={submitting}
+                        module="vote"
                       >
                         Select This Card (→)
                       </Button>
@@ -368,19 +372,19 @@ export default function VotePage() {
               </div>
             </>
           ) : (
-            <Card className="p-6 text-center">
-              <p className="text-gray-600 dark:text-gray-300">
-                No cards available for voting. Try again later.
+            <Card className={`p-6 text-center border ${moduleTheme.borderClass}`}>
+              <p className={moduleTheme.textClass}>
+                No cards available for voting 🗳️ Try again later.
               </p>
               <div className="text-xs text-gray-500 mt-2 mb-4">
                 Session ID: {sessionId ? sessionId.substring(0, 8) + '...' : 'Not found'}
               </div>
               <Button 
                 onClick={fetchVotingPair} 
-                className="mt-4"
-                variant="secondary"
+                className={`mt-4 ${moduleTheme.buttonClass}`}
+                variant="primary"
               >
-                Refresh
+                Refresh 🔄
               </Button>
             </Card>
           )}
@@ -389,8 +393,8 @@ export default function VotePage() {
         {/* Vote History */}
         {voteHistory.length > 0 && (
           <div>
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Votes</h2>
+            <Card className={`p-6 border ${moduleTheme.borderClass}`}>
+              <h2 className={`text-xl font-semibold mb-4 ${moduleTheme.textClass}`}>Recent Votes 🗳️</h2>
               <div className="space-y-3">
                 <AnimatePresence>
                   {voteHistory.map((vote, index) => (
@@ -399,14 +403,14 @@ export default function VotePage() {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 last:border-0"
+                      className={`flex justify-between items-center py-2 border-b ${moduleTheme.borderClass} last:border-0`}
                     >
                       <div className="flex-1">
                         <p className="text-sm font-medium">
-                          <span className="text-green-600 dark:text-green-400">✓ {vote.winner.text?.substring(0, 30)}...</span>
+                          <span className="text-vote-600 dark:text-vote-400">✓ {vote.winner.text?.substring(0, 30)}...</span>
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          over <span className="text-red-500 dark:text-red-400">{vote.loser.text?.substring(0, 30)}...</span>
+                          over <span className="text-vote-300 dark:text-vote-300">{vote.loser.text?.substring(0, 30)}...</span>
                         </p>
                       </div>
                       <span className="text-xs text-gray-500">{formatISODate(vote.timestamp)}</span>

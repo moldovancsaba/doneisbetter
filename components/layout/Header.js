@@ -3,22 +3,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useModuleTheme, moduleThemes } from "../../contexts/ModuleThemeContext";
 
 export const Header = () => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
+  const { currentModule, theme: moduleTheme, allThemes } = useModuleTheme();
   
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const navigationItems = [
-    { href: "/", label: "Home 🏠" },
-    { href: "/rankings", label: "Rankings 🏆" },
-    { href: "/swipe", label: "Swipe 🔄" },
-    { href: "/vote", label: "Vote 🗳️" },
-    { href: "/admin", label: "Admin ⚙️" },
+    { href: "/", label: "Home 🏠", module: "home" },
+    { href: "/rankings", label: "Rankings 🏆", module: "rankings" },
+    { href: "/swipe", label: "Swipe 🔄", module: "swipe" },
+    { href: "/vote", label: "Vote 🗳️", module: "vote" },
+    { href: "/admin", label: "Admin ⚙️", module: "admin" },
   ];
 
   return (
@@ -36,40 +38,43 @@ export const Header = () => {
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center cursor-pointer"
               >
-                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-primary-600">
+                <span className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${moduleTheme.gradient}`}>
                   DoneisBetter
                 </span>
               </motion.div>
             </Link>
 
             <div className="hidden md:flex items-center gap-2">
-              {navigationItems.map((item) => (
-                <motion.div
-                  key={item.href}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Link 
-                    href={item.href}
-                    className={`
-                      px-4 py-2 rounded-lg font-medium transition-colors
-                      ${router.pathname === item.href
-                        ? "bg-primary-500 text-white"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      }
-                    `}
+              {navigationItems.map((item) => {
+                const isActive = router.pathname === item.href;
+                const itemTheme = allThemes[item.module];
+                
+                return (
+                  <motion.div
+                    key={item.href}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    {item.label}
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link 
+                      href={item.href}
+                      className={`
+                        px-4 py-2 rounded-lg font-medium transition-colors
+                        ${isActive ? itemTheme.activeClass : itemTheme.inactiveClass}
+                      `}
+                    >
+                      {item.label}
+                    </Link>
+                  </motion.div>
+                );
+              })}
 
               {mounted && (
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="ml-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                  className="ml-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
+                  aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                 >
                   {theme === "dark" ? "🌞" : "🌙"}
                 </motion.button>
@@ -83,14 +88,16 @@ export const Header = () => {
 };
 
 export const PageWrapper = ({ children }) => {
+  const { backgroundClass } = useModuleTheme();
+  
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className={`min-h-screen ${backgroundClass}`}>
       <Header />
       <motion.main
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="pt-20 pb-24 md:pb-8"
+        className="pt-20 pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
       >
         {children}
       </motion.main>

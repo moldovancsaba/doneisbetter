@@ -5,6 +5,7 @@ import { LoadingScreen } from "../components/ui/Loading";
 import { useToast } from "../components/ui/Toast";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/Button";
+import { useModuleTheme } from "../contexts/ModuleThemeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRedo } from "@fortawesome/free-solid-svg-icons";
 
@@ -15,6 +16,7 @@ export default function SwipePage({ initialCards }) {
   const [lastUpdate, setLastUpdate] = useState(new Date().toISOString());
   const [error, setError] = useState(null);
   const { addToast } = useToast();
+  const { theme: moduleTheme } = useModuleTheme();
 
   // Function to fetch cards
   const fetchCards = async (showRefreshing = false) => {
@@ -89,7 +91,7 @@ export default function SwipePage({ initialCards }) {
     setCards((prev) => prev.slice(1));
   };
 
-  if (loading) return <LoadingScreen />;
+  if (loading) return <LoadingScreen message="Loading cards to swipe..." module="swipe" />;
 
   return (
     <PageWrapper>
@@ -120,10 +122,10 @@ export default function SwipePage({ initialCards }) {
               size="sm"
               isLoading={refreshing}
               disabled={refreshing}
-              className="flex items-center"
+              className={`flex items-center border-swipe-200 dark:border-swipe-800 hover:bg-swipe-50 dark:hover:bg-swipe-900/20`}
             >
-              <FontAwesomeIcon icon={faRedo} className="mr-1" />
-              Refresh
+              <FontAwesomeIcon icon={faRedo} className={`mr-1 text-swipe-500 dark:text-swipe-400`} />
+              Refresh 🔄
             </Button>
           </div>
 
@@ -140,6 +142,7 @@ export default function SwipePage({ initialCards }) {
                   onClick={handleRefresh} 
                   variant="secondary"
                   size="xs"
+                  className={moduleTheme.buttonClass}
                 >
                   Try Again
                 </Button>
@@ -154,8 +157,8 @@ export default function SwipePage({ initialCards }) {
               onSwipe={handleSwipe} 
             />
           ) : (
-            <div className="p-8 text-center bg-gray-100 dark:bg-gray-800 rounded-xl">
-              <h3 className="text-xl font-semibold mb-2">No Cards Available</h3>
+            <div className={`p-8 text-center ${moduleTheme.lightBg} ${moduleTheme.darkBg} rounded-xl border ${moduleTheme.borderClass}`}>
+              <h3 className={`text-xl font-semibold mb-2 ${moduleTheme.textClass}`}>No Cards Available 🔄</h3>
               <p className="text-gray-500 dark:text-gray-400">
                 Check back later for new cards to review
               </p>
@@ -164,7 +167,7 @@ export default function SwipePage({ initialCards }) {
 
           {/* Last Updated */}
           <div className="mt-4 p-2 text-center">
-            <div className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-full text-xs">
+            <div className={`px-3 py-1 ${moduleTheme.lightBg} ${moduleTheme.darkBg} text-gray-500 dark:text-gray-400 rounded-full text-xs border ${moduleTheme.borderClass}`}>
               Last updated: {lastUpdate}
             </div>
           </div>
@@ -176,8 +179,8 @@ export default function SwipePage({ initialCards }) {
             transition={{ delay: 0.3 }}
             className="text-center mt-8"
           >
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Swipe right to like, left to pass
+            <p className={`text-sm ${moduleTheme.textClass}`}>
+              Swipe right to like 👍, left to pass 👎
             </p>
           </motion.div>
         </motion.div>

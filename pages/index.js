@@ -2,10 +2,12 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Input } from '../components/ui/Forms';
 import { motion } from 'framer-motion';
+import { useModuleTheme } from '../contexts/ModuleThemeContext';
 
 export default function Home() {
   const [username, setUsername] = useState('');
   const [hasUsername, setHasUsername] = useState(false);
+  const { allThemes } = useModuleTheme();
 
   // Check if username exists in localStorage on mount
   useEffect(() => {
@@ -27,7 +29,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
-      <h1 className="text-3xl font-bold mb-10 text-center">doneisbetter – Swipe Prototype</h1>
+      <motion.h1 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-4xl font-bold mb-10 text-center bg-clip-text text-transparent bg-gradient-to-r from-home-500 to-home-700"
+      >
+        doneisbetter 🏠
+      </motion.h1>
       
       <div className="flex flex-col w-full max-w-xs gap-6">
         {!hasUsername ? (
@@ -48,7 +56,7 @@ export default function Home() {
               />
               <button 
                 type="submit"
-                className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg text-lg text-center transition-colors duration-200 shadow-md hover:shadow-lg"
+                className="w-full bg-home-600 hover:bg-home-700 text-white font-semibold py-3 px-6 rounded-lg text-lg text-center transition-colors duration-200 shadow-md hover:shadow-lg"
               >
                 Continue
               </button>
@@ -65,23 +73,35 @@ export default function Home() {
               <p className="text-lg font-medium">{username}</p>
               <button 
                 onClick={() => setHasUsername(false)} 
-                className="text-sm text-primary-500 hover:text-primary-600 mt-1"
+                className="text-sm text-home-500 hover:text-home-600 mt-1"
               >
                 Change username
               </button>
             </div>
             
-            <Link href="/swipe" className="block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 px-6 rounded-lg text-xl text-center transition-colors duration-200 shadow-md hover:shadow-lg">
-              SWIPE
-            </Link>
-            
-            <Link href="/vote" className="block bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-6 rounded-lg text-xl text-center transition-colors duration-200 shadow-md hover:shadow-lg">
-              VOTE
-            </Link>
-            
-            <Link href="/admin" className="block bg-gray-700 hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-lg text-xl text-center transition-colors duration-200 shadow-md hover:shadow-lg">
-              ADMIN
-            </Link>
+            {/* Navigation Cards */}
+            <div className="grid gap-4">
+              {Object.entries(allThemes).map(([moduleName, theme]) => (
+                <motion.div
+                  key={moduleName}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Link 
+                    href={moduleName === 'home' ? '/' : `/${moduleName}`}
+                    className={`
+                      block bg-gradient-to-r ${theme.gradient} text-white
+                      font-semibold py-5 px-6 rounded-lg text-xl text-center
+                      transition-all duration-200 shadow-md hover:shadow-lg
+                      flex items-center justify-center gap-3
+                    `}
+                  >
+                    <span className="text-2xl">{theme.name.split(' ')[1]}</span>
+                    <span>{theme.name.split(' ')[0]}</span>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
         )}
       </div>

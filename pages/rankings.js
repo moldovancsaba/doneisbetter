@@ -4,9 +4,10 @@ import Link from "next/link";
 import { PageWrapper } from "../components/layout/Header";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
-import { LoadingScreen, LoadingSpinner } from "../components/ui/Loading";
+import { LoadingScreen, LoadingSpinner, ModuleSkeleton } from "../components/ui/Loading";
 import { useToast } from "../components/ui/Toast";
 import { motion } from "framer-motion";
+import { useModuleTheme } from "../contexts/ModuleThemeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTrophy,
@@ -38,6 +39,7 @@ export default function RankingsPage() {
   const [lastVisitedPage, setLastVisitedPage] = useState(null);
   const router = useRouter();
   const { addToast } = useToast();
+  const { theme: moduleTheme } = useModuleTheme();
 
   // Get or create session ID
   useEffect(() => {
@@ -295,8 +297,8 @@ export default function RankingsPage() {
       (viewMode === 'personal' && loadingPersonal && personalRankings.length === 0)) {
     return (
       <LoadingScreen 
-        message={`Loading ${viewMode === 'global' ? 'global' : 'personal'} rankings...`} 
-        subMessage={sessionId ? `Using session ID: ${sessionId.substring(0, 8)}...` : "Initializing session..."}
+        message={`Loading ${viewMode === 'global' ? 'global' : 'personal'} rankings...`}
+        module="rankings"
       />
     );
   }
@@ -311,7 +313,7 @@ export default function RankingsPage() {
           className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
         >
           <div>
-            <h1 className="text-3xl font-bold">Card Rankings</h1>
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rankings-500 to-rankings-700">Rankings 🏆</h1>
             <p className="text-gray-600 dark:text-gray-300 mt-1">
               {viewMode === 'global' 
                 ? 'See which cards are winning the most votes'
@@ -324,22 +326,22 @@ export default function RankingsPage() {
             <Button
               onClick={() => router.push('/vote')}
               variant="secondary"
-              className="flex items-center"
+              className={`flex items-center border-rankings-200 dark:border-rankings-800 hover:bg-rankings-50 dark:hover:bg-rankings-900/20`}
             >
               <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-              Back to Voting
+              Back to Voting 🗳️
             </Button>
             
             <Button
               onClick={toggleViewMode}
               variant="secondary"
-              className="flex items-center"
+              className={`flex items-center border-rankings-200 dark:border-rankings-800 hover:bg-rankings-50 dark:hover:bg-rankings-900/20`}
             >
               <FontAwesomeIcon 
                 icon={viewMode === 'global' ? faUser : faGlobe} 
-                className="mr-2" 
+                className={`mr-2 text-rankings-500 dark:text-rankings-400`} 
               />
-              {viewMode === 'global' ? 'My Rankings' : 'Global Rankings'}
+              {viewMode === 'global' ? 'My Rankings 👤' : 'Global Rankings 🌐'}
             </Button>
             
             <Button
@@ -347,7 +349,7 @@ export default function RankingsPage() {
               variant="primary"
               isLoading={refreshing}
               disabled={refreshing}
-              className="flex items-center"
+              className={`flex items-center bg-rankings-600 hover:bg-rankings-700 text-white`}
             >
               <FontAwesomeIcon icon={faRedo} className="mr-2" />
               Refresh
@@ -366,7 +368,7 @@ export default function RankingsPage() {
               label: viewMode === 'global' ? "Total Ranked Cards" : "Your Ranked Cards", 
               value: viewMode === 'global' ? globalStats.totalCards : personalStats.rankedCards, 
               icon: faChartBar,
-              color: "text-blue-500 dark:text-blue-400" 
+              color: "text-rankings-500 dark:text-rankings-400" 
             },
             { 
               label: "Top Card Win Rate", 
@@ -374,7 +376,7 @@ export default function RankingsPage() {
                 ? (globalStats.topWinRate > 0 ? `${globalStats.topWinRate}%` : "N/A")
                 : (personalStats.topWinRate > 0 ? `${personalStats.topWinRate}%` : "N/A"), 
               icon: faTrophy,
-              color: "text-yellow-500 dark:text-yellow-400" 
+              color: "text-rankings-600 dark:text-rankings-500" 
             },
             { 
               label: "Total Votes Cast", 
@@ -382,14 +384,14 @@ export default function RankingsPage() {
                 ? globalStats.totalVotes
                 : personalStats.totalVotes, 
               icon: faArrowUp,
-              color: "text-green-500 dark:text-green-400" 
+              color: "text-rankings-700 dark:text-rankings-600" 
             }
           ].map((stat, index) => (
-            <Card key={index} className="p-6">
+            <Card key={index} className={`p-6 border ${moduleTheme.borderClass} hover:shadow-md transition-shadow duration-200`}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
-                  <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                  <p className={`text-3xl font-bold mt-1 ${moduleTheme.textClass}`}>{stat.value}</p>
                 </div>
                 <FontAwesomeIcon icon={stat.icon} className={`text-3xl ${stat.color}`} />
               </div>
@@ -399,9 +401,9 @@ export default function RankingsPage() {
 
         {/* Rankings List */}
         <div>
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              {viewMode === 'global' ? 'Global Rankings' : 'Your Personal Rankings'}
+          <Card className={`p-6 border ${moduleTheme.borderClass}`}>
+            <h2 className={`text-xl font-semibold mb-4 ${moduleTheme.textClass}`}>
+              {viewMode === 'global' ? 'Global Rankings 🌐' : 'Your Personal Rankings 👤'}
             </h2>
             
             {error && (
@@ -409,8 +411,8 @@ export default function RankingsPage() {
                 <p className="text-red-800 dark:text-red-200">{error}</p>
                 <Button 
                   onClick={() => fetchRankings()} 
-                  className="mt-4"
-                  variant="secondary"
+                  className={`mt-4 ${moduleTheme.buttonClass}`}
+                  variant="primary"
                 >
                   Try Again
                 </Button>
@@ -422,15 +424,15 @@ export default function RankingsPage() {
                 <div className="text-center py-8">
                   <p className="text-gray-500 dark:text-gray-400 mb-4">No ranked cards yet.</p>
                   <Link href="/vote">
-                    <Button variant="primary">Vote on Cards</Button>
+                    <Button className={moduleTheme.buttonClass} variant="primary">Vote on Cards 🗳️</Button>
                   </Link>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {refreshing && (
                     <div className="flex justify-center items-center py-2">
-                      <LoadingSpinner size="sm" />
-                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">Refreshing rankings...</span>
+                      <LoadingSpinner size="sm" module="rankings" />
+                      <span className={`ml-2 text-sm ${moduleTheme.textClass}`}>Refreshing rankings... 🔄</span>
                     </div>
                   )}
                   
@@ -441,10 +443,10 @@ export default function RankingsPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <Card className="p-4 hover:bg-gray-50 dark:hover:bg-gray-750">
+                      <Card className={`p-4 hover:bg-rankings-50/30 dark:hover:bg-rankings-900/10 border ${moduleTheme.borderClass} transition-colors duration-200`}>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                           {/* Rank Badge */}
-                          <div className={`flex-shrink-0 w-12 h-12 rounded-full ${getRankBadgeColor(card.rank)} flex items-center justify-center`}>
+                          <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-rankings-${Math.min(card.rank, 5)}00/80 text-white flex items-center justify-center`}>
                             <span className="text-lg font-bold">{card.rank}</span>
                           </div>
                           
@@ -454,19 +456,19 @@ export default function RankingsPage() {
                               <p className="text-sm text-gray-500 dark:text-gray-400">
                                 Card ID: {card._id}
                               </p>
-                              <p className="text-lg font-medium text-gray-900 dark:text-white mt-1">
-                                Card Name: {card.cardText}
+                              <p className={`text-lg font-medium ${moduleTheme.textClass} mt-1`}>
+                                {card.cardText}
                               </p>
                               
                               <div className="flex items-end justify-end mt-1">
                                 {/* Like/Dislike Counts */}
                                 <div className="flex items-center space-x-3">
                                   <div className="flex items-center">
-                                    <FontAwesomeIcon icon={faThumbsUp} className="text-green-500 mr-1" />
+                                    <FontAwesomeIcon icon={faThumbsUp} className="text-rankings-500 mr-1" />
                                     <span className="text-sm font-medium">{card.wins}</span>
                                   </div>
                                   <div className="flex items-center">
-                                    <FontAwesomeIcon icon={faThumbsDown} className="text-red-500 mr-1" />
+                                    <FontAwesomeIcon icon={faThumbsDown} className="text-rankings-300 mr-1" />
                                     <span className="text-sm font-medium">{card.totalVotes - card.wins}</span>
                                   </div>
                                 </div>
@@ -522,18 +524,19 @@ export default function RankingsPage() {
                   </div>
                   <div className="flex flex-col sm:flex-row justify-center gap-3">
                     <Link href="/vote">
-                      <Button variant="primary">
+                      <Button variant="primary" className={moduleTheme.buttonClass}>
                         <FontAwesomeIcon icon={faExchangeAlt} className="mr-2" />
-                        Go Vote on Cards
+                        Go Vote on Cards 🗳️
                       </Button>
                     </Link>
                     <Button 
                       variant="secondary" 
                       onClick={refreshData}
                       isLoading={refreshing}
+                      className={`border-rankings-200 dark:border-rankings-800 hover:bg-rankings-50 dark:hover:bg-rankings-900/20`}
                     >
-                      <FontAwesomeIcon icon={faRedo} className="mr-2" />
-                      Refresh Rankings
+                      <FontAwesomeIcon icon={faRedo} className="mr-2 text-rankings-500" />
+                      Refresh Rankings 🔄
                     </Button>
                   </div>
                 </div>
@@ -541,8 +544,8 @@ export default function RankingsPage() {
                 <div className="space-y-4">
                   {refreshing && (
                     <div className="flex justify-center items-center py-2">
-                      <LoadingSpinner size="sm" />
-                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">Refreshing your rankings...</span>
+                      <LoadingSpinner size="sm" module="rankings" />
+                      <span className={`ml-2 text-sm ${moduleTheme.textClass}`}>Refreshing your rankings... 🔄</span>
                     </div>
                   )}
                   
@@ -553,10 +556,10 @@ export default function RankingsPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <Card className="p-4 hover:bg-gray-50 dark:hover:bg-gray-750">
+                      <Card className={`p-4 hover:bg-rankings-50/30 dark:hover:bg-rankings-900/10 border ${moduleTheme.borderClass} transition-colors duration-200`}>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                           {/* Vote Status Indicator */}
-                          <div className={`flex-shrink-0 w-12 h-12 rounded-full ${getVoteStatusIndicator(card.voteStatus).bgColor} flex items-center justify-center`}>
+                          <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-rankings-${card.voteStatus === 'liked' ? '500' : '300'} flex items-center justify-center`}>
                             <FontAwesomeIcon icon={getVoteStatusIndicator(card.voteStatus).icon} className="text-white" />
                           </div>
                           
@@ -566,8 +569,8 @@ export default function RankingsPage() {
                               <p className="text-sm text-gray-500 dark:text-gray-400">
                                 Card ID: {card._id}
                               </p>
-                              <p className="text-lg font-medium text-gray-900 dark:text-white mt-1">
-                                Card Name: {card.cardText}
+                              <p className={`text-lg font-medium ${moduleTheme.textClass} mt-1`}>
+                                {card.cardText}
                               </p>
                               
                               {/* Stats Grid */}

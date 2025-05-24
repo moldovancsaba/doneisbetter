@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ThemeProvider } from "next-themes";
 import { ToastProvider } from "../components/ui/Toast";
 import { AnimatePresence } from "framer-motion";
+import { ModuleThemeProvider } from "../contexts/ModuleThemeContext";
 import "../styles/globals.css";
 
 function MyApp({ Component, pageProps, router }) {
@@ -17,11 +18,13 @@ function MyApp({ Component, pageProps, router }) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system">
-      <ToastProvider>
-        <AnimatePresence mode="wait">
-          <Component {...pageProps} key={router.route} />
-        </AnimatePresence>
-      </ToastProvider>
+      <ModuleThemeProvider>
+        <ToastProvider>
+          <AnimatePresence mode="wait">
+            <Component {...pageProps} key={router.route} />
+          </AnimatePresence>
+        </ToastProvider>
+      </ModuleThemeProvider>
     </ThemeProvider>
   );
 }
