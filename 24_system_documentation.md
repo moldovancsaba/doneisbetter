@@ -1,3 +1,250 @@
+# System Documentation
+
+Last Updated: 2025-06-02T00:01:20Z
+
+## System Architecture
+
+### Frontend Architecture
+
+#### Core Technologies
+- Next.js (v15.3.3)
+- React (v18.2.0)
+- TailwindCSS (v3.4.1)
+- Framer Motion (v11.0.3)
+
+#### State Management
+- React Context API for global state
+- Local state for component-specific data
+- Session storage for user preferences
+
+#### Error Handling
+```javascript
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    logError(error, 'ErrorBoundary');
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorDisplay error={this.state.error} />;
+    }
+    return this.props.children;
+  }
+}
+
+// Error Logging Utility
+const logError = (error, context) => {
+  console.error(`[${new Date().toISOString()}] ${context}:`, error);
+};
+```
+
+#### Session Management
+```javascript
+// Session Timeout Configuration
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+
+// Session Timeout Hook
+const useSessionTimeout = () => {
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      handleSessionTimeout();
+    }, SESSION_TIMEOUT);
+
+    return () => clearTimeout(timeout);
+  }, []);
+};
+```
+
+### Backend Architecture
+
+#### API Routes
+- Next.js API Routes for serverless endpoints
+- MongoDB with Mongoose for data storage
+- Zod for request validation
+
+#### Error Handling
+```javascript
+// API Error Response Format
+const createErrorResponse = (error, context) => {
+  const timestamp = new Date().toISOString();
+  return {
+    success: false,
+    error: {
+      message: error.message,
+      code: error.code,
+      context,
+      timestamp
+    }
+  };
+};
+```
+
+#### Database Schema
+```javascript
+// User Schema
+const userSchema = new Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  createdAt: { type: Date, default: () => new Date().toISOString() }
+});
+
+// Session Schema
+const sessionSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User' },
+  token: { type: String, required: true },
+  expiresAt: { type: Date, required: true },
+  createdAt: { type: Date, default: () => new Date().toISOString() }
+});
+```
+
+## Error Handling
+
+### Frontend Error Handling
+
+1. **Error Boundaries**
+- Top-level error catching
+- Component-specific error boundaries
+- Fallback UI components
+
+2. **API Error Handling**
+- Axios interceptors for global handling
+- Request retry logic
+- Error state management
+
+3. **Form Validation**
+- Zod schema validation
+- Input sanitization
+- Error message display
+
+### Backend Error Handling
+
+1. **API Errors**
+- Consistent error format
+- Proper HTTP status codes
+- Detailed error messages
+
+2. **Database Errors**
+- Connection error handling
+- Query error handling
+- Validation error handling
+
+3. **Authentication Errors**
+- Session timeout handling
+- Invalid token handling
+- Permission error handling
+
+## Session Management
+
+### Session Lifecycle
+
+1. **Session Creation**
+- User authentication
+- Token generation
+- Session storage
+
+2. **Session Maintenance**
+- Token refresh
+- Activity tracking
+- Timeout handling
+
+3. **Session Termination**
+- Explicit logout
+- Timeout expiration
+- Error conditions
+
+### Error States
+
+1. **Session Timeout**
+- Automatic logout
+- User notification
+- State cleanup
+
+2. **Session Recovery**
+- Token refresh attempt
+- State restoration
+- Error handling
+
+## Development Guidelines
+
+### Code Style
+
+1. **TypeScript Usage**
+- Strict type checking
+- Interface definitions
+- Type exports
+
+2. **Error Handling**
+- Use try/catch blocks
+- Implement error boundaries
+- Log errors with context
+
+3. **Testing**
+- Unit tests for utilities
+- Integration tests for API
+- Component tests
+
+### Best Practices
+
+1. **Error Logging**
+- Include timestamps (ISO 8601)
+- Add context information
+- Stack trace when appropriate
+
+2. **Session Handling**
+- Implement timeout recovery
+- Clear error messages
+- Proper state cleanup
+
+3. **Code Organization**
+- Feature-based structure
+- Shared utilities
+- Type definitions
+
+## Deployment
+
+### Environment Setup
+
+1. **Development**
+- Local MongoDB
+- Environment variables
+- Development tools
+
+2. **Staging**
+- Cloud MongoDB
+- Production-like setup
+- Testing environment
+
+3. **Production**
+- Cloud hosting
+- Database clustering
+- Monitoring setup
+
+### Monitoring
+
+1. **Error Tracking**
+- Error logging service
+- Alert configuration
+- Error analytics
+
+2. **Performance Monitoring**
+- API response times
+- Database metrics
+- Frontend metrics
+
+## Notes
+
+- All timestamps use ISO 8601 format (2025-06-02T00:01:20Z)
+- Error handling is standardized across the application
+- Session management includes proper recovery mechanisms
+- Documentation is regularly updated with system changes
+
 # DoneisBetter System Documentation [2025-05-24T02:40:43.789Z]
 
 ## Table of Contents
@@ -166,24 +413,39 @@ The application uses React's built-in state management with Context API for glob
 2. **Context Providers**: For shared state (theme, user preferences, authentication)
 3. **Real-time Updates**: Socket.io for live updates to rankings and votes
 
-### Navigation System
+### Navigation System [2025-05-31T15:40:38.000Z]
 
-The navigation system consists of multiple components that work together:
+The navigation system uses a unified component architecture with responsive design that adapts between desktop and mobile views:
 
-1. **Header.js**: Main navigation menu for desktop view with items:
-   - Home 🏠
-   - Rankings 🏆
-   - Swipe 🔄
-   - Vote 🗳️
-   - Admin ⚙️
+1. **Desktop Navigation**:
+   - Side navigation panel (permanent)
+   - Left-aligned vertical menu
+   - Visual indicators for active items
+   - Hover and focus states with smooth transitions
+   - Keyboard navigation support
 
-2. **MobileNav.js**: Mobile-optimized navigation with similar items
+2. **Mobile Navigation**:
+   - Bottom navigation bar
+   - Icon-based menu items
+   - Swipe-up gesture to reveal
+   - Touch-optimized hit areas
+   - Compact labels
 
-3. **Key Navigation Features**:
+3. **Standard Menu Items**:
+   - Home 🏠 - Main dashboard
+   - Swipe 🔄 - Card swipe interface
+   - Vote 🗳️ - Voting interface
+   - Rankings 🏆 - Current rankings
+   - Users 👥 - User management
+   - Admin ⚙️ - Admin dashboard
+
+4. **Navigation Features**:
    - Active page highlighting
    - Dark/light mode toggle (🌙/🌞)
+   - Theme-aware styling
+   - ARIA labels for accessibility
    - Animated transitions between pages
-   - Mobile responsiveness
+   - Responsive layout adaptation
 
 ### UI Components
 

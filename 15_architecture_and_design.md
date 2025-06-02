@@ -1,4 +1,4 @@
-# System Architecture and Design [2025-05-24T03:04:04.789Z]
+# System Architecture and Design [2025-05-31T16:33:14.000Z]
 
 ## Overview
 DoneisBetter follows a modern, component-based architecture with real-time capabilities.
@@ -18,10 +18,20 @@ DoneisBetter follows a modern, component-based architecture with real-time capab
    - Local State Management
 
 3. Navigation System
-   - Header.js (Desktop navigation)
-   - MobileNav.js (Mobile-optimized navigation)
-   - Navigation.js (Alternative navigation component)
-   - Consistent menu items with emoji indicators
+   - Unified Navigation Component (Navigation.js)
+     - Responsive design for desktop and mobile
+     - Consistent menu items with emoji indicators
+     - Standard menu items:
+       * Home (🏠)
+       * Swipe (🔄)
+       * Vote (🗳️)
+       * Rankings (🏆)
+       * Users (👥)
+       * Admin (⚙️)
+   - Theme-aware styling
+   - Accessibility features
+   - Mobile-optimized bottom navigation
+   - Desktop side navigation
 
 ### Backend Architecture
 1. API Structure
@@ -236,3 +246,4 @@ DoneisBetter follows a modern, component-based architecture with real-time capab
 ## Version History
 - Initial documentation: 2025-05-22T10:41:29.789Z
 - Updated with navigation system, ranking algorithm, and HTTP polling: 2025-05-24T03:04:04.789Z
+- Updated with unified navigation system and documentation consolidation: 2025-05-31T16:33:14.000Z

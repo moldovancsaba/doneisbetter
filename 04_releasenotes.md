@@ -1,4 +1,13 @@
-# Release Notes [2025-05-24T02:52:45.789Z]
+# Release Notes [2025-05-31T16:33:14.000Z]
+
+## Version 1.20.0 - 2025-05-31T16:33:14.000Z
+### Navigation System Overhaul
+- Implemented unified navigation component
+- Added consistent emoji menu items
+- Improved mobile bottom navigation
+- Enhanced desktop side navigation
+- Updated navigation documentation
+- Standardized timestamp formats
 
 ## Version 1.19.0 - 2025-05-24T02:52:45.789Z
 ### Navigation and Documentation Improvements
@@ -44,26 +53,26 @@
 - Added component documentation
 - Updated roadmap status
 
-## Version 1.17.2 - 2025-05-05T19:04:50+02:00
+## Version 1.17.2 - 2025-05-05T17:04:50.000Z
 ### Bug Fixes
 - Fixed type errors across components
 - Improved error handling
 - Resolved mongoose types issues
 
-## Version 1.17.1 - 2025-05-05T14:15:46+02:00
+## Version 1.17.1 - 2025-05-05T12:15:46.000Z
 ### Technical Updates
 - Removed Babel in favor of SWC
 - Fixed mongoose types
 - Improved build performance
 
-## Version 1.17.0 - 2025-05-05T14:07:28+02:00
+## Version 1.17.0 - 2025-05-05T12:07:28.000Z
 ### Features
 - Completed database connection module
 - Added full test coverage
 - Improved error handling
 - Enhanced data validation
 
-## Version 1.16.0 - 2025-05-05T11:58:35+02:00
+## Version 1.16.0 - 2025-05-05T09:58:35.000Z
 ### Features
 - Added safe property access
 - Implemented null checks for MongoDB documents

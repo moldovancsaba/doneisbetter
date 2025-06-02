@@ -1,4 +1,4 @@
-# Documentation Index [2025-05-24T02:52:45.789Z]
+# Documentation Index [2025-05-31T16:33:14.000Z]
 
 ## Project Documentation Structure
 
@@ -23,7 +23,7 @@
 
 ### Project Guidelines
 - [14_license_and_guidelines.md](14_license_and_guidelines.md) - License and usage
-- [15_architecture_and_design.md](15_architecture_and_design.md) - System architecture
+- [15_architecture_and_design.md](15_architecture_and_design.md) - System architecture and navigation
 - [16_code_of_conduct.md](16_code_of_conduct.md) - Community guidelines
 - [17_contributing_guidelines.md](17_contributing_guidelines.md) - Contribution rules
 
@@ -48,7 +48,7 @@
 All documentation follows the ISO 8601 timestamp format with milliseconds:
 `YYYY-MM-DDThh:mm:ss.SSSZ`
 
-Current timestamp: 2025-05-24T02:52:45.789Z
+Current timestamp: 2025-05-31T16:33:14.000Z
 
 ### Update Process
 1. Use proper timestamp
@@ -70,4 +70,4 @@ Current timestamp: 2025-05-24T02:52:45.789Z
 - Timestamps indicate last modification
 - Cross-references are validated
 
-Last Updated: 2025-05-24T02:52:45.789Z
+Last Updated: 2025-05-31T16:33:14.000Z
