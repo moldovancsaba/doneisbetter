@@ -1,3 +1,176 @@
+# AI Development Plan
+
+Last Updated: 2025-06-02T00:01:20Z
+
+## Current Phase: Error Handling and Documentation Standardization
+
+### Recently Completed
+1. ESLint Configuration
+   - Resolved conflicts between Next.js and TypeScript
+   - Standardized on ES Modules
+   - Fixed TypeScript path aliases
+
+2. Timestamp Standardization
+   - Implemented ISO 8601 format (2025-06-02T00:01:20Z)
+   - Updated all date/time displays
+   - Created timestamp utility functions
+
+3. Error Handling Framework
+   - Implemented centralized error handling
+   - Added error boundaries
+   - Created consistent error message format
+   - Added proper session error handling
+
+### Current Focus
+1. Error Handling Enhancement
+   - Implementing error boundaries
+   - Adding retry mechanisms
+   - Improving error logging
+   - Enhancing session error handling
+
+2. Documentation Updates
+   - Updating technical documentation
+   - Improving API documentation
+   - Adding troubleshooting guides
+   - Enhancing code comments
+
+### Next Steps
+1. Performance Optimization
+   - Implement code splitting
+   - Optimize database queries
+   - Add proper caching
+   - Improve bundle size
+
+2. Testing Enhancement
+   - Add unit tests
+   - Implement integration tests
+   - Add end-to-end tests
+   - Improve test coverage
+
+3. Accessibility Implementation
+   - Add ARIA labels
+   - Improve keyboard navigation
+   - Enhance screen reader support
+   - Verify color contrast
+
+## Project Timeline
+
+### Phase 1: Foundation (Completed)
+- [x] Project setup
+- [x] Basic architecture
+- [x] Core components
+
+### Phase 2: Feature Development (Completed)
+- [x] User authentication
+- [x] Basic CRUD operations
+- [x] UI components
+
+### Phase 3: Error Handling (Current)
+- [x] Error handling framework
+- [x] Session management
+- [ ] Retry mechanisms
+- [ ] Error boundaries
+
+### Phase 4: Performance (Upcoming)
+- [ ] Code splitting
+- [ ] Query optimization
+- [ ] Caching implementation
+- [ ] Bundle optimization
+
+### Phase 5: Testing & Quality (Upcoming)
+- [ ] Unit testing
+- [ ] Integration testing
+- [ ] End-to-end testing
+- [ ] Performance testing
+
+### Phase 6: Accessibility (Upcoming)
+- [ ] ARIA implementation
+- [ ] Keyboard navigation
+- [ ] Screen reader support
+- [ ] Color contrast verification
+
+## Technical Specifications
+
+### Error Handling
+```javascript
+// Error logging format
+const logError = (error, context) => {
+  console.error(`[${new Date().toISOString()}] ${context}:`, error);
+};
+
+// Error boundary component
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    logError(error, 'ErrorBoundary');
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorDisplay error={this.state.error} />;
+    }
+    return this.props.children;
+  }
+}
+```
+
+### Session Management
+```javascript
+// Session timeout handling
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+
+const useSessionTimeout = () => {
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      // Handle session timeout
+      handleSessionTimeout();
+    }, SESSION_TIMEOUT);
+
+    return () => clearTimeout(timeout);
+  }, []);
+};
+```
+
+## Standards and Guidelines
+
+### Error Message Format
+```javascript
+{
+  timestamp: '2025-06-02T00:01:20Z',
+  code: 'ERROR_CODE',
+  message: 'Human readable message',
+  context: 'Where the error occurred',
+  details: {} // Additional error details
+}
+```
+
+### Timestamp Format
+- All timestamps must follow ISO 8601 format
+- Example: 2025-06-02T00:01:20Z
+- Must include milliseconds where applicable
+
+### Module System
+- Use ES Modules consistently
+- No mixing of require() and import
+- Proper file extensions (.js, .ts, .tsx)
+
+### Documentation Format
+- JSDoc comments for functions
+- API documentation with examples
+- Proper type definitions
+- Clear error handling documentation
+
+## Notes
+- All timestamps follow ISO 8601 format
+- ESLint configuration is locked
+- Error handling is standardized
+- Session management is implemented
+
 # Implementation Plan for UI/UX Improvements and Functionality Changes
 
 ## Overview
@@ -314,17 +487,129 @@ const rankedCards = await VoteRank.find({
 
 This implementation plan provides a comprehensive approach to enhancing the doneisbetter application's UI consistency and user experience. The changes will create a more cohesive visual language, standardize iconography, and implement a more logical swipe-then-vote workflow that improves data quality and user satisfaction.
 
-# 10_AI_PLAN.md — DONEISBETTER [2025-05-24T02:52:45.789Z]
+# 10_AI_PLAN.md — DONEISBETTER [2025-06-02T10:24:03Z]
 
-## 📱 UI Enhancement Roadmap
+## 🚨 Critical Issues Resolution Plan
 
-This document outlines the sequential development plan for enhancing the doneisbetter UI according to the "Done is Better Than Perfect" philosophy. All tasks will be implemented in order, tested individually, and deployed before proceeding to the next.
+This document outlines the plan for resolving critical issues in the doneisbetter application, focusing on theme context errors and caching behavior. Following our "Done is Better Than Perfect" philosophy, we'll address these issues through configuration and environment setup without modifying the core codebase.
 
 ---
 
+## 🎯 Current Issues
+
+### 1. Theme Context Errors
+- Multiple pages affected: /rankings, /swipe, /vote
+- Error: moduleTheme.bgClass is undefined
+- Impact: Visual consistency affected
+
+### 2. Admin React Issues
+- Admin page affected
+- Error: useCallback undefined
+- Impact: Admin functionality blocked
+
+### 3. Caching Behavior
+- First-load caching needs adjustment
+- Login/Register flow affected
+- Impact: User authentication flow
+
+## 🔧 Resolution Approach
+
+### Phase 1: Environment Setup
+1. Configure cache control
+2. Set up development environment
+3. Implement monitoring tools
+
+### Phase 2: Testing Protocol
+1. Create testing checklist
+2. Establish verification steps
+3. Document test cases
+
+### Phase 3: Documentation
+1. Update technical docs
+2. Create debugging guide
+3. Document configuration
+
+## 📋 Implementation Steps
+
+### 1. Cache Control Setup
+```bash
+# Environment Variables
+NEXT_PUBLIC_DISABLE_CACHE=true
+NEXT_PUBLIC_FORCE_LOGIN=true
+
+# Build Process
+npm run build
+npm run dev
+```
+
+### 2. Development Environment
+```bash
+# Clean Setup
+rm -rf .next
+rm -rf node_modules/.cache
+rm -rf node_modules
+npm install
+```
+
+### 3. Testing Protocol
+- Clear browser cache
+- Use incognito mode
+- Test all affected routes
+- Verify theme context
+
+## 🔍 Monitoring
+
+### 1. Browser Tools
+- Chrome DevTools
+- React DevTools
+- Network Monitor
+
+### 2. Console Logging
+```javascript
+// Theme context debug
+window.checkTheme = () => {
+  console.log('Theme:', document.documentElement.dataset.theme);
+  console.log('Module:', window.__NEXT_DATA__.props.moduleTheme);
+}
+```
+
+## ✅ Success Criteria
+
+### Theme Context
+- [ ] No undefined errors
+- [ ] Consistent theming
+- [ ] Proper initialization
+
+### Admin Page
+- [ ] React hooks working
+- [ ] No reference errors
+- [ ] Full functionality
+
+### Caching
+- [ ] No first-load cache
+- [ ] Login flow works
+- [ ] Session handling correct
+
+## 📝 Documentation Updates
+
+### 1. Technical Documentation
+- Environment setup
+- Cache configuration
+- Theme system
+
+### 2. Testing Guidelines
+- Test procedures
+- Verification steps
+- Error handling
+
+### 3. Deployment Guide
+- Server configuration
+- Cache headers
+- Environment variables
+
 ## 🔄 Process Structure
 
-Each enhancement task must be:
+Each resolution task must be:
 - Fully implemented
 - Tested in isolation
 - Committed to GitHub
