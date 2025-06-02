@@ -4,21 +4,58 @@ module.exports = {
     './pages/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
   ],
-  darkMode: 'class',
+  darkMode: ['class', '[data-theme="dark"]'],
   theme: {
+    screens: {
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
+    fontSize: {
+      'xs': ['0.75rem', { lineHeight: '1rem' }],
+      'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+      'base': ['1rem', { lineHeight: '1.5rem' }],
+      'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+      'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+      '2xl': ['1.5rem', { lineHeight: '2rem' }],
+      '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+      '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+      '5xl': ['3rem', { lineHeight: '1' }],
+      '6xl': ['3.75rem', { lineHeight: '1' }],
+    },
     extend: {
       colors: {
+        // Material Design 3 colors using CSS variables
+        'md': {
+          'primary': 'rgb(var(--md-primary))',
+          'on-primary': 'rgb(var(--md-on-primary))',
+          'primary-container': 'rgb(var(--md-primary-container))',
+          'on-primary-container': 'rgb(var(--md-on-primary-container))',
+          'secondary': 'rgb(var(--md-secondary))',
+          'on-secondary': 'rgb(var(--md-on-secondary))',
+          'secondary-container': 'rgb(var(--md-secondary-container))',
+          'on-secondary-container': 'rgb(var(--md-on-secondary-container))',
+          'surface': 'rgb(var(--md-surface))',
+          'on-surface': 'rgb(var(--md-on-surface))',
+          'surface-variant': 'rgb(var(--md-surface-variant))',
+          'on-surface-variant': 'rgb(var(--md-on-surface-variant))',
+          'outline': 'rgb(var(--md-outline))',
+          'outline-variant': 'rgb(var(--md-outline-variant))',
+        },
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          // Light Blue theme
+          50: '#e1f5fe',
+          100: '#b3e5fc',
+          200: '#81d4fa',
+          300: '#4fc3f7',
+          400: '#29b6f6',
+          500: '#03a9f4',
+          600: '#039be5',
+          700: '#0288d1',
+          800: '#0277bd',
+          900: '#01579b',
         },
         // Module-specific colors
         home: {
@@ -82,6 +119,18 @@ module.exports = {
           900: '#0d47a1',
         },
       },
+      borderRadius: {
+        'md-sm': 'var(--md-radius-small)',
+        'md-md': 'var(--md-radius-medium)',
+        'md-lg': 'var(--md-radius-large)',
+        'md-xl': 'var(--md-radius-extra-large)',
+      },
+      spacing: {
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
+      },
       animation: {
         'slide-up': 'slideUp 0.3s ease-out',
         'slide-down': 'slideDown 0.3s ease-out',
@@ -132,12 +181,35 @@ module.exports = {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
       },
+      container: {
+        center: true,
+        padding: {
+          DEFAULT: '1rem',
+          sm: '1.5rem',
+          lg: '2rem',
+        },
+      },
+      maxWidth: {
+        'mobile': '100%',
+        'tablet': '640px',
+        'laptop': '1024px',
+        'desktop': '1280px',
+      },
     },
   },
   plugins: [
     require('@tailwindcss/forms'),
     function ({ addUtilities }) {
       addUtilities({
+        '.md-elevation-1': {
+          'box-shadow': '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+        },
+        '.md-elevation-2': {
+          'box-shadow': '0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12)',
+        },
+        '.md-elevation-3': {
+          'box-shadow': '0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10)',
+        },
         '.text-shadow-sm': {
           'text-shadow': '0 1px 2px rgba(0, 0, 0, 0.05)',
         },
@@ -146,6 +218,23 @@ module.exports = {
         },
         '.text-shadow-lg': {
           'text-shadow': '0 4px 8px rgba(0, 0, 0, 0.15)',
+        },
+        '.touch-target': {
+          'min-height': '44px',
+          'min-width': '44px',
+        },
+        '.safe-paddings': {
+          'padding-top': 'env(safe-area-inset-top)',
+          'padding-bottom': 'env(safe-area-inset-bottom)',
+          'padding-left': 'env(safe-area-inset-left)',
+          'padding-right': 'env(safe-area-inset-right)',
+        },
+        '.glass': {
+          'background': 'rgba(255, 255, 255, 0.7)',
+          'backdrop-filter': 'blur(10px)',
+          '@media (prefers-color-scheme: dark)': {
+            'background': 'rgba(17, 24, 39, 0.7)',
+          },
         },
       });
     },
