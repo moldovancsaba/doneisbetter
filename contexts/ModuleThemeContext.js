@@ -11,6 +11,7 @@ export const moduleThemes = {
     color: "home",
     lightBg: "bg-home-50/30",
     darkBg: "dark:bg-gray-900",
+    bgClass: "bg-home-50/30 dark:bg-gray-900",
     gradient: "from-home-500 to-home-700",
     activeClass: "bg-home-600 dark:bg-home-700 text-white",
     inactiveClass: "text-home-700 dark:text-home-300 hover:bg-home-50 dark:hover:bg-home-900/20",
@@ -24,6 +25,7 @@ export const moduleThemes = {
     color: "rankings",
     lightBg: "bg-rankings-50/30",
     darkBg: "dark:bg-gray-900",
+    bgClass: "bg-rankings-50/30 dark:bg-gray-900",
     gradient: "from-rankings-500 to-rankings-700",
     activeClass: "bg-rankings-600 dark:bg-rankings-700 text-white",
     inactiveClass: "text-rankings-700 dark:text-rankings-300 hover:bg-rankings-50 dark:hover:bg-rankings-900/20",
@@ -37,6 +39,7 @@ export const moduleThemes = {
     color: "swipe",
     lightBg: "bg-swipe-50/30",
     darkBg: "dark:bg-gray-900",
+    bgClass: "bg-swipe-50/30 dark:bg-gray-900",
     gradient: "from-swipe-500 to-swipe-700",
     activeClass: "bg-swipe-600 dark:bg-swipe-700 text-white",
     inactiveClass: "text-swipe-700 dark:text-swipe-300 hover:bg-swipe-50 dark:hover:bg-swipe-900/20",
@@ -50,6 +53,7 @@ export const moduleThemes = {
     color: "vote",
     lightBg: "bg-vote-50/30",
     darkBg: "dark:bg-gray-900",
+    bgClass: "bg-vote-50/30 dark:bg-gray-900",
     gradient: "from-vote-500 to-vote-700",
     activeClass: "bg-vote-600 dark:bg-vote-700 text-white",
     inactiveClass: "text-vote-700 dark:text-vote-300 hover:bg-vote-50 dark:hover:bg-vote-900/20",
@@ -63,6 +67,7 @@ export const moduleThemes = {
     color: "admin",
     lightBg: "bg-admin-50/30",
     darkBg: "dark:bg-gray-900",
+    bgClass: "bg-admin-50/30 dark:bg-gray-900",
     gradient: "from-admin-500 to-admin-700",
     activeClass: "bg-admin-600 dark:bg-admin-700 text-white",
     inactiveClass: "text-admin-700 dark:text-admin-300 hover:bg-admin-50 dark:hover:bg-admin-900/20",
@@ -70,6 +75,20 @@ export const moduleThemes = {
     textClass: "text-admin-700 dark:text-admin-200",
     buttonClass: "bg-admin-600 hover:bg-admin-700 text-white",
     iconClass: "text-admin-500 dark:text-admin-400",
+  },
+  users: {
+    name: "Users 👥",
+    color: "primary", // Using primary color scheme instead of admin
+    lightBg: "bg-primary-50/30",
+    darkBg: "dark:bg-gray-900",
+    bgClass: "bg-primary-50/30 dark:bg-gray-900",
+    gradient: "from-primary-500 to-primary-700",
+    activeClass: "bg-primary-600 dark:bg-primary-700 text-white",
+    inactiveClass: "text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20",
+    borderClass: "border-primary-200 dark:border-primary-800",
+    textClass: "text-primary-700 dark:text-primary-200",
+    buttonClass: "bg-primary-600 hover:bg-primary-700 text-white",
+    iconClass: "text-primary-500 dark:text-primary-400",
   },
 };
 
@@ -90,6 +109,8 @@ export const ModuleThemeProvider = ({ children }) => {
       setCurrentModule('swipe');
     } else if (path.startsWith('/vote')) {
       setCurrentModule('vote');
+    } else if (path.startsWith('/users')) {
+      setCurrentModule('users');
     } else if (path.startsWith('/admin')) {
       setCurrentModule('admin');
     } else {
@@ -107,7 +128,7 @@ export const ModuleThemeProvider = ({ children }) => {
     <ModuleThemeContext.Provider value={{ 
       currentModule, 
       theme, 
-      backgroundClass,
+      bgClass: theme.bgClass,
       allThemes: moduleThemes
     }}>
       {children}

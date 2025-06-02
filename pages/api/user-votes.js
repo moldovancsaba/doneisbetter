@@ -1,8 +1,4 @@
-import dbConnect from '../../lib/dbConnect';
-import VotePair from '../../models/VotePair';
-import VoteRank from '../../models/VoteRank';
-import Card from '../../models/Card';
-import Interaction from '../../models/Interaction';
+import { connectToDatabase, initializeModels, VotePair, VoteRank, Card, Interaction } from '../../models';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -25,7 +21,8 @@ export default async function handler(req, res) {
   
   try {
     console.log(`[${requestTime}] Connecting to database...`);
-    await dbConnect();
+    await connectToDatabase();
+    initializeModels();
     console.log(`[${requestTime}] Database connected successfully`);
 
     // Build query based on provided parameters
@@ -35,10 +32,19 @@ export default async function handler(req, res) {
     
     console.log(`[${requestTime}] Query parameters:`, query);
     
-    // Find all cards that have been swiped right by this user/session
-    const rightSwipedQuery = sessionId 
-      ? { sessionId, type: 'swipe', action: 'right' }
-      : { userId, type: 'swipe', action: 'right' };
+    // Find the user ID associated with this session
+    const interaction = await Interaction.findOne({ sessionId });
+    const associatedUserId = interaction?.userId;
+    
+    // Build the query to find right-swiped cards
+    let rightSwipedQuery = { type: 'swipe', action: 'right' };
+    if (associatedUserId) {
+      // If there's a user ID, find cards from all their sessions
+      rightSwipedQuery.$or = [{ sessionId }, { userId: associatedUserId }];
+    } else {
+      // Otherwise, just use the current session
+      rightSwipedQuery.sessionId = sessionId;
+    }
       
     console.log(`[${requestTime}] Finding right-swiped cards with query:`, rightSwipedQuery);
     
@@ -103,9 +109,9 @@ export default async function handler(req, res) {
     try {
       votePairs = await VotePair.find(query)
         .sort({ timestamp: -1 })
-        .populate('card1Id')
-        .populate('card2Id')
-        .populate('winnerId');
+        .populate('card1')
+        .populate('card2')
+        .populate('winner');
 
       console.log(`[${requestTime}] Found ${votePairs.length} vote pairs for this session`);
       
@@ -148,80 +154,59 @@ export default async function handler(req, res) {
     // Add debug logging for vote pairs structure
     if (votePairs && votePairs.length > 0) {
       try {
-        console.log(`[${requestTime}] First vote pair structure sample:`, JSON.stringify({
-          card1Id: votePairs[0].card1Id._id.toString(),
-          card1Fields: Object.keys(votePairs[0].card1Id._doc || votePairs[0].card1Id),
-          card2Id: votePairs[0].card2Id._id.toString(),
-          card2Fields: Object.keys(votePairs[0].card2Id._doc || votePairs[0].card2Id)
-        }));
-      } catch (structureError) {
-        console.error(`[${requestTime}] Error logging vote pair structure:`, structureError);
+          console.log(`[${requestTime}] First vote pair structure sample:`, JSON.stringify({
+            card1Id: votePairs[0].card1._id.toString(),
+            card1Fields: Object.keys(votePairs[0].card1._doc || votePairs[0].card1),
+            card2Id: votePairs[0].card2._id.toString(),
+            card2Fields: Object.keys(votePairs[0].card2._doc || votePairs[0].card2)
+          }));
+
+          console.log(`[${requestTime}] First vote pair winner:`, votePairs[0].winner.text);
+        } catch (debugError) {
+          console.log(`[${requestTime}] Error logging vote pair structure:`, debugError);
+        }
       }
-    }
-    
-    // Helper function to get card text safely
-    const getCardText = (card) => {
-      // Check various possible field names for the card text
-      if (!card) return 'Unknown Card';
-      
-      try {
-        // Try different possible field names
-        if (card.text !== undefined) return card.text;
-        if (card.cardText !== undefined) return card.cardText;
-        if (card.content !== undefined) return card.content;
-        if (card.title !== undefined) return card.title;
-        
-        // If no text field is found, return a placeholder
-        return 'Card #' + card._id.toString().substring(0, 6);
-      } catch (error) {
-        console.error(`[${requestTime}] Error getting card text:`, error);
-        return 'Error reading card';
-      }
-    };
-    
-    // Now process vote pairs to update the vote statistics for cards that have been voted on
-    if (votePairs && votePairs.length > 0) {
-      votePairs.forEach(vote => {
-        const card1Id = vote.card1Id._id.toString();
-        const card2Id = vote.card2Id._id.toString();
-        const winnerId = vote.winnerId._id.toString();
-        
-        // Update card1 voting statistics if it's in our map (was swiped right)
-        const card1 = cardsMap.get(card1Id);
-        if (card1) {
-          card1.totalVotes = (card1.totalVotes || 0) + 1;
-          if (card1Id === winnerId) {
-            card1.wins = (card1.wins || 0) + 1;
+
+      // Now process vote pairs to update the vote statistics for cards that have been voted on
+      if (votePairs && votePairs.length > 0) {
+        // Process each vote pair
+        votePairs.forEach(vote => {
+          // Update card1 voting statistics if it's in our map (was swiped right)
+          const card1 = cardsMap.get(vote.card1._id.toString());
+          if (card1) {
+            card1.totalVotes = (card1.totalVotes || 0) + 1;
+            if (vote.card1._id.toString() === vote.winner._id.toString()) {
+              card1.wins = (card1.wins || 0) + 1;
+            }
+            
+            // Update lastVoted time if this vote is more recent
+            if (new Date(vote.timestamp) > new Date(card1.lastVoted)) {
+              card1.lastVoted = vote.timestamp;
+            }
           }
           
-          // Update lastVoted time if this vote is more recent
-          if (new Date(vote.timestamp) > new Date(card1.lastVoted)) {
-            card1.lastVoted = vote.timestamp;
+          // Update card2 voting statistics if it's in our map (was swiped right)
+          const card2 = cardsMap.get(vote.card2._id.toString());
+          if (card2) {
+            card2.totalVotes = (card2.totalVotes || 0) + 1;
+            if (vote.card2._id.toString() === vote.winner._id.toString()) {
+              card2.wins = (card2.wins || 0) + 1;
+            }
+            
+            // Update lastVoted time if this vote is more recent
+            if (new Date(vote.timestamp) > new Date(card2.lastVoted)) {
+              card2.lastVoted = vote.timestamp;
+            }
           }
-        }
+        });
         
-        // Update card2 voting statistics if it's in our map (was swiped right)
-        const card2 = cardsMap.get(card2Id);
-        if (card2) {
-          card2.totalVotes = (card2.totalVotes || 0) + 1;
-          if (card2Id === winnerId) {
-            card2.wins = (card2.wins || 0) + 1;
+        // Calculate win rates for all cards that have votes
+        for (const [cardId, cardData] of cardsMap.entries()) {
+          if (cardData.totalVotes > 0) {
+            cardData.winRate = Math.round((cardData.wins / cardData.totalVotes) * 100);
           }
-          
-          // Update lastVoted time if this vote is more recent
-          if (new Date(vote.timestamp) > new Date(card2.lastVoted)) {
-            card2.lastVoted = vote.timestamp;
-          }
-        }
-      });
-      
-      // Calculate win rates for all cards that have votes
-      for (const [cardId, cardData] of cardsMap.entries()) {
-        if (cardData.totalVotes > 0) {
-          cardData.winRate = Math.round((cardData.wins / cardData.totalVotes) * 100);
         }
       }
-    }
     
     // Convert Map to Array for formatting and sorting
     const cardIdsArray = Array.from(cardsMap.keys());

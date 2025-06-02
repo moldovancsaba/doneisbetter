@@ -3,6 +3,7 @@ import { ThemeProvider } from "next-themes";
 import { ToastProvider } from "../components/ui/Toast";
 import { AnimatePresence } from "framer-motion";
 import { ModuleThemeProvider } from "../contexts/ModuleThemeContext";
+import { SessionProvider } from "../contexts/SessionContext";
 import "../styles/globals.css";
 
 function MyApp({ Component, pageProps, router }) {
@@ -17,14 +18,16 @@ function MyApp({ Component, pageProps, router }) {
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system">
-      <ModuleThemeProvider>
-        <ToastProvider>
-          <AnimatePresence mode="wait">
-            <Component {...pageProps} key={router.route} />
-          </AnimatePresence>
-        </ToastProvider>
-      </ModuleThemeProvider>
+    <ThemeProvider attribute="data-theme" defaultTheme="system">
+      <SessionProvider>
+        <ModuleThemeProvider>
+          <ToastProvider>
+            <AnimatePresence mode="wait">
+              <Component {...pageProps} key={router.route} />
+            </AnimatePresence>
+          </ToastProvider>
+        </ModuleThemeProvider>
+      </SessionProvider>
     </ThemeProvider>
   );
 }

@@ -1,12 +1,15 @@
-import { useState, useEffect } from "react";
-import { PageWrapper } from "../components/layout/Header";
+import { useState, useEffect, useCallback } from "react";
+import { PageWrapper } from "../components/layout/PageWrapper";
 import { CardStack } from "../components/features/CardStack";
 import { LoadingScreen } from "../components/ui/Loading";
 import { useToast } from "../components/ui/Toast";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/Button";
 import { useModuleTheme } from "../contexts/ModuleThemeContext";
-// Remove FontAwesome imports as we're using emojis
+import { useSession } from "../contexts/SessionContext";
+import { useSwipeController } from "../hooks/useSwipeController";
+import { UserRegistration } from "../components/features/UserRegistration";
+import { toISOWithMillisec } from "../utils/dates";
 
 export default function SwipePage({ initialCards }) {
   const [cards, setCards] = useState(initialCards || []);
@@ -14,12 +17,26 @@ export default function SwipePage({ initialCards }) {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date().toISOString());
   const [error, setError] = useState(null);
-  const [sessionId, setSessionId] = useState(null);
   const { addToast } = useToast();
   const { theme: moduleTheme } = useModuleTheme();
+  const { 
+    sessionId, 
+    userId, 
+    status: sessionStatus, 
+    error: sessionError,
+    isRegistered,
+    refreshSession,
+    toISOWithMillisec
+  } = useSession();
 
   // Function to fetch cards
-  const fetchCards = async (showRefreshing = false) => {
+  const fetchCards = useCallback(async (showRefreshing = false) => {
+    if (!sessionId) {
+      setError("No session ID available. Please refresh the page.");
+      addToast("Session ID not available. Please refresh the page.", "error");
+      return;
+    }
+    
     if (showRefreshing) {
       setRefreshing(true);
     } else {
@@ -27,7 +44,8 @@ export default function SwipePage({ initialCards }) {
     }
     
     try {
-      const response = await fetch('/api/cards');
+      // Include sessionId as a query parameter to filter out swiped cards
+      const response = await fetch(`/api/cards?sessionId=${sessionId}`);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -37,7 +55,7 @@ export default function SwipePage({ initialCards }) {
       const data = await response.json();
       if (data.success) {
         setCards(data.data);
-        setLastUpdate(new Date().toISOString());
+        setLastUpdate(toISOWithMillisec(new Date()));
       } else {
         throw new Error(data.error || "Failed to fetch cards");
       }
@@ -48,27 +66,23 @@ export default function SwipePage({ initialCards }) {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [addToast, sessionId, toISOWithMillisec]);
 
-  // Get or create session ID from localStorage
+  // Handle session status changes
   useEffect(() => {
-    // Try to get existing session ID from localStorage
-    const storedSessionId = localStorage.getItem('voteSessionId');
-    if (storedSessionId) {
-      console.log("Using existing session ID:", storedSessionId);
-      setSessionId(storedSessionId);
-    } else {
-      // Create a new random session ID using a timestamp and random number
-      const newSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      console.log("Created new session ID:", newSessionId);
-      localStorage.setItem('voteSessionId', newSessionId);
-      setSessionId(newSessionId);
+    if (sessionError) {
+      setError(`Session error: ${sessionError}`);
+      addToast(`Session error: ${sessionError}. Please refresh the page.`, "error");
     }
-  }, []);
+  }, [sessionError, addToast]);
 
   // Set up polling for new cards every 30 seconds
   useEffect(() => {
-    // Initial fetch not needed because we have initialCards from SSR
+    // Only start polling if we have both session and user
+    if (!sessionId || !userId) return;
+    
+    // Fetch cards initially with session ID
+    fetchCards();
     
     // Set up polling every 30 seconds
     const pollInterval = setInterval(() => {
@@ -78,7 +92,7 @@ export default function SwipePage({ initialCards }) {
     return () => {
       clearInterval(pollInterval);
     };
-  }, []);
+  }, [sessionId, userId, fetchCards]);
   
   // Manual refresh function
   const handleRefresh = () => {
@@ -86,23 +100,32 @@ export default function SwipePage({ initialCards }) {
     addToast("Refreshing cards", "info");
   };
 
-  const handleSwipe = async (direction) => {
+  // Use the swipe controller to prevent duplicate swipes
+  const handleActualSwipe = async (direction, cardId) => {
     if (!cards.length) return;
     
     // Get the current card being swiped
     const currentCard = cards[0];
     
-    // Create a reference to the card for logging even if we remove it from the state
-    const cardId = currentCard._id;
-    const cardText = currentCard.text || 'Unknown card';
-    
-    // Log the swipe locally
-    console.log(`Card ${cardId} swiped ${direction === 'right' ? 'liked' : 'disliked'}`);
-    
-    // Validate session ID
-    if (!sessionId) {
+  // Use provided cardId or fallback to current card
+  const actualCardId = cardId || currentCard._id;
+  const cardText = currentCard.text || 'Unknown card';
+  
+  // Log the swipe locally
+  console.log(`Card ${actualCardId} swiped ${direction === 'right' ? 'liked' : 'disliked'}`);
+  
+  // Don't allow swipes without user ID
+  if (!userId) {
+    console.error("No user ID available, cannot record swipe interaction");
+    addToast("Please log in before swiping cards.", "error");
+    return;
+  }
+  
+  // Validate session ID
+  if (!sessionId) {
       console.error("No session ID available, cannot record swipe interaction");
       addToast("Session ID not found. Your swipes may not be tracked correctly.", "error");
+      refreshSession(); // Try to refresh the session
       
       // Remove the swiped card anyway to not block the UI
       setCards((prev) => prev.slice(1));
@@ -110,7 +133,7 @@ export default function SwipePage({ initialCards }) {
     }
     
     // Validate card ID
-    if (!cardId) {
+    if (!actualCardId) {
       console.error("Card ID is missing, cannot record swipe interaction");
       addToast("Card data is incomplete. Your swipe may not be tracked correctly.", "error");
       
@@ -126,10 +149,11 @@ export default function SwipePage({ initialCards }) {
     // Prepare interaction data
     const interactionData = {
       sessionId: sessionId,
-      cardId: cardId,
+      ...(userId && { userId }),
+      cardId: actualCardId,
       type: 'swipe',
       action: validDirection, // normalized to 'left' or 'right'
-      createdAt: new Date().toISOString() // ISO 8601 with milliseconds
+      createdAt: toISOWithMillisec(new Date()) // ISO 8601 with milliseconds
     };
     
     // Remove the card from the stack immediately for better UX
@@ -175,12 +199,70 @@ export default function SwipePage({ initialCards }) {
       }
     }
   };
+  
+  // Initialize the swipe controller
+  const { isSwipeLocked, processSwipe } = useSwipeController(handleActualSwipe);
+  
+  // Main swipe handler that will be passed to the CardStack component
+  const handleSwipe = (direction, cardId) => {
+    // The processSwipe function handles locking and prevents duplicates
+    processSwipe(direction, cardId);
+  };
 
-  if (loading || !sessionId) return <LoadingScreen message="Loading cards to swipe..." module="swipe" />;
+  // Show appropriate loading or error states
+  // Show registration modal if no user ID is set
+  if (!userId && sessionStatus !== 'loading' && sessionStatus !== 'initializing') {
+    return (
+      <PageWrapper>
+        <UserRegistration />
+      </PageWrapper>
+    );
+  }
+
+  if (loading || sessionStatus === 'initializing') {
+    return <LoadingScreen message="Loading cards to swipe..." module="swipe" />;
+  }
+  
+  if (sessionStatus === 'error') {
+    return (
+      <PageWrapper>
+        <div className={`min-h-[80vh] flex flex-col items-center justify-center px-4 ${moduleTheme.lightBg} ${moduleTheme.darkBg}`}>
+          <div className="w-full max-w-lg mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-red-300 dark:border-red-800">
+            <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-4">Session Error</h2>
+            <p className="mb-4">{sessionError || "Failed to initialize session. Please refresh the page."}</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="w-full bg-red-600 hover:bg-red-700 text-white"
+            >
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
+  
+  if (!sessionId) {
+    return <LoadingScreen message="Initializing session..." module="swipe" />;
+  }
 
   return (
     <PageWrapper>
-      <div className={`min-h-[80vh] flex flex-col items-center justify-center px-4 ${moduleTheme.lightBg} ${moduleTheme.darkBg}`}>
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+        >
+          <div>
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-swipe-500 to-swipe-700">Card Swiper 🔄</h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
+              Swipe right on cards you like, left to pass
+            </p>
+          </div>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -236,8 +318,13 @@ export default function SwipePage({ initialCards }) {
           
           {/* Session Information */}
           <div className={`mb-4 p-3 bg-swipe-50/30 dark:bg-swipe-900/20 border ${moduleTheme.borderClass} rounded-lg text-xs text-gray-500 dark:text-gray-400`}>
-            Session ID: {sessionId ? `${sessionId.substring(0, 8)}...` : 'Not available'}
-            <p className="mt-1">
+            <div className="flex flex-col space-y-1">
+              <span>Session ID: {sessionId ? `${sessionId.substring(0, 8)}...` : 'Not available'}</span>
+              {userId && <span>User ID: {userId.substring(0, 8)}...</span>}
+              <span>Status: {sessionStatus}</span>
+              {lastUpdate && <span>Last updated: {lastUpdate}</span>}
+            </div>
+            <p className="mt-2 pt-2 border-t border-swipe-100 dark:border-swipe-800">
               Swipe right on cards you like to vote on them later!
             </p>
           </div>
@@ -247,7 +334,8 @@ export default function SwipePage({ initialCards }) {
             <div className={`border ${moduleTheme.borderClass} rounded-xl p-4 hover:bg-swipe-50/30 dark:hover:bg-swipe-900/10 transition-colors duration-200`}>
               <CardStack 
                 cards={cards} 
-                onSwipe={handleSwipe} 
+                onSwipe={handleSwipe}
+                isSwipeLocked={isSwipeLocked}
               />
             </div>
           ) : (
@@ -262,7 +350,7 @@ export default function SwipePage({ initialCards }) {
           {/* Last Updated */}
           <div className="mt-4 p-2 text-center">
             <div className={`px-3 py-1 ${moduleTheme.lightBg} ${moduleTheme.darkBg} ${moduleTheme.textClass} text-opacity-70 dark:text-opacity-70 rounded-full text-xs border ${moduleTheme.borderClass}`}>
-              Last updated: {lastUpdate}
+              Last updated: {new Date(lastUpdate).toLocaleTimeString()}
             </div>
           </div>
 
@@ -289,6 +377,9 @@ export async function getServerSideProps() {
     // Fetch cards from API
     const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
     const host = process.env.VERCEL_URL || 'localhost:3000';
+    
+    // We don't filter by sessionId server-side because the client 
+    // will handle filtering once the session is loaded
     const res = await fetch(`${protocol}://${host}/api/cards`);
     
     if (!res.ok) {
@@ -298,6 +389,12 @@ export async function getServerSideProps() {
     }
 
     const data = await res.json();
+    
+    // Format timestamp for consistent ISO 8601 format
+    const timestamp = new Date().toISOString(); // 2025-04-13T12:34:56.789Z format
+    
+    console.log(`[${timestamp}] getServerSideProps loaded ${data.data?.length || 0} cards`);
+    
     return {
       props: {
         initialCards: data.success ? data.data : [],

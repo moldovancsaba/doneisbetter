@@ -8,12 +8,21 @@ export const SwipeCard = ({
   active,
   disabled,
   showControls = true,
+  isSwipeLocked = false,
 }) => {
   const controls = useAnimation();
   const [direction, setDirection] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragEnd = (event, info) => {
+    // Prevent swipe if locked
+    if (isSwipeLocked || disabled) {
+      controls.start({ x: 0, opacity: 1 });
+      setDirection(null);
+      setIsDragging(false);
+      return;
+    }
+
     const swipeThreshold = 100;
     const velocity = info.velocity.x;
     const offset = info.offset.x;
@@ -40,9 +49,11 @@ export const SwipeCard = ({
 
   // Handle keyboard controls
   useEffect(() => {
-    if (!active || disabled) return;
+    if (!active || disabled || isSwipeLocked) return;
 
     const handleKeyDown = (event) => {
+      if (isSwipeLocked) return; // Double check to prevent race conditions
+      
       if (event.key === "ArrowLeft") {
         setDirection("left");
         const swipeAnimation = {
@@ -68,12 +79,12 @@ export const SwipeCard = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [active, disabled, controls, onSwipe]);
+  }, [active, disabled, controls, onSwipe, isSwipeLocked]);
 
   return (
     <motion.div
-      className={`relative ${active ? "cursor-grab active:cursor-grabbing" : ""}`}
-      drag={active && !disabled ? "x" : false}
+      className={`relative ${active && !isSwipeLocked ? "cursor-grab active:cursor-grabbing" : ""}`}
+      drag={active && !disabled && !isSwipeLocked ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       onDragStart={() => setIsDragging(true)}
       onDrag={(event, info) => {
@@ -116,6 +127,7 @@ export const SwipeCard = ({
         <div className="absolute -bottom-16 left-0 right-0 flex justify-center items-center gap-8">
           <button
             onClick={() => {
+              if (isSwipeLocked) return;
               setDirection("left");
               controls
                 .start({
@@ -127,12 +139,15 @@ export const SwipeCard = ({
                   onSwipe("left");
                 });
             }}
-            className="bg-red-500 hover:bg-red-600 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-200"
+            className={`bg-red-500 hover:bg-red-600 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-200 
+            ${isSwipeLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSwipeLocked}
           >
             👎
           </button>
           <button
             onClick={() => {
+              if (isSwipeLocked) return;
               setDirection("right");
               controls
                 .start({
@@ -144,10 +159,19 @@ export const SwipeCard = ({
                   onSwipe("right");
                 });
             }}
-            className="bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-200"
+            className={`bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-200
+            ${isSwipeLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSwipeLocked}
           >
             👍
           </button>
+        </div>
+      )}
+      
+      {/* Swipe Lock Indicator */}
+      {isSwipeLocked && (
+        <div className="absolute -bottom-16 left-0 right-0 flex justify-center items-center mt-2">
+          <span className="text-amber-500 text-sm animate-pulse">Processing swipe...</span>
         </div>
       )}
 

@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import dbConnect from '../../lib/db';
-import Interaction from '../../models/Interaction';
-import User from '../../models/User';
-import Card from '../../models/Card';
-import VoteRank from '../../models/VoteRank';
+import { Card, VoteRank, VotePair, User, Interaction, connectToDatabase, initializeModels } from '../../models';
 
 // Schema for validation
 const requestSchema = z.object({
@@ -16,7 +12,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    await dbConnect();
+  await connectToDatabase();
+  initializeModels();
 
     // Get username from query parameters
     const username = req.query.username;

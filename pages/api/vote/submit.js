@@ -1,7 +1,4 @@
-import dbConnect from "../../../lib/dbConnect";
-import Card from "../../../models/Card";
-import VoteRank from "../../../models/VoteRank";
-import VotePair from "../../../models/VotePair";
+import { connectToDatabase, initializeModels, Card, VoteRank, VotePair } from '../../../models';
 
 export default async function handler(req, res) {
   const requestTime = new Date().toISOString();
@@ -46,7 +43,8 @@ export default async function handler(req, res) {
   console.log(`[${requestTime}] Winner ID: ${winnerId}, Loser ID: ${loserId}`);
 
   try {
-    await dbConnect();
+    await connectToDatabase();
+    initializeModels();
     console.log(`[${requestTime}] Database connected successfully`);
 
     // Verify cards exist
@@ -72,9 +70,9 @@ export default async function handler(req, res) {
     // Record the vote pair
     const timestamp = new Date();
     const votePairData = {
-      card1Id: winnerId,
-      card2Id: loserId,
-      winnerId,
+      card1: winnerId,
+      card2: loserId,
+      winner: winnerId,
       sessionId,
       userId: req.body.userId || null,
       timestamp: timestamp
@@ -247,21 +245,37 @@ export default async function handler(req, res) {
         }
       }
       
-      // Update win rates for all ranked cards
-      console.log(`[${requestTime}] Updating win rates for all ranked cards`);
-      const allRankedCards = await VoteRank.find();
+      // Update win rates only for the affected cards
+      console.log(`[${requestTime}] Updating win rates for affected cards`);
       
-      for (const card of allRankedCards) {
-        if (card.totalVotes > 0) {
-          const winRate = Math.round((card.wins / card.totalVotes) * 100);
-          await VoteRank.findByIdAndUpdate(
-            card._id,
-            { 
-              winRate, 
-              lastUpdated 
-            }
-          );
-        }
+      // Get the latest data for both cards
+      const updatedWinner = await VoteRank.findOne({ cardId: winnerId });
+      const updatedLoser = await VoteRank.findOne({ cardId: loserId });
+      
+      // Update winner's win rate
+      if (updatedWinner && updatedWinner.totalVotes > 0) {
+        const winnerWinRate = Math.round((updatedWinner.wins / updatedWinner.totalVotes) * 100);
+        await VoteRank.findByIdAndUpdate(
+          updatedWinner._id,
+          { 
+            winRate: winnerWinRate, 
+            lastUpdated 
+          }
+        );
+        console.log(`[${requestTime}] Updated winner win rate to ${winnerWinRate}%`);
+      }
+      
+      // Update loser's win rate
+      if (updatedLoser && updatedLoser.totalVotes > 0) {
+        const loserWinRate = Math.round((updatedLoser.wins / updatedLoser.totalVotes) * 100);
+        await VoteRank.findByIdAndUpdate(
+          updatedLoser._id,
+          { 
+            winRate: loserWinRate, 
+            lastUpdated 
+          }
+        );
+        console.log(`[${requestTime}] Updated loser win rate to ${loserWinRate}%`);
       }
       
       console.log(`[${requestTime}] Rank updates completed successfully`);

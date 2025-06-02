@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { PageWrapper } from "../components/layout/Header";
+import { PageWrapper } from "../components/layout/PageWrapper";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { LoadingScreen } from "../components/ui/Loading";
 import { useToast } from "../components/ui/Toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useModuleTheme } from "../contexts/ModuleThemeContext";
+import { useSession } from "../contexts/SessionContext";
+import InfoMessage from "../components/ui/InfoMessage";
 
 export default function VotePage() {
   const [votingPair, setVotingPair] = useState(null);
@@ -14,14 +16,22 @@ export default function VotePage() {
   const [submitting, setSubmitting] = useState(false);
   const [voteHistory, setVoteHistory] = useState([]);
   const [error, setError] = useState(null);
-  const [sessionId, setSessionId] = useState(null);
   const { addToast } = useToast();
   const [keyboardEnabled, setKeyboardEnabled] = useState(true);
-  const [hasSwipedCards, setHasSwipedCards] = useState(true); // Initially assume true, will be verified
+  const [hasSwipedCards, setHasSwipedCards] = useState(true);
   const { theme: moduleTheme } = useModuleTheme();
+  const { 
+    sessionId,
+    userId,
+    status: sessionStatus,
+    error: sessionError,
+    isRegistered,
+    refreshSession,
+    formatISO
+  } = useSession();
   
   // Helper function to safely extract card ID
-  const getCardId = (card) => {
+  const getCardId = useCallback((card) => {
     if (!card) {
       console.error("Card is null or undefined");
       return null;
@@ -45,36 +55,48 @@ export default function VotePage() {
     
     console.error("Could not extract ID from card:", card);
     return null;
-  };
+  }, []);
 
   // Check if user has swiped cards
-  const checkUserHasSwipedCards = async () => {
+  const checkUserHasSwipedCards = useCallback(async () => {
     if (!sessionId) {
       console.error("Cannot check swiped cards without sessionId");
+      setError("Session ID is required. Please refresh the page.");
       return false;
     }
     
     try {
+      console.log(`Checking swiped cards for session: ${sessionId}`);
       const url = `/api/user-votes?sessionId=${encodeURIComponent(sessionId)}`;
       const response = await fetch(url);
       
       if (!response.ok) {
-        console.error("Failed to fetch user votes:", response.status);
-        return false;
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch user votes");
       }
       
       const data = await response.json();
-      const hasSwiped = data.success && Array.isArray(data.data) && data.data.length > 0;
-      console.log("User has swiped cards:", hasSwiped, "Count:", data.data?.length || 0);
-      return hasSwiped;
+      console.log("User votes response:", data);
+      
+      // Check if user has right-swiped cards
+      const hasRightSwipes = data.success && Array.isArray(data.data) && data.data.length > 0;
+      
+      if (!hasRightSwipes) {
+        setError("You need to swipe right on some cards before you can vote! Head to the swipe page to get started.");
+        return false;
+      }
+      
+      console.log(`User has ${data.data.length} right-swiped cards available for voting`);
+      return true;
     } catch (err) {
-      console.error("Error checking if user has swiped cards:", err);
+      console.error("Error checking swiped cards:", err);
+      setError(`Failed to check swiped cards: ${err.message}`);
       return false;
     }
-  };
+  }, [sessionId, setError]);
 
   // Fetch a new pair of cards for voting
-  const fetchVotingPair = async () => {
+  const fetchVotingPair = useCallback(async () => {
     setLoading(true);
     
     // Verify session ID is available
@@ -131,10 +153,10 @@ export default function VotePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId, addToast, checkUserHasSwipedCards, setLoading, setError, setHasSwipedCards, setVotingPair, getCardId]);
 
   // Submit vote
-  const submitVote = async (winningCard, losingCard) => {
+  const submitVote = useCallback(async (winningCard, losingCard) => {
     if (submitting) return;
     setKeyboardEnabled(false);
     
@@ -165,7 +187,8 @@ export default function VotePage() {
       console.log(`Winner ID: ${winnerId}, Loser ID: ${loserId}`);
       
       const voteData = {
-        sessionId: sessionId, // Use the sessionId from localStorage
+        sessionId: sessionId,
+        ...(userId && { userId }), // Add userId if available
         winnerId: winnerId,
         loserId: loserId,
         type: votingPair.type
@@ -213,33 +236,18 @@ export default function VotePage() {
       setSubmitting(false);
       setKeyboardEnabled(true);
     }
-  };
+  }, [sessionId, addToast, getCardId, votingPair, setVoteHistory, fetchVotingPair, submitting, userId]);
 
-  // Get or create session ID from localStorage
-  useEffect(() => {
-    // Try to get existing session ID from localStorage
-    const storedSessionId = localStorage.getItem('voteSessionId');
-    if (storedSessionId) {
-      console.log("Using existing session ID:", storedSessionId);
-      setSessionId(storedSessionId);
-    } else {
-      // Create a new random session ID using a timestamp and random number
-      const newSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      console.log("Created new session ID:", newSessionId);
-      localStorage.setItem('voteSessionId', newSessionId);
-      setSessionId(newSessionId);
-    }
-  }, []);
 
-  // Initial fetch - only after sessionId is available
+  // Initial fetch - only after session is active
   useEffect(() => {
-    if (sessionId) {
-      console.log("Session ID available, fetching initial voting pair");
+    if (sessionStatus === 'active' && sessionId && isRegistered) {
+      console.log("Session active, fetching initial voting pair");
       fetchVotingPair();
     } else {
-      console.log("Waiting for session ID before fetching voting pair");
+      console.log("Waiting for active session before fetching voting pair");
     }
-  }, [sessionId]);
+  }, [sessionStatus, sessionId, isRegistered, fetchVotingPair]);
 
   // Keyboard controls
   useEffect(() => {
@@ -260,29 +268,51 @@ export default function VotePage() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [votingPair, submitting, keyboardEnabled]);
+  }, [votingPair, submitting, keyboardEnabled, submitVote]);
 
   // Format date to ISO string
   const formatISODate = (date) => {
     return new Date(date).toISOString();
   };
 
-  // Check if session ID is missing after initial load
-  useEffect(() => {
-    if (!loading && !sessionId) {
-      const errorMsg = "Session ID not found. Please refresh the page or clear your browser cache.";
-      setError(errorMsg);
-      addToast(errorMsg, "error");
-    }
-  }, [loading, sessionId]);
+
+  if (sessionStatus === 'initializing' || sessionStatus === 'error' || !sessionId) {
+    return (
+      <PageWrapper>
+        <div className="container-responsive py-4 sm:py-6">
+          <InfoMessage
+            type={sessionStatus === 'error' ? "error" : "info"}
+            title={sessionStatus === 'error' ? "Session Error" : "Initializing Session"}
+            message={sessionStatus === 'error' 
+              ? `${sessionError || 'Failed to initialize session'}`
+              : "Preparing your voting session..."}
+            module="vote"
+            className={`border ${moduleTheme.borderClass}`}
+          />
+        </div>
+      </PageWrapper>
+    );
+  }
 
   if (loading && !votingPair) {
-    return <LoadingScreen message="Loading cards for voting..." module="vote" />;
+    return (
+      <PageWrapper>
+        <div className="max-w-4xl mx-auto p-4">
+          <InfoMessage
+            type="info"
+            title="Loading Vote Cards"
+            message="Loading cards for voting..."
+            module="vote"
+            className={`border ${moduleTheme.borderClass}`}
+          />
+        </div>
+      </PageWrapper>
+    );
   }
 
   return (
     <PageWrapper>
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="container-responsive space-y-6 sm:space-y-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -290,7 +320,7 @@ export default function VotePage() {
           className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
         >
           <div>
-            <h1 className="text-3xl font-bold">Card Voting</h1>
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-vote-500 to-vote-700">Card Voting 🗳️</h1>
             <p className="text-gray-600 dark:text-gray-300 mt-1">
               Choose which card you prefer
             </p>
@@ -300,40 +330,32 @@ export default function VotePage() {
         {/* Voting Area */}
         <div className="grid grid-cols-1 gap-8">
           {error ? (
-            <div className={`${moduleTheme.lightBg} border ${moduleTheme.borderClass} rounded-lg p-4`}>
-              <p className="text-red-800 dark:text-red-200">{error}</p>
+            <div className="space-y-4">
+                <InfoMessage
+                  type={!hasSwipedCards ? "info" : "error"}
+                  title={!hasSwipedCards ? "New here? Let's get started!" : "Error Loading Vote Cards"}
+                  message={
+                    !hasSwipedCards
+                      ? "You&apos;ll need to swipe right on at least two cards before you can start voting. Head over to the Swipe section to get started!"
+                      : error
+                  }
+                  action={true}
+                  actionLabel={!hasSwipedCards ? "Start Swiping 🔄" : "Try Again"}
+                  actionLink={!hasSwipedCards ? "/swipe" : null}
+                  onAction={!hasSwipedCards ? null : fetchVotingPair}
+                  module="vote"
+                  className={`border ${moduleTheme.borderClass}`}
+                />
               
-              {!hasSwipedCards ? (
-                <div className="mt-4">
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    You need to swipe some cards before you can vote on them! Head to the swipe page to get started.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Link href="/swipe">
-                      <Button 
-                        className="bg-swipe-600 hover:bg-swipe-700 text-white"
-                        variant="primary"
-                      >
-                        Go to Swipe Page 🔄
-                      </Button>
-                    </Link>
-                    <Button 
-                      onClick={fetchVotingPair} 
-                      className={moduleTheme.buttonClass}
-                      variant="secondary"
-                    >
-                      Check Again
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <Button 
-                  onClick={fetchVotingPair} 
-                  className={`mt-4 ${moduleTheme.buttonClass}`}
-                  variant="primary"
-                >
-                  Try Again
-                </Button>
+              {!hasSwipedCards && (
+                <Card className={`p-4 border ${moduleTheme.borderClass}`}>
+                  <h3 className="text-lg font-medium mb-2">How Voting Works:</h3>
+                  <ol className="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                    <li>First, swipe right on cards you like in the Swipe section</li>
+                    <li>Once you&apos;ve liked at least two cards, you can start voting</li>
+                    <li>Your votes help determine the overall rankings</li>
+                  </ol>
+                </Card>
               )}
             </div>
           ) : votingPair ? (
@@ -448,49 +470,38 @@ export default function VotePage() {
               </div>
             </>
           ) : (
-            <Card className={`p-6 text-center border ${moduleTheme.borderClass}`}>
-              <p className={moduleTheme.textClass}>
-                No cards available for voting 🗳️
-              </p>
+            <div className="space-y-4">
+              <InfoMessage
+                type={!hasSwipedCards ? "info" : "warning"}
+                title="No Cards Available for Voting"
+                message={
+                  !hasSwipedCards
+                    ? "Welcome! To get started with voting, first head to the Swipe section and swipe right on cards you&apos;d like to rank. You&apos;ll need at least two liked cards to begin voting."
+                    : "No cards are currently available for voting. Try refreshing or add more cards to your liked list by visiting the Swipe section."
+                }
+                action={true}
+                actionLabel={!hasSwipedCards ? "Start Swiping 🔄" : "Refresh 🔄"}
+                actionLink={!hasSwipedCards ? "/swipe" : null}
+                onAction={!hasSwipedCards ? null : fetchVotingPair}
+                module="vote"
+                className={`border ${moduleTheme.borderClass}`}
+              />
               
-              {!hasSwipedCards ? (
-                <div className="mt-4">
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    You need to swipe right on some cards before you can vote on them. Head to the swipe page to get started!
-                  </p>
-                  <div className="flex flex-col sm:flex-row justify-center gap-3">
-                    <Link href="/swipe">
-                      <Button 
-                        className="bg-swipe-600 hover:bg-swipe-700 text-white"
-                        variant="primary"
-                      >
-                        Go to Swipe Page 🔄
-                      </Button>
-                    </Link>
-                    <Button 
-                      onClick={fetchVotingPair} 
-                      className={moduleTheme.buttonClass}
-                      variant="secondary"
-                    >
-                      Check Again
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="text-xs text-gray-500 mt-2 mb-4">
-                    Session ID: {sessionId ? sessionId.substring(0, 8) + '...' : 'Not found'}
-                  </div>
-                  <Button 
-                    onClick={fetchVotingPair} 
-                    className={`mt-4 ${moduleTheme.buttonClass}`}
-                    variant="primary"
-                  >
-                    Refresh 🔄
-                  </Button>
-                </>
+              {!hasSwipedCards && (
+                <Card className={`p-4 border ${moduleTheme.borderClass}`}>
+                  <h3 className="text-lg font-medium mb-2">Getting Started:</h3>
+                  <ol className="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-300">
+                    <li>Visit the Swipe section to discover cards</li>
+                    <li>Swipe right on cards you&apos;re interested in ranking</li>
+                    <li>Return here once you&apos;ve liked at least two cards</li>
+                  </ol>
+                </Card>
               )}
-            </Card>
+              
+              <div className="text-center text-xs text-gray-500">
+                Session ID: {sessionId ? sessionId.substring(0, 8) + '...' : 'Not found'}
+              </div>
+            </div>
           )}
         </div>
 

@@ -15,7 +15,7 @@ export const Tooltip = ({
   const tooltipRef = useRef(null);
   const timeoutRef = useRef(null);
 
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (!triggerRef.current || !tooltipRef.current) return;
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
@@ -48,7 +48,7 @@ export const Tooltip = ({
     y = Math.max(8, Math.min(y, window.innerHeight - tooltipRect.height - 8));
 
     setCoords({ x, y });
-  };
+  }, [position]);
 
   useEffect(() => {
     if (isVisible) {
@@ -61,20 +61,20 @@ export const Tooltip = ({
       window.removeEventListener("scroll", updatePosition);
       window.removeEventListener("resize", updatePosition);
     };
-  }, [isVisible]);
+  }, [isVisible, updatePosition]);
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = useCallback(() => {
     timeoutRef.current = setTimeout(() => {
       setIsVisible(true);
     }, delay);
-  };
+  }, [delay]);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
     setIsVisible(false);
-  };
+  }, []);
 
   return (
     <>
@@ -185,7 +185,7 @@ export const useTooltipPosition = (triggerRef, tooltipRef, position) => {
       window.removeEventListener("scroll", updatePosition);
       window.removeEventListener("resize", updatePosition);
     };
-  }, [position]);
+  }, [position, triggerRef, tooltipRef]);
 
   return coords;
 };

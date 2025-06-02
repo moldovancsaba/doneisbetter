@@ -4,22 +4,36 @@ const cardSchema = new mongoose.Schema({
   text: {
     type: String,
     required: true,
-    maxlength: 160,
-    trim: true
+    trim: true,
+    maxlength: [160, 'Card text must be 160 characters or less']
   },
-  status: {
+  createdBy: {
     type: String,
-    enum: ['liked', 'disliked', 'new'],
-    default: 'new'
+    required: false
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
+    default: () => new Date().toISOString()
+  }
+}, {
+  timestamps: {
+    currentTime: () => new Date().toISOString()
   }
 });
 
-export default mongoose.models.Card || mongoose.model('Card', cardSchema);
+// Ensure proper ISO 8601 format with milliseconds
+cardSchema.pre('save', function(next) {
+  if (this.isNew) {
+    this.createdAt = new Date().toISOString();
+  }
+  next();
+});
+
+// Create indexes for faster queries
+cardSchema.index({ createdBy: 1 });
+cardSchema.index({ createdAt: -1 });
+cardSchema.index({ text: 'text' });
+
+const Card = mongoose.models.Card || mongoose.model('Card', cardSchema);
+
+export default Card;

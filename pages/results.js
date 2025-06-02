@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { PageWrapper } from "../components/layout/Header";
+import { PageWrapper } from "../components/layout/PageWrapper";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { LoadingScreen } from "../components/ui/Loading";

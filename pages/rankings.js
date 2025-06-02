@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { PageWrapper } from "../components/layout/Header";
+import { PageWrapper } from "../components/layout/PageWrapper";
+import { PageContent } from "../components/layout/PageContent";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { LoadingScreen, LoadingSpinner, ModuleSkeleton } from "../components/ui/Loading";
+import InfoMessage from "../components/ui/InfoMessage";
 import { useToast } from "../components/ui/Toast";
 import { motion } from "framer-motion";
 import { useModuleTheme } from "../contexts/ModuleThemeContext";
@@ -66,10 +68,10 @@ export default function RankingsPage() {
     
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [sessionId]);
 
   // Fetch global rankings data
-  const fetchRankings = async (showRefreshing = false) => {
+  const fetchRankings = useCallback(async (showRefreshing = false) => {
     if (showRefreshing) {
       setRefreshing(true);
     } else {
@@ -97,10 +99,10 @@ export default function RankingsPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [addToast]);
   
   // Fetch personal rankings data (cards the user has voted on)
-  const fetchPersonalRankings = async (showRefreshing = false) => {
+  const fetchPersonalRankings = useCallback(async (showRefreshing = false) => {
     // Add a unique request ID to track this specific request through logs
     const requestId = Math.random().toString(36).substring(2, 10);
     console.log(`[${requestId}] BEGIN fetchPersonalRankings`, {
@@ -278,7 +280,7 @@ export default function RankingsPage() {
       setRefreshing(false);
       console.log("Personal rankings fetch completed at:", new Date().toISOString());
     }
-  };
+  }, [addToast, sessionId]);
 
   // Memoized refresh function to avoid recreating on every render
   const refreshData = useCallback(() => {
@@ -292,7 +294,7 @@ export default function RankingsPage() {
       // Force remount to ensure fresh UI
       setRemountKey(Date.now());
     }
-  }, [sessionId, viewMode]);
+  }, [sessionId, viewMode, fetchPersonalRankings, fetchRankings]);
 
   // Handle navigation events (detect returns from voting page)
   useEffect(() => {
@@ -301,9 +303,9 @@ export default function RankingsPage() {
     };
     
     const handleRouteComplete = (url) => {
-      // If we're coming back from the voting page to rankings
-      if (url === '/rankings' && lastVisitedPage === '/vote') {
-        console.log('Returned from voting page, refreshing data...');
+      // Always refresh when returning to rankings page
+      if (url === '/rankings') {
+        console.log('Returned to rankings page, refreshing data...');
         // Small delay to ensure data is updated on the server
         setTimeout(refreshData, 500);
       }
@@ -324,11 +326,18 @@ export default function RankingsPage() {
       console.log('Window focused, refreshing data...');
       refreshData();
     };
+
+    // Add an interval to refresh data every 10 seconds
+    const refreshInterval = setInterval(() => {
+      console.log('Auto-refreshing rankings data...');
+      refreshData();
+    }, 10000);
     
     window.addEventListener('focus', handleFocus);
     
     return () => {
       window.removeEventListener('focus', handleFocus);
+      clearInterval(refreshInterval);
     };
   }, [refreshData]);
 
@@ -369,7 +378,7 @@ export default function RankingsPage() {
       window._debug = window._debug || {};
       window._debug.isSessionAvailable = false;
     }
-  }, [sessionId]);
+  }, [sessionId, fetchRankings, fetchPersonalRankings]);
   
   // Switch between global and personal rankings
   const toggleViewMode = () => {
@@ -462,112 +471,85 @@ export default function RankingsPage() {
 
   return (
     <PageWrapper key={remountKey}>
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-        >
-          <div>
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rankings-500 to-rankings-700">Rankings 🏆</h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
-              {viewMode === 'global' 
-                ? 'See which cards are winning the most votes'
-                : 'Cards you have liked (swiped right on)'
-              }
-            </p>
-          </div>
-
-          <div className="flex space-x-3">
-            <Button
-              onClick={() => router.push('/vote')}
-              variant="secondary"
-              className={`flex items-center border-rankings-200 dark:border-rankings-800 hover:bg-rankings-50 dark:hover:bg-rankings-900/20`}
-            >
-              <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-              Back to Voting 🗳️
-            </Button>
-            
-            <Button
-              onClick={toggleViewMode}
-              variant="secondary"
-              className={`flex items-center border-rankings-200 dark:border-rankings-800 hover:bg-rankings-50 dark:hover:bg-rankings-900/20`}
-            >
-              <FontAwesomeIcon 
-                icon={viewMode === 'global' ? faUser : faGlobe} 
-                className={`mr-2 text-rankings-500 dark:text-rankings-400`} 
-              />
-              {viewMode === 'global' ? 'My Rankings 👤' : 'Global Rankings 🌐'}
-            </Button>
-            
-            <Button
-              onClick={refreshData}
-              variant="primary"
-              isLoading={refreshing}
-              disabled={refreshing}
-              className={`flex items-center bg-rankings-600 hover:bg-rankings-700 text-white`}
-            >
-              <FontAwesomeIcon icon={faRedo} className="mr-2" />
-              Refresh
-            </Button>
-            
-            {/* Hidden debug button - only visible in development */}
-            {process.env.NODE_ENV !== 'production' && (
-              <Button
-                onClick={showDebugInfo}
-                variant="secondary"
-                className="ml-2 border-gray-200 dark:border-gray-700 text-xs"
-                size="sm"
-              >
-                Debug
-              </Button>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Stats Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-        >
-          {[
-            { 
-              label: viewMode === 'global' ? "Total Ranked Cards" : "Your Ranked Cards", 
-              value: viewMode === 'global' ? globalStats.totalCards : personalStats.rankedCards, 
-              icon: faChartBar,
-              color: "text-rankings-500 dark:text-rankings-400" 
-            },
-            { 
-              label: "Top Card Win Rate", 
-              value: viewMode === 'global' 
-                ? (globalStats.topWinRate > 0 ? `${globalStats.topWinRate}%` : "N/A")
-                : (personalStats.topWinRate > 0 ? `${personalStats.topWinRate}%` : "N/A"), 
-              icon: faTrophy,
-              color: "text-rankings-600 dark:text-rankings-500" 
-            },
-            { 
-              label: "Total Votes Cast", 
-              value: viewMode === 'global'
-                ? globalStats.totalVotes
-                : personalStats.totalVotes, 
-              icon: faArrowUp,
-              color: "text-rankings-700 dark:text-rankings-600" 
-            }
-          ].map((stat, index) => (
-            <Card key={index} className={`p-6 border ${moduleTheme.borderClass} hover:shadow-md transition-shadow duration-200`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
-                  <p className={`text-3xl font-bold mt-1 ${moduleTheme.textClass}`}>{stat.value}</p>
-                </div>
-                <FontAwesomeIcon icon={stat.icon} className={`text-3xl ${stat.color}`} />
+      <PageContent
+        title="Rankings 🏆"
+        subtitle={viewMode === 'global' 
+          ? 'See which cards are winning the most votes'
+          : 'Cards you have liked (swiped right on)'
+        }
+        loading={loading}
+        refreshing={refreshing}
+        error={error}
+        actions={[
+          <Button
+            key="back"
+            onClick={() => router.push('/vote')}
+            variant="secondary"
+            className={`flex items-center border-rankings-200 dark:border-rankings-800 hover:bg-rankings-50 dark:hover:bg-rankings-900/20`}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+            Back to Voting 🗳️
+          </Button>,
+          <Button
+            key="toggle"
+            onClick={toggleViewMode}
+            variant="secondary"
+            className={`flex items-center border-rankings-200 dark:border-rankings-800 hover:bg-rankings-50 dark:hover:bg-rankings-900/20`}
+          >
+            <FontAwesomeIcon 
+              icon={viewMode === 'global' ? faUser : faGlobe} 
+              className={`mr-2 text-rankings-500 dark:text-rankings-400`} 
+            />
+            {viewMode === 'global' ? 'My Rankings 👤' : 'Global Rankings 🌐'}
+          </Button>,
+          <Button
+            key="refresh"
+            onClick={refreshData}
+            variant="primary"
+            isLoading={refreshing}
+            disabled={refreshing}
+            className={`flex items-center bg-rankings-600 hover:bg-rankings-700 text-white`}
+          >
+            <FontAwesomeIcon icon={faRedo} className="mr-2" />
+            Refresh
+          </Button>
+        ]}
+        stats={[
+          { 
+            label: viewMode === 'global' ? "Total Ranked Cards" : "Your Ranked Cards", 
+            value: viewMode === 'global' ? globalStats.totalCards : personalStats.rankedCards, 
+            icon: faChartBar,
+            color: "text-rankings-500 dark:text-rankings-400" 
+          },
+          { 
+            label: "Top Card Win Rate", 
+            value: viewMode === 'global' 
+              ? (globalStats.topWinRate > 0 ? `${globalStats.topWinRate}%` : "N/A")
+              : (personalStats.topWinRate > 0 ? `${personalStats.topWinRate}%` : "N/A"), 
+            icon: faTrophy,
+            color: "text-rankings-600 dark:text-rankings-500" 
+          },
+          { 
+            label: "Total Votes Cast", 
+            value: viewMode === 'global'
+              ? globalStats.totalVotes
+              : personalStats.totalVotes, 
+            icon: faArrowUp,
+            color: "text-rankings-700 dark:text-rankings-600" 
+          }
+        ].map((stat, index) => (
+          <Card key={index} className={`p-6 border ${moduleTheme.borderClass} hover:shadow-md transition-shadow duration-200`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+                <p className={`text-3xl font-bold mt-1 ${moduleTheme.textClass}`}>{stat.value}</p>
               </div>
-            </Card>
-          ))}
-        </motion.div>
-
+              <FontAwesomeIcon icon={stat.icon} className={`text-3xl ${stat.color}`} />
+            </div>
+          </Card>
+        ))}
+        module="rankings"
+      >
         {/* Rankings List */}
         <div>
           <Card className={`p-6 border ${moduleTheme.borderClass}`}>
@@ -575,31 +557,23 @@ export default function RankingsPage() {
               {viewMode === 'global' ? 'Global Rankings 🌐' : 'Your Personal Rankings 👤'}
             </h2>
             
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
-                <p className="text-red-800 dark:text-red-200">{error}</p>
-                <p className="text-gray-600 dark:text-gray-300 mt-2 mb-2">
-                  New here? You might need to swipe or vote on some cards first before you can see your rankings.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                  <Button 
-                    onClick={() => fetchRankings()} 
-                    className={`${moduleTheme.buttonClass}`}
-                    variant="primary"
-                  >
-                    Try Again
-                  </Button>
-                  <Link href="/swipe">
-                    <Button 
-                      className={`bg-swipe-600 hover:bg-swipe-700 text-white`}
-                      variant="primary"
-                    >
-                      Go to Swipe Page 🔄
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            )}
+    {error && (
+      <InfoMessage
+        type="warning"
+        title="No Rankings Available"
+        message={
+          error.reason === "no_swipes"
+            ? "New here? You might need to swipe right on some cards first before you can see your rankings."
+            : error.reason === "no_votes"
+            ? "New here? You might need to vote at least once before you can see your rankings."
+            : "New here? You might need to swipe or vote on some cards first before you can see your rankings."
+        }
+        action={true}
+        actionLabel={error.reason === "no_votes" ? "Go to Vote Page 🗳️" : "Go to Swipe Page 🔄"}
+        actionLink={error.reason === "no_votes" ? "/vote" : "/swipe"}
+        className="mb-4"
+      />
+    )}
             
             {viewMode === 'global' ? (
               rankings.length === 0 && !loading && !error ? (
@@ -696,14 +670,14 @@ export default function RankingsPage() {
                       : "Session ID not found. Your swipes and votes may not be tracked correctly."}
                   </p>
                   <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-                    <span className="font-semibold">Note:</span> Only cards you've swiped right on (liked) will appear in your personal rankings.
+                    <span className="font-semibold">Note:</span> Only cards you&apos;ve swiped right on (liked) will appear in your personal rankings.
                   </p>
                   <div className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                    <p>If you've recently voted but don't see your rankings:</p>
+                    <p>If you&apos;ve recently voted but don&apos;t see your rankings:</p>
                     <ul className="list-disc list-inside mt-2 mx-auto max-w-md text-left">
                       <li>Try refreshing the rankings using the button below</li>
                       <li>Go to the Swipe page and swipe right on cards you like</li>
-                      <li>Check that you're using the same browser session as when you swiped</li>
+                      <li>Check that you&apos;re using the same browser session as when you swiped</li>
                       <li>Your session ID: <span className="font-mono">{sessionId ? sessionId.substring(0, 12) + '...' : 'Not found'}</span></li>
                       <li>Last check time: <span className="font-mono">{new Date().toISOString()}</span></li>
                     </ul>
@@ -792,7 +766,7 @@ export default function RankingsPage() {
             )}
           </Card>
         </div>
-      </div>
+      </PageContent>
     </PageWrapper>
   );
 }

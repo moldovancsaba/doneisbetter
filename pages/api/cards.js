@@ -1,5 +1,5 @@
 import dbConnect from '../../lib/dbConnect';
-import Card from '../../models/Card';
+import { Card } from '../../models/index';
 
 export default async function handler(req, res) {
   const { method } = req;
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     // POST - Create a new card
     case 'POST':
       try {
-        const { text } = req.body;
+        const { text, createdBy } = req.body;
         
         if (!text || text.trim() === '') {
           return res.status(400).json({ success: false, error: 'Card text is required' });
@@ -37,11 +37,18 @@ export default async function handler(req, res) {
           return res.status(400).json({ success: false, error: 'Card text must be 160 characters or less' });
         }
         
-        const card = await Card.create({ 
-          text,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
+        const cardData = { 
+          text: text.trim(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        // Add createdBy if provided
+        if (createdBy) {
+          cardData.createdBy = createdBy;
+        }
+        
+        const card = await Card.create(cardData);
         res.status(201).json({ success: true, data: card });
       } catch (error) {
         console.error('POST card error:', error);

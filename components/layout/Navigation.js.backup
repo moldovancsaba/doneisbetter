@@ -1,0 +1,980 @@
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export default function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100'
+                : 'hover:bg-blue-50 dark:hover:bg-blue-800/30 text-gray-700 dark:text-gray-300 hover:text-blue-900 dark:hover:text-blue-100'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export default function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+export default Navigation;
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export default function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export const Navigation = () => {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+};
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+
+const menuItems = [
+  { href: '/', label: 'Home 🏠' },
+  { href: '/swipe', label: 'Swipe 🔄' },
+  { href: '/vote', label: 'Vote 🗳️' },
+  { href: '/rankings', label: 'Rankings 🏆' },
+  { href: '/admin', label: 'Admin ⚙️' }
+];
+
+export function Navigation() {
+  const router = useRouter();
+  
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import React from 'react';
+import { useModuleTheme } from '../../contexts/ModuleThemeContext';
+
+export function Navigation() {
+  const router = useRouter();
+  const { theme } = useModuleTheme();
+  
+  const menuItems = [
+    { href: '/', label: 'Home 🏠' },
+    { href: '/swipe', label: 'Swipe 🔄' },
+    { href: '/vote', label: 'Vote 🗳️' },
+    { href: '/rankings', label: 'Rankings 🏆' },
+    { href: '/admin', label: 'Admin ⚙️' }
+  ];
+
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+
+export function Navigation() {
+  const router = useRouter();
+  
+  const menuItems = [
+    { href: '/', label: 'Home 🏠' },
+    { href: '/swipe', label: 'Swipe 🔄' },
+    { href: '/vote', label: 'Vote 🗳️' },
+    { href: '/rankings', label: 'Rankings 🏆' },
+    { href: '/admin', label: 'Admin ⚙️' }
+  ];
+
+  return (
+    <nav className="flex items-center space-x-4">
+      {menuItems.map((item) => {
+        const isActive = router.pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`
+              px-3 py-2 rounded-lg transition-colors duration-200
+              ${isActive
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+              }
+            `}
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.label}
+            </motion.span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useModuleTheme } from '../../contexts/ModuleThemeContext';
+import { navigationConfig, navigationThemes } from '../../config/navigation';
+
+// Spring animation presets for smooth transitions
+const springTransition = {
+  type: 'spring',
+  stiffness: 400,
+  damping: 30
+};
+
+// Navigation item component
+const NavigationItem = ({ item, isActive, isMobile }) => {
+  const [rippleActive, setRippleActive] = useState(false);
+  const { theme: moduleTheme } = useModuleTheme();
+  const navTheme = navigationThemes.default;
+
+  // Handle click/tap interaction
+  const handleInteraction = () => {
+    setRippleActive(true);
+    setTimeout(() => setRippleActive(false), 500);
+  };
+
+  return (
+    <Link
+      href={item.path}
+      className={`
+        nav-item relative
+        ${isMobile ? 'p-3 sm:p-4' : 'p-4'}
+        rounded-md-md
+        transition-all duration-200
+        hover:bg-[rgb(var(--md-surface-variant))]/10
+        ${isActive ? navTheme.activeClass : navTheme.inactiveClass}
+        focus-ring
+        touch-target
+      `}
+      onClick={handleInteraction}
+      onKeyDown={(e) => e.key === 'Enter' && handleInteraction()}
+      role="menuitem"
+      aria-label={item.ariaLabel}
+      aria-current={isActive ? 'page' : undefined}
+      tabIndex={0}
+    >
+      <motion.div
+        className={`
+          flex items-center gap-3
+          ${isMobile ? 'flex-col text-center' : ''}
+        `}
+        whileHover={isMobile ? {} : { x: 4 }}
+        whileTap={{ scale: 0.95 }}
+        transition={springTransition}
+      >
+        <span className={`
+          text-2xl
+          ${isActive && moduleTheme?.iconClass ? moduleTheme.iconClass : ''}
+        `}>
+          {item.icon}
+        </span>
+        <span className={`
+          ${isMobile ? 'text-xs' : 'text-sm'}
+          font-medium
+        `}>
+          {item.label}
+        </span>
+
+        {/* Active indicator */}
+        {isActive && (
+          <motion.div
+            layoutId={`nav-indicator-${isMobile ? 'mobile' : 'desktop'}`}
+            className={`
+              absolute
+              ${isMobile ? 'top-0 left-1/2 -translate-x-1/2 w-8 h-0.5' : 'left-0 top-1/2 -translate-y-1/2 w-1 h-8'}
+              rounded-full
+              ${navTheme.indicatorClass}
+            `}
+            transition={springTransition}
+          />
+        )}
+
+        {/* Interaction ripple effect */}
+        <div
+          className={`
+            absolute inset-0
+            rounded-md-md
+            bg-[rgb(var(--md-primary))]/10
+            transition-opacity duration-300
+            ${rippleActive ? 'opacity-100' : 'opacity-0'}
+          `}
+          aria-hidden="true"
+        />
+      </motion.div>
+    </Link>
+  );
+};
+
+// Mobile navigation component
+const MobileNavigation = () => {
+  const router = useRouter();
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Handle scroll-based visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setIsVisible(currentScrollY <= lastScrollY || currentScrollY < 50);
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  return (
+    <motion.nav
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
+      initial={false}
+      animate={{
+        y: isVisible ? 0 : '100%'
+      }}
+      transition={springTransition}
+    >
+      <div className="bg-[rgb(var(--md-surface))]/90 backdrop-blur-lg md-elevation-2 border-t border-[rgb(var(--md-outline-variant))]">
+        <div className="container-responsive safe-bottom">
+          <div
+            className="grid grid-cols-5 gap-1 py-1"
+            role="menu"
+            aria-label="Main Navigation"
+          >
+            {navigationConfig.map((item) => (
+              <NavigationItem
+                key={item.id}
+                item={item}
+                isActive={router.pathname === item.path}
+                isMobile={true}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.nav>
+  );
+};
+
+// Desktop navigation component
+const DesktopNavigation = () => {
+  const router = useRouter();
+
+  return (
+    <nav
+      className="
+        md:flex flex-col gap-2
+        w-full h-screen pt-24 px-4 pb-8
+        sticky top-0
+        bg-[rgb(var(--md-surface))]/50
+        backdrop-blur-lg
+        border-r border-[rgb(var(--md-outline-variant))]
+      "
+      role="navigation"
+      aria-label="Main Navigation"
+    >
+      <motion.div
+        className="space-y-1"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={springTransition}
+      >
+        {navigationConfig.map((item) => (
+          <NavigationItem
+            key={item.id}
+            item={item}
+            isActive={router.pathname === item.path}
+            isMobile={false}
+          />
+        ))}
+      </motion.div>
+    </nav>
+  );
+};
+
+// Main Navigation component
+export const Navigation = () => {
+  return (
+    <>
+      <DesktopNavigation />
+      <MobileNavigation />
+    </>
+  );
+};
+
+export default Navigation;
+

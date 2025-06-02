@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { PageWrapper } from "../components/layout/Header";
+import React, { useCallback, useState, useEffect } from 'react';
+import { PageWrapper } from "../components/layout/PageWrapper";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { LoadingScreen, LoadingSpinner } from "../components/ui/Loading";
@@ -7,6 +7,7 @@ import { useToast } from "../components/ui/Toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useModuleTheme } from "../contexts/ModuleThemeContext";
+import { toISOWithMillisec } from "../utils/dates";
 import {
   faTrophy,
   faArrowUp,
@@ -32,7 +33,7 @@ export default function AdminPage() {
   const { theme: moduleTheme } = useModuleTheme();
 
   // Function to fetch cards via HTTP
-  const fetchCards = async (showRefreshing = false) => {
+  const fetchCards = useCallback(async (showRefreshing = false) => {
     if (showRefreshing) {
       setRefreshing(true);
     } else {
@@ -58,10 +59,9 @@ export default function AdminPage() {
       setLoadingCards(false);
       setRefreshing(false);
     }
-  };
-
+  }, [addToast]);
   // Function to fetch card statistics
-  const fetchCardStats = async (showRefreshing = false) => {
+  const fetchCardStats = useCallback(async (showRefreshing = false) => {
     if (!showRefreshing) {
       setLoadingStats(true);
     }
@@ -96,28 +96,33 @@ export default function AdminPage() {
     } finally {
       setLoadingStats(false);
     }
-  };
+  }, [addToast]);
   
-  // Handle refresh of all data
-  const refreshAllData = () => {
+  // Handle refresh
+  const refreshAllData = useCallback(() => {
     fetchCards(true);
     fetchCardStats(true);
-  };
+  }, [fetchCards, fetchCardStats]);
 
   // Initial data fetch
   useEffect(() => {
     fetchCards();
     fetchCardStats();
-  }, []);
+  }, [fetchCards, fetchCardStats]);
 
   // Format date to ISO string with milliseconds
   const formatISODate = (dateString) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toISOString();
+    try {
+      return toISOWithMillisec(new Date(dateString));
+    } catch (error) {
+      console.error('Invalid date:', error);
+      return "Invalid date";
+    }
   };
 
   // Handle form submission
-  const handleCreateCard = async (e) => {
+  const handleCreateCard = useCallback(async (e) => {
     e.preventDefault();
     if (!newCardText.trim() || isSubmitting) return;
 
@@ -152,21 +157,22 @@ export default function AdminPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [newCardText, isSubmitting, fetchCardStats, addToast]);
   
   // Start editing a card
-  const startEditCard = (card) => {
+  const startEditCard = useCallback((card) => {
     setEditingCard(card._id);
     setEditText(card.text);
-  };
+  }, []);
+
   // Cancel editing
-  const cancelEdit = () => {
+  const cancelEdit = useCallback(() => {
     setEditingCard(null);
     setEditText("");
-  };
+  }, []);
   
   // Save edited card
-  const saveEditedCard = async (cardId) => {
+  const saveEditedCard = useCallback(async (cardId) => {
     if (!editText.trim() || isSubmitting) return;
     
     setIsSubmitting(true);
@@ -204,10 +210,10 @@ export default function AdminPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [editText, isSubmitting, fetchCardStats, addToast]);
 
   // Handle card deletion
-  const handleDeleteCard = async (cardId) => {
+  const handleDeleteCard = useCallback(async (cardId) => {
     try {
       const response = await fetch(`/api/cards/${cardId}`, {
         method: 'DELETE'
@@ -227,7 +233,7 @@ export default function AdminPage() {
       console.error('Error deleting card:', error);
       addToast("Failed to delete card", "error");
     }
-  };
+  }, [fetchCardStats, addToast]);
 
   return (
     <PageWrapper>
@@ -239,7 +245,7 @@ export default function AdminPage() {
           className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
         >
           <div>
-            <h1 className="text-3xl font-bold">Card Management</h1>
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-admin-500 to-admin-700">Card Management ⚙️</h1>
             <p className="text-gray-600 dark:text-gray-300 mt-1">
               Create and manage your decision cards
             </p>

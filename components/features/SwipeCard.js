@@ -1,5 +1,5 @@
 import { motion, useAnimation, useMotionValue, useTransform } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export const SwipeCard = ({ content, onSwipe }) => {
   const [exitX, setExitX] = useState(0);
@@ -16,7 +16,7 @@ export const SwipeCard = ({ content, onSwipe }) => {
     [0, 1, 1, 1, 0]
   );
 
-  const handleSwipeAnimation = async (direction) => {
+  const handleSwipeAnimation = useCallback(async (direction) => {
     const targetX = direction === "right" ? 200 : -200;
     setExitX(targetX);
 
@@ -44,7 +44,7 @@ export const SwipeCard = ({ content, onSwipe }) => {
 
     // Pass normalized direction value to the parent handler
     onSwipe(direction);
-  };
+  }, [controls, onSwipe, setExitX, setShowLeftBubble, setShowRightBubble]);
 
   const handleDragEnd = async (_, info) => {
     const offset = info.offset.x;
@@ -73,7 +73,7 @@ export const SwipeCard = ({ content, onSwipe }) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [handleSwipeAnimation]);
 
   return (
     <div className="relative w-full max-w-md mx-auto">

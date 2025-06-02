@@ -1,7 +1,4 @@
-import dbConnect from "../../../lib/dbConnect";
-import Card from "../../../models/Card";
-import VoteRank from "../../../models/VoteRank";
-import VotePair from "../../../models/VotePair";
+import { VoteRank, VotePair, connectToDatabase, initializeModels } from '../../../models';
 
 export default async function handler(req, res) {
   const requestTime = new Date().toISOString();
@@ -30,7 +27,8 @@ export default async function handler(req, res) {
   console.log(`[${requestTime}] Debug request for sessionId: ${sessionId}`);
   
   try {
-    await dbConnect();
+  await connectToDatabase();
+  initializeModels();
     console.log(`[${requestTime}] Database connected successfully`);
     
     // Get recent votes for this session

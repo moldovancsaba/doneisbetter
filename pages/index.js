@@ -3,27 +3,86 @@ import { useState, useEffect } from 'react';
 import { Input } from '../components/ui/Forms';
 import { motion } from 'framer-motion';
 import { useModuleTheme } from '../contexts/ModuleThemeContext';
+import { useSession } from '../contexts/SessionContext';
+import { toISOWithMillisec } from '../utils/dates';
 
 export default function Home() {
   const [username, setUsername] = useState('');
   const [hasUsername, setHasUsername] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const { allThemes } = useModuleTheme();
+  const { setUserIdentity, userId, status, isReady, registerSession } = useSession();
 
-  // Check if username exists in localStorage on mount
+  // Clear data on first load
   useEffect(() => {
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-      setHasUsername(true);
+    if (typeof window !== 'undefined' && !sessionStorage.getItem('initialized')) {
+      localStorage.removeItem('username');
+      sessionStorage.setItem('initialized', new Date().toISOString());
     }
   }, []);
 
-  // Save username to localStorage
-  const handleUsernameSubmit = (e) => {
+  // Session expiry check
+  const checkSession = () => {
+    const loginTimestamp = localStorage.getItem('loginTimestamp');
+    if (loginTimestamp) {
+      const lastLogin = new Date(loginTimestamp);
+      const now = new Date();
+      // Clear session if older than 24 hours
+      if (now - lastLogin > 24 * 60 * 60 * 1000) {
+        localStorage.clear();
+        setHasUsername(false);
+      }
+    }
+  };
+
+  // Check if user exists in session
+  useEffect(() => {
+    if (isReady) {
+      checkSession();
+      if (status === 'active' && userId) {
+        setUsername(userId);
+        // User needs to click login to proceed
+      } else if (status === 'error') {
+        // Clear any existing username if there's a session error
+        setUsername('');
+        setHasUsername(false);
+      }
+    }
+  }, [userId, status, isReady]);
+
+  // Handle username submission
+  const handleUsernameSubmit = async (e) => {
     e.preventDefault();
-    if (username.trim().length > 0) {
-      localStorage.setItem('username', username);
+    setError('');
+    
+    const trimmedUsername = username.trim();
+    if (trimmedUsername.length < 3) {
+      setError('Username must be at least 3 characters long');
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      // Update the user identity
+      const success = await setUserIdentity(trimmedUsername);
+      if (!success) {
+        throw new Error('Failed to set username');
+      }
+      
+      // Set states and timestamps only after both operations succeed
+      const timestamp = new Date().toISOString();
+      localStorage.setItem('username', trimmedUsername);
+      localStorage.setItem('loginTimestamp', timestamp);
       setHasUsername(true);
+    } catch (error) {
+      console.error('Error:', error);
+      setError(error.message || 'An error occurred. Please try again.');
+      setHasUsername(false);
+      localStorage.removeItem('username');
+      localStorage.removeItem('loginTimestamp');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,17 +107,20 @@ export default function Home() {
             <div className="space-y-4">
               <Input
                 label="Enter your username"
-                placeholder="Your username"
+                placeholder="Enter any username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                autoComplete="off"
                 className="text-lg"
+                error={error}
               />
               <button 
                 type="submit"
-                className="w-full bg-home-600 hover:bg-home-700 text-white font-semibold py-3 px-6 rounded-lg text-lg text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-home-700/20"
+                disabled={isLoading || !username.trim()}
+                className={`w-full bg-home-600 ${!isLoading && 'hover:bg-home-700'} text-white font-semibold py-3 px-6 rounded-lg text-lg text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-home-700/20 ${isLoading || !username.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                Continue 🚀
+                {isLoading ? 'Logging in...' : 'Continue 🚀'}
               </button>
             </div>
           </motion.form>

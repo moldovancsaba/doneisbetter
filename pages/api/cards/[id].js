@@ -1,13 +1,13 @@
-import dbConnect from '../../../lib/dbConnect';
-import Card from '../../../models/Card';
+import { connectToDatabase, Card, initializeModels } from '../../../models';
 
 export default async function handler(req, res) {
   const { method } = req;
   const { id } = req.query;
 
-  // Connect to database
+  // Connect to database and initialize models
   try {
-    await dbConnect();
+    await connectToDatabase();
+    initializeModels();
   } catch (error) {
     console.error('Database connection error:', error);
     return res.status(500).json({ success: false, error: 'Database connection failed' });

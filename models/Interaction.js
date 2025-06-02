@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 const interactionSchema = new mongoose.Schema({
   // Support both userId (for authenticated users) and sessionId (for anonymous users)
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: String,
     required: false // Changed to false since we might use sessionId instead
   },
   sessionId: {
@@ -59,5 +58,7 @@ interactionSchema.set('toJSON', {
   }
 });
 
-export default mongoose.models.Interaction || mongoose.model('Interaction', interactionSchema);
+const Interaction = mongoose.models.Interaction || mongoose.model('Interaction', interactionSchema);
 
+export { Interaction };
+export default Interaction;

@@ -1,8 +1,8 @@
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useModuleTheme } from "../../contexts/ModuleThemeContext";
 
-export const CardStack = ({ cards, onSwipe }) => {
+export const CardStack = ({ cards, onSwipe, isSwipeLocked = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -19,9 +19,9 @@ export const CardStack = ({ cards, onSwipe }) => {
     setSwipeDirection(null);
     setIsDragging(false);
     console.log("Reset animation state for new card");
-  }, [currentIndex]);
+  }, [currentIndex, x]);
 
-  const handleSwipe = (direction) => {
+  const handleSwipe = useCallback((direction) => {
     if (!cards || currentIndex >= cards.length) return;
     
     // Ensure direction is normalized to 'right' or 'left'
@@ -39,18 +39,20 @@ export const CardStack = ({ cards, onSwipe }) => {
     // Create a two-step animation:
     // 1. First let the card animate out with the swipe direction
     // 2. Then update the index which will trigger a clean reset for the next card
+    
+    // Use a single swipe action to prevent double swipes
     setTimeout(() => {
       // Notify parent component of swipe with normalized direction
-      onSwipe?.(normalizedDirection);
+      onSwipe?.(normalizedDirection, cards[currentIndex]._id);
       
       // Move to next card - the useEffect will handle resetting the animation state
       setCurrentIndex(prev => prev + 1);
     }, 300);
-  };
+  }, [cards, currentIndex, onSwipe, setCurrentIndex, setSwipeDirection, x]);
 
   // Add keyboard event listeners
   // Add visual feedback for keyboard swipes
-  const handleKeyboardSwipe = (direction) => {
+  const handleKeyboardSwipe = useCallback((direction) => {
     // First ensure we're starting from a clean state
     x.set(0);
     setSwipeDirection(null);
@@ -68,7 +70,7 @@ export const CardStack = ({ cards, onSwipe }) => {
         handleSwipe(direction);
       }, 300);
     }, 50);
-  };
+  }, [x, setSwipeDirection, handleSwipe]);
   
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -86,7 +88,7 @@ export const CardStack = ({ cards, onSwipe }) => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [cards, currentIndex]);
+  }, [cards, currentIndex, handleKeyboardSwipe]);
 
   return (
     <div className="relative w-full max-w-md mx-auto">
@@ -99,7 +101,7 @@ export const CardStack = ({ cards, onSwipe }) => {
           <motion.div
             key={cards[currentIndex]._id}
             className="relative w-full"
-            drag="x"
+            drag={!isSwipeLocked ? "x" : false}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.8}
             style={{ 
@@ -211,7 +213,7 @@ export const CardStack = ({ cards, onSwipe }) => {
               All Done! 🎉
             </h2>
             <p className={`${moduleTheme.textClass} text-opacity-70 dark:text-opacity-70 mb-6`}>
-              You've gone through all the cards
+            You&apos;ve gone through all the cards
             </p>
             <button
               onClick={() => setCurrentIndex(0)}

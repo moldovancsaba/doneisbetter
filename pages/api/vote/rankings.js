@@ -1,14 +1,12 @@
-import dbConnect from '../../../lib/dbConnect';
-import VoteRank from '../../../models/VoteRank';
-import VotePair from '../../../models/VotePair';
-
+import { connectToDatabase, VoteRank, VotePair, Card, initializeModels } from '../../../models';
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
   try {
-    await dbConnect();
+    await connectToDatabase();
+    initializeModels();
     
     // Get all rankings, sorted by rank
     const rankings = await VoteRank.find()

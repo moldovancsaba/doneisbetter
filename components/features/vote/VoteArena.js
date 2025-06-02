@@ -6,12 +6,12 @@ export const VoteArena = ({ card1, card2, onVote, loading }) => {
   const [selectedCard, setSelectedCard] = useState(null);
   const [animatingOut, setAnimatingOut] = useState(false);
 
-  const handleCardSelect = (cardId) => {
+  const handleCardSelect = useCallback((cardId) => {
     if (animatingOut || loading) return;
     setSelectedCard(cardId);
-  };
+  }, [animatingOut, loading]);
 
-  const handleVoteSubmit = (cardId) => {
+  const handleVoteSubmit = useCallback((cardId) => {
     if (animatingOut || loading) return;
     setAnimatingOut(true);
     
@@ -24,7 +24,7 @@ export const VoteArena = ({ card1, card2, onVote, loading }) => {
       setSelectedCard(null);
       setAnimatingOut(false);
     }, 500);
-  };
+  }, [animatingOut, loading, onVote, card1._id, card2._id]);
 
   // Handle keyboard controls
   useEffect(() => {
@@ -55,7 +55,7 @@ export const VoteArena = ({ card1, card2, onVote, loading }) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedCard, loading, animatingOut, card1._id, card2._id]);
+  }, [selectedCard, loading, animatingOut, card1._id, card2._id, handleCardSelect, handleVoteSubmit]);
 
   return (
     <div className="w-full">

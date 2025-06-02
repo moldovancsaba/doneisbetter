@@ -1,109 +1,54 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { useModuleTheme, moduleThemes } from "../../contexts/ModuleThemeContext";
+import { useModuleTheme } from '../../contexts/ModuleThemeContext';
 
-export const Header = () => {
+const ThemeSwitcher = () => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
-  const router = useRouter();
-  const { currentModule, theme: moduleTheme, allThemes } = useModuleTheme();
-  
+
   useEffect(() => {
     setMounted(true);
+    return () => setMounted(false);
   }, []);
 
-  const navigationItems = [
-    { href: "/", label: "Home 🏠", module: "home" },
-    { href: "/rankings", label: "Rankings 🏆", module: "rankings" },
-    { href: "/swipe", label: "Swipe 🔄", module: "swipe" },
-    { href: "/vote", label: "Vote 🗳️", module: "vote" },
-    { href: "/admin", label: "Admin ⚙️", module: "admin" },
-  ];
+  if (!mounted) return null;
 
   return (
-    <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-50"
+    <button
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="
+        p-2 rounded-lg
+        bg-gray-100 dark:bg-gray-800
+        hover:bg-gray-200 dark:hover:bg-gray-700
+        transition-colors duration-200
+      "
+      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >
-      <div className="backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-700/50">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-16 flex items-center justify-between">
-            <Link href="/">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center cursor-pointer"
-              >
-                <span className={`text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${moduleTheme.gradient}`}>
-                  DoneisBetter
-                </span>
-              </motion.div>
-            </Link>
-
-            <div className="hidden md:flex items-center gap-2">
-              {navigationItems.map((item) => {
-                const isActive = router.pathname === item.href;
-                const itemTheme = allThemes[item.module];
-                
-                return (
-                  <motion.div
-                    key={item.href}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Link 
-                      href={item.href}
-                      className={`
-                        px-4 py-2 rounded-lg font-medium transition-colors
-                        ${isActive 
-                          ? allThemes[item.module].activeClass 
-                          : allThemes[item.module].inactiveClass
-                        }
-                      `}
-                    >
-                      {item.label}
-                    </Link>
-                  </motion.div>
-                );
-              })}
-
-              {mounted && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="ml-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
-                  aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                >
-                  {theme === "dark" ? "🌞" : "🌙"}
-                </motion.button>
-              )}
-            </div>
-          </div>
-        </nav>
-      </div>
-    </motion.header>
+      <span className="text-xl">
+        {theme === "dark" ? "🌞" : "🌙"}
+      </span>
+    </button>
   );
 };
 
-export const PageWrapper = ({ children }) => {
-  const { backgroundClass } = useModuleTheme();
-  
+export function Header() {
+  const { theme } = useModuleTheme();
+
   return (
-    <div className={`min-h-screen ${backgroundClass}`}>
-      <Header />
-      <motion.main
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="pt-20 pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
-      >
-        {children}
-      </motion.main>
-    </div>
+    <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-4">
+          <div className="flex items-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">DoneIsBetter</h1>
+          </div>
+          <div className="flex items-center">
+            <ThemeSwitcher />
+          </div>
+        </div>
+      </div>
+    </header>
   );
-};
+}
+
+export default Header;

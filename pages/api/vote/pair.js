@@ -1,8 +1,4 @@
-import dbConnect from "../../../lib/dbConnect";
-import Card from "../../../models/Card";
-import VoteRank from "../../../models/VoteRank";
-import Interaction from "../../../models/Interaction";
-import { v4 as uuidv4 } from "uuid";
+import { connectToDatabase, Card, VoteRank, VotePair, Interaction, initializeModels } from '../../../models';
 
 export default async function handler(req, res) {
   const requestTime = new Date().toISOString();
@@ -18,7 +14,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    await dbConnect();
+    await connectToDatabase();
+    initializeModels();
     console.log(`[${requestTime}] Database connected successfully`);
 
     // Get session ID from the request
@@ -34,12 +31,18 @@ export default async function handler(req, res) {
 
     console.log(`[${requestTime}] Looking up swiped cards for session: ${sessionId}`);
     
-    // Find all cards this user has swiped right on
-    const rightSwipedCards = await Interaction.find({
-      sessionId,
-      type: 'swipe',
-      action: 'right'
-    }).distinct('cardId');
+    // Find all cards that have been swiped right, including from previous sessions with same user
+    const interaction = await Interaction.findOne({ sessionId });
+    const userId = interaction?.userId;
+    
+    let rightSwipedQuery = { type: 'swipe', action: 'right' };
+    if (userId) {
+      rightSwipedQuery.$or = [{ sessionId }, { userId }];
+    } else {
+      rightSwipedQuery.sessionId = sessionId;
+    }
+    
+    const rightSwipedCards = await Interaction.find(rightSwipedQuery).distinct('cardId');
 
     console.log(`[${requestTime}] User has swiped right on ${rightSwipedCards.length} cards`);
 

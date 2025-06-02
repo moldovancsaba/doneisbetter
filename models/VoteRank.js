@@ -6,27 +6,38 @@ const voteRankSchema = new mongoose.Schema({
     ref: 'Card',
     required: true
   },
+  userId: {
+    type: String,
+    required: false
+  },
   rank: {
     type: Number,
-    required: true,
-    default: 0
+    required: true
   },
-  totalVotes: {
-    type: Number,
-    default: 0
-  },
-  wins: {
-    type: Number,
-    default: 0
-  },
-  lastUpdated: {
+  updatedAt: {
     type: Date,
-    default: Date.now
+    default: () => new Date().toISOString()
+  }
+}, {
+  timestamps: {
+    currentTime: () => new Date().toISOString()
   }
 });
 
-// Create a compound index to ensure each card has only one rank entry
+// Ensure proper ISO 8601 format with milliseconds
+voteRankSchema.pre('save', function(next) {
+  if (this.isModified('rank')) {
+    this.updatedAt = new Date().toISOString();
+  }
+  next();
+});
+
+// Create indexes for faster queries
 voteRankSchema.index({ cardId: 1 }, { unique: true });
+voteRankSchema.index({ userId: 1 });
+voteRankSchema.index({ rank: -1 });
+voteRankSchema.index({ updatedAt: -1 });
 
-export default mongoose.models.VoteRank || mongoose.model('VoteRank', voteRankSchema);
+const VoteRank = mongoose.models.VoteRank || mongoose.model('VoteRank', voteRankSchema);
 
+export default VoteRank;

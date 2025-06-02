@@ -1,6 +1,4 @@
-import dbConnect from '../../lib/dbConnect';
-import Interaction from '../../models/Interaction';
-import Card from '../../models/Card';
+import { Card, Interaction, connectToDatabase, initializeModels } from '../../models';
 
 export default async function handler(req, res) {
   const requestTime = new Date().toISOString();
@@ -17,7 +15,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    await dbConnect();
+  await connectToDatabase();
+  initializeModels();
     console.log(`[${requestTime}] Database connected successfully`);
     
     const { sessionId, userId, cardId, type, action, againstCardId } = req.body;

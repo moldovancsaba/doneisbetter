@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/Button";
 import Link from "next/link";
-import { PageWrapper } from "../components/layout/Header";
+import { PageWrapper } from "../components/layout/PageWrapper";
 
 export default function Custom404() {
   return (

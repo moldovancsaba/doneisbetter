@@ -1,5 +1,50 @@
 import { motion } from "framer-motion";
 import { useModuleTheme } from "../../contexts/ModuleThemeContext";
+
+// Content Skeleton component for displaying loading UI
+export const ContentSkeleton = ({ type = 'default' }) => {
+  const { theme: moduleTheme } = useModuleTheme();
+
+  const renderDefaultSkeleton = () => (
+    <div className="animate-pulse space-y-4">
+      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+      <div className="space-y-2">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+      </div>
+    </div>
+  );
+
+  const renderCardSkeleton = () => (
+    <div className={`p-4 border ${moduleTheme.borderClass} rounded-lg animate-pulse`}>
+      <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+      <div className="space-y-3">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/6"></div>
+      </div>
+    </div>
+  );
+
+  const renderTableSkeleton = () => (
+    <div className="animate-pulse">
+      <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+      ))}
+    </div>
+  );
+
+  switch (type) {
+    case 'card':
+      return renderCardSkeleton();
+    case 'table':
+      return renderTableSkeleton();
+    default:
+      return renderDefaultSkeleton();
+  }
+};
+
 // Skeleton loading component with module theming
 export const ModuleSkeleton = ({ type = "text", lines = 3, module, className = "" }) => {
   const { theme: moduleTheme } = useModuleTheme();
@@ -36,6 +81,8 @@ export const ModuleSkeleton = ({ type = "text", lines = 3, module, className = "
     </div>
   );
 };
+
+// Spinning loading indicator with module theming
 export const LoadingSpinner = ({ size = "md", className = "", module }) => {
   const { currentModule, theme: moduleTheme } = useModuleTheme();
   const activeModule = module || currentModule;
@@ -63,6 +110,7 @@ export const LoadingSpinner = ({ size = "md", className = "", module }) => {
   );
 };
 
+// Full-screen loading view with module theming
 export const LoadingScreen = ({ message = "Loading...", module }) => {
   const { theme: moduleTheme } = useModuleTheme();
   const activeTheme = module ? `${module}` : moduleTheme.color;
@@ -93,6 +141,7 @@ export const LoadingScreen = ({ message = "Loading...", module }) => {
   );
 };
 
+// Modal-style loading overlay with module theming
 export const LoadingOverlay = ({ message = "Loading...", module }) => {
   const { theme: moduleTheme } = useModuleTheme();
   const activeTheme = module ? `${module}` : moduleTheme.color;
@@ -124,6 +173,7 @@ export const LoadingOverlay = ({ message = "Loading...", module }) => {
   );
 };
 
+// Loading button with module theming
 export const LoadingButton = ({ children, loading, module, loadingText = "Loading...", ...props }) => {
   const { theme: moduleTheme } = useModuleTheme();
   const activeTheme = module ? `${module}` : moduleTheme.color;
