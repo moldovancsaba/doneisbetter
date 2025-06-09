@@ -1,173 +1,158 @@
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { Input } from '../components/ui/Forms';
-import { motion } from 'framer-motion';
-import { useModuleTheme } from '../contexts/ModuleThemeContext';
-import { useSession } from '../contexts/SessionContext';
-import { toISOWithMillisec } from '../utils/dates';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
-  const [username, setUsername] = useState('');
-  const [hasUsername, setHasUsername] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { allThemes } = useModuleTheme();
-  const { setUserIdentity, userId, status, isReady, registerSession } = useSession();
+  const [token, setToken] = useState('');
+  const [identifier, setIdentifier] = useState('');
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [text, setText] = useState('');
+  const [items, setItems] = useState([]);
+  const [message, setMessage] = useState('');
+  const [editingId, setEditingId] = useState(null);
 
-  // Clear data on first load
   useEffect(() => {
-    if (typeof window !== 'undefined' && !sessionStorage.getItem('initialized')) {
-      localStorage.removeItem('username');
-      sessionStorage.setItem('initialized', new Date().toISOString());
+    const match = window.location.href.match(/[?&]token=([^&]+)/);
+    const foundToken = match ? match[1] : null;
+
+    if (foundToken) {
+      document.cookie = `token=${foundToken}; path=/`;
+      setToken(foundToken);
+      const cleanUrl = window.location.href.split('?token=')[0];
+      window.history.replaceState({}, document.title, cleanUrl);
     }
+
+    const cookieToken = document.cookie.split('; ').find(row => row.startsWith('token='));
+    const tokenValue = cookieToken ? cookieToken.split('=')[1] : null;
+
+    if (tokenValue) {
+      fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: tokenValue })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.identifier) {
+            setIdentifier(data.identifier);
+            setLoggedIn(true);
+            setToken(tokenValue);
+          }
+        });
+    }
+
+    fetch('/api/list')
+      .then(res => res.json())
+      .then(data => setItems(data));
   }, []);
 
-  // Session expiry check
-  const checkSession = () => {
-    const loginTimestamp = localStorage.getItem('loginTimestamp');
-    if (loginTimestamp) {
-      const lastLogin = new Date(loginTimestamp);
-      const now = new Date();
-      // Clear session if older than 24 hours
-      if (now - lastLogin > 24 * 60 * 60 * 1000) {
-        localStorage.clear();
-        setHasUsername(false);
-      }
-    }
+  const handleLogin = () => {
+    const redirectUrl = encodeURIComponent(window.location.href);
+    window.location.href = `https://thanperfect.vercel.app?redirect=${redirectUrl}`;
   };
 
-  // Check if user exists in session
-  useEffect(() => {
-    if (isReady) {
-      checkSession();
-      if (status === 'active' && userId) {
-        setUsername(userId);
-        // User needs to click login to proceed
-      } else if (status === 'error') {
-        // Clear any existing username if there's a session error
-        setUsername('');
-        setHasUsername(false);
-      }
-    }
-  }, [userId, status, isReady]);
-
-  // Handle username submission
-  const handleUsernameSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    
-    const trimmedUsername = username.trim();
-    if (trimmedUsername.length < 3) {
-      setError('Username must be at least 3 characters long');
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      // Update the user identity
-      const success = await setUserIdentity(trimmedUsername);
-      if (!success) {
-        throw new Error('Failed to set username');
+    if (!text.trim()) return;
+    const res = await fetch(editingId ? '/api/update' : '/api/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, token, id: editingId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (editingId) {
+        setItems(items.map(item => (item._id === editingId ? data.entry : item)));
+        setEditingId(null);
+        setMessage('✅ Updated successfully');
+      } else {
+        setItems([...items, data.entry]);
+        setMessage('✅ Submitted successfully');
       }
-      
-      // Set states and timestamps only after both operations succeed
-      const timestamp = new Date().toISOString();
-      localStorage.setItem('username', trimmedUsername);
-      localStorage.setItem('loginTimestamp', timestamp);
-      setHasUsername(true);
-    } catch (error) {
-      console.error('Error:', error);
-      setError(error.message || 'An error occurred. Please try again.');
-      setHasUsername(false);
-      localStorage.removeItem('username');
-      localStorage.removeItem('loginTimestamp');
-    } finally {
-      setIsLoading(false);
+      setText('');
+    } else {
+      setMessage(data.error || '❌ Submission failed');
+      console.log('[ERROR]', data);
     }
   };
+
+  const handleEdit = (entry) => {
+    setText(entry.text);
+    setEditingId(entry._id);
+  };
+
+  const handleDelete = async (id) => {
+    const res = await fetch('/api/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, id })
+    });
+    const data = await res.json();
+    if (data.success) {
+      setItems(items.filter(item => item._id !== id));
+      setMessage('🗑️ Deleted successfully');
+    } else {
+      setMessage(data.error || '❌ Delete failed');
+      console.log('[DELETE ERROR]', data);
+    }
+  };
+
+  if (!loggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <button
+          className="bg-blue-600 text-white px-6 py-3 rounded"
+          onClick={handleLogin}
+        >
+          Login with thanperfect SSO
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4">
-      <motion.h1 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-4xl font-bold mb-10 text-center bg-clip-text text-transparent bg-gradient-to-r from-home-500 to-home-700"
-      >
-        DoneisBetter 🏠
-      </motion.h1>
-      
-      <div className="flex flex-col w-full max-w-xs gap-6">
-        {!hasUsername ? (
-          <motion.form 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            onSubmit={handleUsernameSubmit}
-            className="w-full"
-          >
-            <div className="space-y-4">
-              <Input
-                label="Enter your username"
-                placeholder="Enter any username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                autoComplete="off"
-                className="text-lg"
-                error={error}
-              />
-              <button 
-                type="submit"
-                disabled={isLoading || !username.trim()}
-                className={`w-full bg-home-600 ${!isLoading && 'hover:bg-home-700'} text-white font-semibold py-3 px-6 rounded-lg text-lg text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-home-700/20 ${isLoading || !username.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {isLoading ? 'Logging in...' : 'Continue 🚀'}
-              </button>
+    <div className="p-4 max-w-xl mx-auto">
+      <h1 className="text-xl mb-4">Welcome, {identifier}</h1>
+      <form onSubmit={handleSubmit} className="mb-4">
+        <input
+          className="border p-2 w-full"
+          value={text}
+          onChange={e => setText(e.target.value)}
+          placeholder="Submit a new string"
+        />
+        <button type="submit" className="mt-2 p-2 bg-blue-500 text-white">
+          {editingId ? 'Update' : 'Submit'}
+        </button>
+        <p className="text-green-600 mt-2">{message}</p>
+      </form>
+      <ul>
+        {items.map((entry) => (
+          <li key={entry._id} className="mb-4 border p-3">
+            <div className="w-full">
+              <div className="flex justify-between">
+                <div>
+                  <strong>{entry.text}</strong> — <span className="text-sm text-gray-500">{entry.author}</span>
+                </div>
+              </div>
+              {entry.activities && entry.activities.length > 0 && (
+                <div className="mt-1 text-xs text-gray-500">
+                  <p className="font-semibold">Activity Log:</p>
+                  <ul className="ml-4 list-disc">
+                    <li>created @ {new Date(entry.createdAt).toISOString()}</li>
+                    {entry.activities.map((log, idx) => (
+                      <li key={idx}>{log.type} @ {new Date(log.timestamp).toISOString()}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {entry.author === identifier && (
+                <div className="flex gap-2 mt-2">
+                  <button onClick={() => handleEdit(entry)} className="text-blue-500 text-sm">Edit</button>
+                  <button onClick={() => handleDelete(entry._id)} className="text-red-500 text-sm">Delete</button>
+                </div>
+              )}
             </div>
-          </motion.form>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="w-full space-y-4"
-          >
-            <div className="text-center mb-2">
-              <p className="text-gray-600 dark:text-gray-300">Logged in as:</p>
-              <p className="text-lg font-medium">{username}</p>
-              <button 
-                onClick={() => setHasUsername(false)} 
-                className="text-sm text-home-500 hover:text-home-600 mt-1"
-              >
-                Change username
-              </button>
-            </div>
-            
-            {/* Navigation Cards */}
-            <div className="grid gap-4 mt-6">
-              {Object.entries(allThemes).map(([moduleName, theme]) => (
-                <motion.div
-                  key={moduleName}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Link 
-                    href={moduleName === 'home' ? '/' : `/${moduleName}`}
-                    className={`
-                      block border ${theme.borderClass}
-                      bg-white dark:bg-gray-800 hover:bg-${moduleName}-50/30 dark:hover:bg-${moduleName}-900/20
-                      font-semibold py-5 px-6 rounded-lg text-xl
-                      transition-all duration-200 shadow-md hover:shadow-lg
-                      flex items-center justify-center gap-3
-                    `}
-                  >
-                    <span className={`text-2xl ${theme.iconClass}`}>{theme.name.split(' ')[1]}</span>
-                    <span className={theme.textClass}>{theme.name.split(' ')[0]}</span>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
