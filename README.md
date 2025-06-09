@@ -44,11 +44,30 @@ npm install
 
 3. Configure environment variables:
    - Create a `.env.local` file in the root directory
-   - Add the following required variables:
+   - For Vercel deployment, the following variables are required in `.env.vercel`:
+
 ```env
-MONGODB_URI="your_mongo_uri"
-SSO_VALIDATE_URL="https://thanperfect.vercel.app/api/validate"
+# Google OAuth Configuration
+GOOGLE_CLIENT_ID="your_google_client_id"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
+
+# MongoDB Configuration
+MONGODB_URI="your_mongodb_connection_string"
+MONGODB_CONNECT_TIMEOUT_MS="optional_connect_timeout"
+MONGODB_INITIAL_RETRY_DELAY_MS="optional_retry_delay"
+MONGODB_MAX_RETRIES="optional_max_retries"
+MONGODB_MAX_RETRY_DELAY_MS="optional_max_retry_delay"
+MONGODB_SOCKET_TIMEOUT_MS="optional_socket_timeout"
+
+# NextAuth Configuration
+NEXTAUTH_SECRET="your_nextauth_secret"
+
+# Feature Flags
+NEXT_PUBLIC_DISABLE_CACHE="optional_cache_disable_flag"
+NEXT_PUBLIC_FORCE_LOGIN="optional_force_login_flag"
 ```
+
+NOTE: Never commit the actual values of these environment variables to version control. Use placeholder values in documentation and keep the real values secure.
 
 4. Start the development server:
 ```bash
