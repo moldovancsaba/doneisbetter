@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CardSwipe
 
-## Getting Started
+A privacy-focused image ranking application that allows users to discover and rank images through an intuitive swipe and vote interface.
 
-First, run the development server:
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+
+## Overview
+
+CardSwipe presents public image URLs from imgbb.com as swipeable cards, enabling users to:
+1. **SWIPE** through images (like/dislike)
+2. **VOTE** in 1v1 preference battles
+3. View final **RANKING**
+
+## Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000` to start using the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## SSO Integration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+CardSwipe uses SSO authentication from sso.doneisbetter.com. Configure your environment:
 
-## Learn More
+```env
+SSO_API_URL=https://sso.doneisbetter.com
+SSO_CLIENT_ID=your_client_id
+SSO_CLIENT_SECRET=your_client_secret
+```
 
-To learn more about Next.js, take a look at the following resources:
+See [SSO Integration Guide](https://sso.doneisbetter.com/docs/integration) for detailed setup.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Documentation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- [Architecture Overview](ARCHITECTURE.md)
+- [Development Roadmap](ROADMAP.md)
+- [Task List](TASKLIST.md)
+- [Release Notes](RELEASE_NOTES.md)
+- [Project Learnings](LEARNINGS.md)
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+© 2025 CardSwipe. All rights reserved.
