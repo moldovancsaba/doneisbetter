@@ -1,3 +1,14 @@
+## [1.6.0] — 2025-07-06T14:52:51Z
+
+### Changed
+- Complete overhaul of voting system to match requirements:
+  - Implements required business logic exactly
+  - Progressive ranking through multiple comparisons
+  - New card always on left, random comparison on right
+  - Proper comparison chain based on win/loss results
+  - Full battle outcome tracking
+  - State management with VoteManager
+
 ## [1.5.2] — 2025-07-06T14:46:41Z
 
 ### Fixed
