@@ -100,7 +100,7 @@ export default function PlayPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-800">
+    <div className="h-full w-full flex items-center justify-center bg-gray-800">
       {phase === 'swipe' ? (
         <SwipePhase 
           cards={cards}

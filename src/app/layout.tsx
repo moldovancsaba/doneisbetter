@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import './globals.css';
 import { Inter } from 'next/font/google';
 import { Navigation } from '@/components/layout/Navigation';
@@ -9,7 +10,16 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
-export const metadata = {
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#1a1a1a'
+}
+
+export const metadata: Metadata = {
+  manifest: '/manifest.json',
   title: 'DoneIsBetter',
   description: 'A better way to organize and rank your tasks',
 };

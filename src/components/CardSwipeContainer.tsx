@@ -7,9 +7,12 @@ interface CardSwipeContainerProps {
   voteThreshold?: number;
   disabled?: boolean;
   mode: 'swipe' | 'vote';
-  // Added to support responsive sizing
-  maxWidth?: string;
-  maxHeight?: string;
+  // Optional override for optimal dimensions
+  maxWidth?: string | number;
+  maxHeight?: string | number;
+  // Allow custom constraint ratios
+  widthRatio?: number;
+  heightRatio?: number;
 }
 
 /**
@@ -18,17 +21,40 @@ interface CardSwipeContainerProps {
  * A simplified container component that handles both swipe gestures and keyboard
  * navigation for voting. Uses framer-motion for gesture handling.
  */
+// Get optimal dimensions based on viewport size
+const getOptimalDimensions = () => {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  return {
+    width: Math.min(vw * 0.9, 500),
+    height: Math.min(vh * 0.8, 700)
+  };
+};
+
 export const CardSwipeContainer: React.FC<CardSwipeContainerProps> = ({
   children,
   onVote,
   voteThreshold = 100,
   disabled = false,
   mode,
-  maxWidth = '100%',
-  maxHeight = '100vh',
+  maxWidth,
+  maxHeight,
+  widthRatio = 0.9,
+  heightRatio = 0.8,
 }) => {
-  const controls = useAnimation();
+const controls = useAnimation();
   const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
+  const [dimensions, setDimensions] = useState(getOptimalDimensions());
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions(getOptimalDimensions());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -144,12 +170,18 @@ export const CardSwipeContainer: React.FC<CardSwipeContainerProps> = ({
         x: 0,
         opacity: 1,
         rotate: 0,
-        maxWidth,
-        maxHeight,
+        width: maxWidth || dimensions.width,
+        height: maxHeight || dimensions.height,
+        maxWidth: maxWidth || `${widthRatio * 100}vw`,
+        maxHeight: maxHeight || `${heightRatio * 100}vh`,
         touchAction: 'none', // Prevent default touch behaviors
         WebkitTapHighlightColor: 'transparent', // Remove tap highlight on mobile
+        WebkitTouchCallout: 'none', // Disable touch callout
         WebkitUserSelect: 'none', // Prevent text selection
-        userSelect: 'none'
+        userSelect: 'none',
+        msUserSelect: 'none',
+        MozUserSelect: 'none',
+        pointerEvents: disabled ? 'none' : 'auto'
       }}
       onClick={!disabled && mode === 'vote' ? () => onVote('right') : undefined}
     >

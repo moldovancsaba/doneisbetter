@@ -11,8 +11,8 @@ export function Navigation() {
   };
 
   return (
-    <nav className="bg-blue-600 text-white">
-      <div className="container mx-auto px-4">
+    <nav className="bg-blue-600 text-white shadow-lg">
+      <div className="w-full px-4">
         <div className="flex justify-between items-center h-16">
 
           <div className="hidden md:flex items-center space-x-4">
