@@ -6,23 +6,21 @@ interface Card {
   title: string;
   description: string;
   imageUrl: string;
+  rank?: number;
 }
 
 interface VoteComparisonProps {
-  cards: Card[];
+  leftCard: Card;
+  rightCard: Card;
   onVoteComplete: (winnerId: string, loserId: string) => void;
 }
 
-export const VoteComparison: React.FC<VoteComparisonProps> = ({ cards, onVoteComplete }) => {
+export const VoteComparison: React.FC<VoteComparisonProps> = ({ leftCard, rightCard, onVoteComplete }) => {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
 
   const handleVote = async (winnerId: string) => {
-    const loserId = cards.find(card => card._id !== winnerId)?._id;
-    if (!loserId) return;
-
+    const loserId = winnerId === leftCard._id ? rightCard._id : leftCard._id;
     setSelectedCard(winnerId);
-    
-    // Trigger the vote complete handler
     onVoteComplete(winnerId, loserId);
   };
 
@@ -30,7 +28,7 @@ export const VoteComparison: React.FC<VoteComparisonProps> = ({ cards, onVoteCom
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-8">Which one do you prefer?</h2>
       <div className="flex justify-center gap-8 w-full">
-        {cards.map((card) => (
+        {[leftCard, rightCard].map((card, index) => (
           <motion.div
             key={card._id}
             className={`
@@ -41,15 +39,15 @@ export const VoteComparison: React.FC<VoteComparisonProps> = ({ cards, onVoteCom
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => handleVote(card._id)}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, x: index === 0 ? -20 : 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: index === 0 ? -20 : 20 }}
           >
             <div className="h-48 w-full mb-4">
               <img 
                 src={card.imageUrl} 
                 alt={card.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover rounded-lg"
               />
             </div>
             <div className="flex flex-col flex-grow">

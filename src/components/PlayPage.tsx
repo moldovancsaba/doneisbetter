@@ -1,12 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { CardSwipeContainer } from './CardSwipeContainer';
 import { VoteComparison } from './VoteComparison';
+import { getNextComparisonCard } from '../utils/rankingLogic';
 
 interface Card {
   _id: string;
   title: string;
   description: string;
   imageUrl: string;
+  rank?: number;
 }
 
 type Phase = 'swipe' | 'vote';
@@ -24,13 +26,23 @@ export const PlayPage: React.FC = () => {
   const [likedCards, setLikedCards] = useState<Card[]>([]);
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [previousComparisons, setPreviousComparisons] = useState<Set<string>>(new Set());
+  const [comparisonCard, setComparisonCard] = useState<Card | null>(null);
 
   // Watch likedCards and transition to vote phase when we have 2 or more
   useEffect(() => {
-    if (likedCards.length >= 2) {
-      setPhase('vote');
+    if (likedCards.length >= 2 && phase === 'swipe') {
+      // Get a comparison card for the most recently liked card
+      const newCard = likedCards[likedCards.length - 1];
+      const nextCard = getNextComparisonCard(newCard, likedCards.slice(0, -1));
+      
+      if (nextCard) {
+        setComparisonCard(nextCard);
+        setPhase('vote');
+        setPreviousComparisons(new Set([nextCard._id]));
+      }
     }
-  }, [likedCards]);
+  }, [likedCards, phase]);
 
   // Fetch initial card
   useEffect(() => {
@@ -88,6 +100,8 @@ export const PlayPage: React.FC = () => {
 
   if (phase === 'vote') {
     const handleVoteComplete = async (winnerId: string, loserId: string) => {
+      const newCard = likedCards[likedCards.length - 1];
+      const isNewCardWinner = winnerId === newCard._id;
       try {
         // Record the vote
         await fetch('/api/battles', {
@@ -100,11 +114,33 @@ export const PlayPage: React.FC = () => {
           }),
         });
 
-        // Remove the cards from liked list and go back to swipe phase
-        setLikedCards(prev => prev.filter(card => 
-          card._id !== winnerId && card._id !== loserId
-        ));
-        setPhase('swipe');
+        // Update rankings in likedCards
+        setLikedCards(prev => prev.map(card => {
+          if (card._id === winnerId) {
+            return { ...card, rank: (card.rank || 1500) + 32 };
+          }
+          if (card._id === loserId) {
+            return { ...card, rank: (card.rank || 1500) - 32 };
+          }
+          return card;
+        }));
+
+        // Get next comparison if needed
+        const nextCard = getNextComparisonCard(
+          newCard,
+          likedCards,
+          new Set([...previousComparisons, comparisonCard?._id || ''])
+        );
+
+        if (nextCard) {
+          setComparisonCard(nextCard);
+          setPreviousComparisons(prev => new Set([...prev, nextCard._id]));
+        } else {
+          // No more comparisons needed, back to swipe
+          setPhase('swipe');
+          setPreviousComparisons(new Set());
+          setComparisonCard(null);
+        }
       } catch (error) {
         console.error('Failed to process battle:', error);
       }
@@ -113,7 +149,8 @@ export const PlayPage: React.FC = () => {
     return (
       <div className="flex flex-col items-center w-full p-4">
         <VoteComparison 
-          cards={likedCards.slice(0, 2)} 
+          leftCard={likedCards[likedCards.length - 1]}
+          rightCard={comparisonCard!}
           onVoteComplete={handleVoteComplete} 
         />
       </div>

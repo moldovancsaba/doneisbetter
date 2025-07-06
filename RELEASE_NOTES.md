@@ -1,3 +1,17 @@
+## [1.5.0] — 2025-07-06T14:36:53Z
+
+### Changed
+- Fixed vote phase implementation:
+  - New card always appears on the left
+  - Random previously liked card on the right
+  - Progressive ranking system based on vote outcomes
+  - Proper ranking adjustment after each vote
+  - Efficient card comparison tracking
+- Enhanced vote UI:
+  - Clear left/right card positioning
+  - Smooth slide-in animations
+  - Improved visual feedback
+
 ## [1.4.0] — 2025-07-06T14:26:43Z
 
 ### Added
