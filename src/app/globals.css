@@ -12,7 +12,7 @@
 
   /* Card image container */
   .card-image-container {
-    @apply w-full aspect-square;
+    @apply w-full;
     @apply relative overflow-hidden;
   }
 
@@ -37,7 +37,7 @@
   .card-interactive-container {
     @apply relative w-full h-full;
     @apply flex items-center justify-center;
-    @apply max-h-[80vh] aspect-square;
+    @apply max-h-[80vh];
   }
 
   /* Grid container for card layout */

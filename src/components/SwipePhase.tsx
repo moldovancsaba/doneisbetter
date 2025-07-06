@@ -34,14 +34,16 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
   }
 
   return (
-    <div className="w-full h-full flex items-center justify-center relative touch-none p-4 md:p-6">
+    <div className="w-full h-[calc(100vh-80px)] flex items-center justify-center relative p-4 md:p-6 overflow-hidden">
+      <div className="absolute inset-0 touch-none pointer-events-none"></div>
       <AnimatePresence>
         <CardSwipeContainer
           key={currentCard._id}
           onVote={handleVote}
           mode="swipe"
         >
-          <div className="w-[min(90vw,500px)] mx-auto max-h-[80vh] overflow-hidden">
+          <div className="w-[min(90vw,500px)] mx-auto h-auto overflow-hidden pointer-events-auto">
+            {/* Container preserves natural aspect ratio */}
             <Card
               card={currentCard}
               className="w-full shadow-xl"

@@ -3,6 +3,45 @@
 ## 🔄 Active Tasks
 
 ### High Priority (P0)
+- [x] Card Image Aspect Ratio and Layout Unification @frontend (2025-07-06T21:14:54Z)
+  - Update Card component to preserve image aspect ratio
+  - Implement responsive image container
+  - Remove all text overlays from cards
+  - Ensure consistent card design across all views
+
+  Implementation Steps:
+  1. Centralized Card Component Updates
+     - Modify /components/common/Card.tsx
+     - Add aspect ratio preservation logic
+     - Remove text content section
+     - Add responsive sizing utilities
+
+  2. Swipe Phase Implementation
+     - Update SwipePhase component
+     - Ensure card fills available space
+     - Maintain image aspect ratio
+     - Remove any text overlays
+
+  3. Vote Phase Layout
+     - Create responsive layout manager
+     - Implement landscape mode (side-by-side)
+     - Implement portrait mode (stacked)
+     - Ensure consistent card sizing
+
+  4. Ranking Page Alignment
+     - Update ranking grid layout
+     - Remove rank numbers and text
+     - Maintain image aspect ratios
+     - Ensure consistent card sizing
+
+  Dependencies:
+  - Existing Card component
+  - Layout utility functions
+  - Current responsive design system
+
+## Previous Tasks
+
+### High Priority (P0)
 - [ ] Vote and Swipe Integration @dev (2025-07-13T23:59:59.999Z)
   - Rename VoteBattle component to Vote
   - Update vote direction handling
