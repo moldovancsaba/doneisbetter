@@ -1,3 +1,13 @@
+## [1.5.2] — 2025-07-06T14:46:41Z
+
+### Fixed
+- Fixed vote state management:
+  - Added battle win/loss tracking
+  - Improved card selection for battles
+  - Fixed API request format for battles
+  - Added battle stats display in UI
+  - Streamlined phase transitions
+
 ## [1.5.1] — 2025-07-06T14:46:41Z
 
 ### Fixed

@@ -7,6 +7,8 @@ export interface ICard {
   description: string; // Card description
   imageUrl: string;   // Image URL
   rank?: number;      // Card's current rank
+  battlesWon?: number;  // Number of battles won
+  battlesLost?: number; // Number of battles lost
   createdAt: string;  // ISO 8601 UTC with ms
 }
 
@@ -24,6 +26,16 @@ const cardSchema = new mongoose.Schema<ICard>({
   rank: {
     type: Number,
     required: false,
+  },
+  battlesWon: {
+    type: Number,
+    required: false,
+    default: 0
+  },
+  battlesLost: {
+    type: Number,
+    required: false,
+    default: 0
   },
   imageUrl: {
     type: String,

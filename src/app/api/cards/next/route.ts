@@ -7,11 +7,14 @@ export async function GET() {
     await connectDB();
     const Card = await getCardModel();
     
-    // Get a random card that hasn't been fully ranked
-    const cards = await Card.aggregate([
-      { $match: { rank: { $exists: false } } },
-      { $sample: { size: 1 } }
-    ]);
+    // Get a random card with an empty battle history
+    const cards = await Card.find({
+      $or: [
+        { battlesWon: { $exists: false } },
+        { battlesLost: { $exists: false } },
+        { battlesWon: 0, battlesLost: 0 }
+      ]
+    }).limit(1);
 
     if (cards.length === 0) {
       return NextResponse.json({ message: 'No more cards available' }, { status: 404 });

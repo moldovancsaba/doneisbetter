@@ -7,6 +7,8 @@ interface Card {
   description: string;
   imageUrl: string;
   rank?: number;
+  battlesWon?: number;
+  battlesLost?: number;
 }
 
 interface VoteComparisonProps {
@@ -53,6 +55,9 @@ export const VoteComparison: React.FC<VoteComparisonProps> = ({ leftCard, rightC
             <div className="flex flex-col flex-grow">
               <h3 className="text-xl font-semibold mb-2">{card.title}</h3>
               <p className="text-gray-600 flex-grow">{card.description}</p>
+              <div className="text-sm text-gray-500 mt-2">
+                Rank: {card.rank || 1400} ({card.battlesWon || 0}W/{card.battlesLost || 0}L)
+              </div>
               <div className="mt-4 flex justify-center">
                 <motion.button
                   className="px-6 py-2 bg-blue-500 text-white rounded-lg font-medium"

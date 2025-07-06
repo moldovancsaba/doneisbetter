@@ -100,47 +100,19 @@ export const PlayPage: React.FC = () => {
 
   if (phase === 'vote') {
     const handleVoteComplete = async (winnerId: string, loserId: string) => {
-      const newCard = likedCards[likedCards.length - 1];
-      const isNewCardWinner = winnerId === newCard._id;
       try {
         // Record the vote
         await fetch('/api/battles', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            winnerId,
-            loserId,
-            timestamp: new Date().toISOString(),
+            winnerCardId: winnerId,
+            loserCardId: loserId,
           }),
         });
 
-        // Update rankings in likedCards
-        setLikedCards(prev => prev.map(card => {
-          if (card._id === winnerId) {
-            return { ...card, rank: (card.rank || 1500) + 32 };
-          }
-          if (card._id === loserId) {
-            return { ...card, rank: (card.rank || 1500) - 32 };
-          }
-          return card;
-        }));
-
-        // Get next comparison if needed
-        const nextCard = getNextComparisonCard(
-          newCard,
-          likedCards,
-          new Set([...previousComparisons, comparisonCard?._id || ''])
-        );
-
-        if (nextCard) {
-          setComparisonCard(nextCard);
-          setPreviousComparisons(prev => new Set([...prev, nextCard._id]));
-        } else {
-          // No more comparisons needed, back to swipe
-          setPhase('swipe');
-          setPreviousComparisons(new Set());
-          setComparisonCard(null);
-        }
+        // Back to swipe phase after vote
+        setPhase('swipe');
       } catch (error) {
         console.error('Failed to process battle:', error);
       }
