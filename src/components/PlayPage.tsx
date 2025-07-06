@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { CardSwipeContainer } from './CardSwipeContainer';
+import { VoteComparison } from './VoteComparison';
 
 interface Card {
   _id: string;
@@ -85,20 +86,35 @@ export const PlayPage: React.FC = () => {
   }
 
   if (phase === 'vote') {
+    const handleVoteComplete = async (winnerId: string, loserId: string) => {
+      try {
+        // Record the vote
+        await fetch('/api/battles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            winnerId,
+            loserId,
+            timestamp: new Date().toISOString(),
+          }),
+        });
+
+        // Remove the cards from liked list and go back to swipe phase
+        setLikedCards(prev => prev.filter(card => 
+          card._id !== winnerId && card._id !== loserId
+        ));
+        setPhase('swipe');
+      } catch (error) {
+        console.error('Failed to process battle:', error);
+      }
+    };
+
     return (
-      <div className="flex flex-col items-center">
-        <h2 className="text-2xl font-bold mb-4">Vote Phase</h2>
-        <div className="space-y-4">
-          {likedCards.map((card) => (
-            <div 
-              key={card._id}
-              className="p-4 border rounded-lg shadow-sm"
-            >
-              <h3 className="font-semibold">{card.title}</h3>
-              <p className="text-gray-600">{card.description}</p>
-            </div>
-          ))}
-        </div>
+      <div className="flex flex-col items-center w-full p-4">
+        <VoteComparison 
+          cards={likedCards.slice(0, 2)} 
+          onVoteComplete={handleVoteComplete} 
+        />
       </div>
     );
   }

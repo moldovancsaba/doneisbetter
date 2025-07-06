@@ -1,3 +1,15 @@
+## [1.4.0] — 2025-07-06T14:26:43Z
+
+### Added
+- Implemented VoteComparison component for direct card comparison
+  - Added animated card selection with Framer Motion
+  - Interactive voting interface with visual feedback
+  - Smooth transitions between cards
+- Enhanced vote phase with battle functionality
+  - Direct winner/loser selection
+  - Automatic phase transition after voting
+  - Battle results recording via API
+
 ## [1.3.1] — 2025-07-06T14:18:53Z
 
 ### Fixed
