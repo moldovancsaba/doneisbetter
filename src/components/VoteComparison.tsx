@@ -37,7 +37,7 @@ export const VoteComparison: React.FC<VoteComparisonProps> = ({ leftCard, rightC
 
   return (
     <div className="flex flex-col items-center w-full max-w-6xl mx-auto h-[calc(100vh-64px)] overflow-hidden p-4">
-      <h2 className="text-2xl font-bold mb-4">
+      <h2 className="text-2xl font-bold mb-4">Which one do you prefer?</h2>
       <div className="flex justify-center gap-8 w-full h-full">
         {[leftCard, rightCard].map((card, index) => (
           <motion.div
