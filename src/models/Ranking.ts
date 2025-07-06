@@ -10,6 +10,12 @@ export interface IRanking {
     right: number;
     total: number;
   };
+  battles: {
+    won: number;
+    lost: number;
+    total: number;
+  };
+  rating: number;  // ELO-based rating
   createdAt: string;  // ISO 8601 UTC with ms
 }
 
@@ -21,6 +27,12 @@ const rankingSchema = new mongoose.Schema<IRanking>({
     right: { type: Number, required: true, default: 0 },
     total: { type: Number, required: true, default: 0 }
   },
+  battles: {
+    won: { type: Number, required: true, default: 0 },
+    lost: { type: Number, required: true, default: 0 },
+    total: { type: Number, required: true, default: 0 }
+  },
+  rating: { type: Number, required: true, default: 1400 },  // Initial ELO rating
   createdAt: { type: String, required: true }  // ISO 8601 UTC with ms
 });
 

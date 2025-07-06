@@ -1,15 +1,18 @@
 # CardSwipe
 
-A privacy-focused image ranking application that allows users to discover and rank images through an intuitive swipe and vote interface.
+A simple card management and ranking application with an intuitive swipe interface.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 
 ## Overview
 
-CardSwipe presents public image URLs from imgbb.com as swipeable cards, enabling users to:
-1. **SWIPE** through images (like/dislike)
-2. **VOTE** in 1v1 preference battles
-3. View final **RANKING**
+CardSwipe is a straightforward card management system that lets you create, organize, and rank cards through an easy-to-use interface.
+
+### Features
+- **Card Management**: Create and edit cards with titles and descriptions
+- **Simple Ranking**: Swipe to rank cards
+- **Basic Filtering**: Search and sort cards
+- **Personal Rankings**: Track your card preferences
 
 ## Quick Start
 
@@ -17,26 +20,25 @@ CardSwipe presents public image URLs from imgbb.com as swipeable cards, enabling
 # Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.example .env.local
-
 # Run development server
 npm run dev
 ```
 
-Visit `http://localhost:3000` to start using the application.
+Visit `http://localhost:3003` to start using the application.
 
-## SSO Integration
+## Project Structure
 
-CardSwipe uses SSO authentication from sso.doneisbetter.com. Configure your environment:
+- `/src/app` - Next.js pages and layouts
+- `/src/components` - React components
+- `/src/models` - MongoDB models
+- `/src/types` - TypeScript types
 
-```env
-SSO_API_URL=https://sso.doneisbetter.com
-SSO_CLIENT_ID=your_client_id
-SSO_CLIENT_SECRET=your_client_secret
-```
+## Technical Stack
 
-See [SSO Integration Guide](https://sso.doneisbetter.com/docs/integration) for detailed setup.
+- Next.js
+- TypeScript
+- MongoDB
+- TailwindCSS
 
 ## Documentation
 

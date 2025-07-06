@@ -1,47 +1,71 @@
 # CardSwipe Development Roadmap
 
-## Q3 2025 - Core Foundation
+## Q3 2025 - Vote and Swipe Integration
 
-### Milestone 1: Basic Infrastructure (July 2025)
-- Project setup with Next.js 14 and Tailwind CSS
-- MongoDB integration and data models
-- SSO authentication system
-- Basic CRUD operations for cards
+### Milestone 1: Core Integration (July 2025)
+- Unified Vote component implementation
+- Enhanced swipe detection system
+- Real-time ranking updates
+- End-to-end testing completion
 
-### Milestone 2: Core Features (August 2025)
-- Swipe interface implementation
-- Voting system development
-- Ranking algorithm implementation
-- Activity logging system
+### Milestone 2: Performance (August 2025)
+- Vote caching implementation
+- MongoDB query optimization
+- WebSocket performance enhancement
+- Client-side rendering optimization
 
-### Milestone 3: Admin Features (September 2025)
-- Admin dashboard
-- Analytics system
-- Bulk image management
-- User session tracking
+### Milestone 3: Analytics (September 2025)
+- Vote tracking system
+- Ranking analytics dashboard
+- Performance monitoring
+- User engagement metrics
 
-## Q4 2025 - Enhancement & Scale
+## Historical Milestones
 
-### Milestone 4: Performance & Security (October 2025)
-- Caching implementation
-- Rate limiting
+## Q1 2024 - Foundation & Testing
+
+### Milestone 1: Core Features ✅ (January 2024)
+- Next.js App Router implementation with TypeScript
+- MongoDB integration with Mongoose models
+- NextAuth.js authentication
+- Card ranking system with WebSocket updates
+- Dark mode and responsive UI
+- Role-based access control
+
+### Milestone 2: Testing & Reliability (January - February 2024)
+- Comprehensive test suite implementation
+- Enhanced error handling system
+- Performance monitoring setup
 - Security hardening
+
+### Milestone 3: User Experience (February - March 2024)
+- Direct image upload capability
+- User profile management
+- Activity history tracking
+- Custom error pages and feedback
+
+## Q2 2024 - Enhancement & Scale
+
+### Milestone 4: Analytics & Insights (April 2024)
+- Analytics dashboard implementation
+- Ranking statistics visualization
+- User activity metrics
+- System performance monitoring
+
+### Milestone 5: Advanced Features (May 2024)
+- Batch card operations
+- Advanced search and filters
+- Team collaboration features
+- API documentation (OpenAPI/Swagger)
+
+### Milestone 6: Production Ready (June 2024)
 - Performance optimization
-
-### Milestone 5: Advanced Features (November 2025)
-- Social sharing integration
-- Export functionality
-- Advanced analytics
-- API documentation
-
-### Milestone 6: Polish & Launch (December 2025)
-- UI/UX refinements
 - Documentation completion
-- Final security audit
-- Production deployment
+- Deployment pipeline setup
+- Production environment configuration
 
-## Dependencies
-- SSO system availability
-- MongoDB cluster capacity
-- Vercel deployment quotas
-- imgbb.com API stability
+## Dependencies & Prerequisites
+- MongoDB Atlas cluster
+- Vercel deployment environment
+- WebSocket server capacity
+- Image storage solution

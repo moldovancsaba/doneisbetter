@@ -1,0 +1,50 @@
+
+> cardswipe@1.0.1 dev
+> next dev
+
+   ▲ Next.js 14.0.4
+   - Local:        http://localhost:3000
+   - Environments: .env.local, .env
+
+ ✓ Ready in 1266ms
+ ○ Compiling / ...
+ ✓ Compiled / in 877ms (1087 modules)
+ ✓ Compiled in 123ms (536 modules)
+ ✓ Compiled /api/cards in 198ms (574 modules)
+ ✓ Compiled /not-found in 100ms (577 modules)
+ ✓ Compiled /play in 207ms (1105 modules)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ✓ Compiled /api/rankings in 83ms (584 modules)
+ ✓ Compiled /cards in 310ms (1152 modules)
+ ✓ Compiled /api/cards in 292ms (1137 modules)
+ ✓ Compiled in 1ms (600 modules)
+ ✓ Compiled in 190ms (1160 modules)
+ ✓ Compiled in 119ms (560 modules)
+ ✓ Compiled in 62ms (560 modules)
+ ✓ Compiled in 139ms (560 modules)
+ ✓ Compiled in 111ms (577 modules)
+ ✓ Compiled in 147ms (560 modules)
+ ✓ Compiled in 53ms (560 modules)
+ ✓ Compiled in 51ms (560 modules)
+ ✓ Compiled in 57ms (560 modules)
+ ✓ Compiled in 109ms (560 modules)
+ ✓ Compiled in 51ms (560 modules)
+ ✓ Compiled in 95ms (560 modules)
+ ✓ Compiled in 51ms (560 modules)
+ ✓ Compiled /api/cards in 125ms (601 modules)
+MongoDB connected successfully
+Failed to delete card: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at parseJSONFromBytes (node:internal/deps/undici/undici:6251:19)
+    at successSteps (node:internal/deps/undici/undici:6232:27)
+    at readAllBytes (node:internal/deps/undici/undici:5201:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+Failed to delete card: SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at parseJSONFromBytes (node:internal/deps/undici/undici:6251:19)
+    at successSteps (node:internal/deps/undici/undici:6232:27)
+    at readAllBytes (node:internal/deps/undici/undici:5201:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+ ✓ Compiled /not-found in 140ms (604 modules)
+ ✓ Compiled /_error in 483ms (1309 modules)
+[?25h

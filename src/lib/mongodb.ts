@@ -6,6 +6,10 @@ if (!process.env.MONGODB_URI) {
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
+declare global {
+  var mongoose: { conn: any; promise: any; } | undefined;
+}
+
 let cached = global.mongoose;
 
 if (!cached) {
@@ -13,6 +17,10 @@ if (!cached) {
 }
 
 async function connectDB() {
+  if (!cached) {
+    cached = { conn: null, promise: null };
+  }
+
   if (cached.conn) {
     return cached.conn;
   }

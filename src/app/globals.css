@@ -1,4 +1,71 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Core classes for card swipe interface */
+@layer components {
+  /* Container for swipeable cards */
+  .card-container {
+    @apply relative w-full max-w-sm mx-auto aspect-[3/4];
+    perspective: 1000px;
+  }
+
+  /* Individual swipeable card */
+  .swipe-card {
+    @apply absolute w-full h-full rounded-lg shadow-lg;
+    @apply transition-transform duration-300 ease-in-out;
+    @apply will-change-transform;
+    @apply touch-none select-none;
+    @apply bg-white dark:bg-gray-800;
+  }
+
+  /* Swipe card hover and active states */
+  .swipe-card:hover {
+    @apply shadow-xl;
+    transform: scale(1.02);
+  }
+
+  .swipe-card:active {
+    @apply shadow-md;
+    transform: scale(0.98);
+  }
+
+  /* Input field styling */
+  .input-field {
+    @apply w-full px-4 py-2 border rounded-lg focus:ring-2;
+    @apply focus:ring-blue-500 focus:border-blue-500;
+    @apply transition-all duration-200;
+    @apply min-h-[44px];
+    @apply dark:bg-gray-700 dark:border-gray-600 dark:text-white;
+  }
+
+  /* Swipe animation classes */
+  .swipe-left {
+    @apply -translate-x-full rotate-[-20deg] opacity-0;
+  }
+
+  .swipe-right {
+    @apply translate-x-full rotate-[20deg] opacity-0;
+  }
+
+  /* Touch feedback classes */
+  .touch-active {
+    @apply scale-[0.98] shadow-md;
+  }
+
+  /* Responsive adjustments */
+  @screen sm {
+    .card-container {
+      @apply max-w-md;
+    }
+  }
+
+  @screen lg {
+    .card-container {
+      @apply max-w-lg;
+    }
+  }
+}
 
 :root {
   --background: #ffffff;
