@@ -37,7 +37,7 @@ const BasicResults: React.FC<BasicResultsProps> = ({ images }) => {
             className="bg-white rounded-lg shadow-md overflow-hidden"
           >
             {/* Image container with fixed aspect ratio */}
-            <div className="relative aspect-square">
+            <div className="relative w-full" style={{ paddingBottom: '100%' }}>
               <Image
                 src={image.imageUrl}
                 alt="Voted image"

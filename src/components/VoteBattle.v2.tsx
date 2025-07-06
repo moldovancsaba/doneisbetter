@@ -19,16 +19,17 @@ interface VoteCardsProps {
 const VoteCards: React.FC<VoteCardsProps> = ({ leftCard, rightCard, onVote, isVoting, votedCardId }) => {
   const { orientation } = useOrientation();
 
+  // Dynamic styles based on orientation
   const containerStyles = orientation === 'landscape'
-    ? 'flex-row gap-8'
-    : 'flex-col gap-8';
+    ? 'flex-row gap-8 px-8 max-h-screen'
+    : 'flex-col gap-8 py-8 w-full max-w-screen';
 
   const cardContainerStyles = orientation === 'landscape'
-    ? 'w-[40vmin]'
-    : 'w-[60vmin]';
+    ? 'w-[45vh] max-w-[45vw]'
+    : 'w-[80vw] max-w-[80vh]';
 
   return (
-    <div className="w-full h-[calc(100vh-80px)] flex items-center justify-center">
+    <div className="w-full h-[calc(100vh-80px)] flex items-center justify-center overflow-hidden">
       <div className={`flex justify-center items-center ${containerStyles}`}>
         <div className={cardContainerStyles}>
           <CardSwipeContainer
