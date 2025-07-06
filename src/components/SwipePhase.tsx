@@ -64,7 +64,7 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
   }, [currentCard]); // Re-attach when current card changes
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full max-h-[calc(100vh-64px)] overflow-hidden">
       {/* Card Area */}
       <div className="relative flex-1 bg-white rounded-xl shadow-lg p-4 min-h-[400px] max-h-[70vh] mx-auto max-w-xl w-full flex items-center justify-center">
         <AnimatePresence>
@@ -96,7 +96,7 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
       </div>
 
       {/* Instructions */}
-      <div className="mt-8 bg-white rounded-lg shadow p-4">
+      <div className="mt-4 bg-white rounded-lg shadow p-4 mb-4">
         <h3 className="text-lg font-semibold mb-2">How to Swipe</h3>
         <div className="grid grid-cols-2 gap-4 text-center">
           <div className="p-3 bg-gray-50 rounded">
