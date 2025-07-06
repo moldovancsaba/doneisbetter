@@ -22,7 +22,7 @@ const VoteCards: React.FC<VoteCardsProps> = ({ leftCard, rightCard, onVote, isVo
   // Dynamic styles based on orientation
   const containerStyles = orientation === 'landscape'
     ? 'flex-row gap-8 px-8 max-h-screen'
-    : 'flex-col gap-8 py-8 w-full max-w-screen';
+    : 'flex-col gap-4 justify-between py-10 w-full h-full';
 
   const cardContainerStyles = orientation === 'landscape'
     ? 'w-[45vh] max-w-[45vw]'
