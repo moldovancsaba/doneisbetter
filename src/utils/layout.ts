@@ -70,3 +70,39 @@ export type GridSpacingKey = keyof typeof GRID_SPACING;
 export const getMediaQuery = (breakpoint: BreakpointKey): string => {
   return `@media (min-width: ${BREAKPOINTS[breakpoint]}px)`;
 };
+
+export type Orientation = 'portrait' | 'landscape';
+
+export const getOrientation = (width: number, height: number): Orientation => {
+  return width >= height ? 'landscape' : 'portrait';
+};
+
+export const calculateImageDimensions = (
+  containerWidth: number,
+  containerHeight: number,
+  imageWidth: number,
+  imageHeight: number
+) => {
+  const containerAspectRatio = containerWidth / containerHeight;
+  const imageAspectRatio = imageWidth / imageHeight;
+
+  let width: number;
+  let height: number;
+
+  if (imageAspectRatio > containerAspectRatio) {
+    // Image is wider than container relative to height
+    width = containerWidth;
+    height = containerWidth / imageAspectRatio;
+  } else {
+    // Image is taller than container relative to width
+    height = containerHeight;
+    width = containerHeight * imageAspectRatio;
+  }
+
+  return { width, height };
+};
+
+export const useWindowOrientation = (): Orientation => {
+  if (typeof window === 'undefined') return 'portrait';
+  return getOrientation(window.innerWidth, window.innerHeight);
+};
