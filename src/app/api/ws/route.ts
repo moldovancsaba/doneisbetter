@@ -1,7 +1,8 @@
 import { WebSocketHandler } from '@/lib/websocket';
 
-// WebSocket setup suitable for Next.js running in an Edge-compatible environment
-import { Server } from 'ws';
+// Edge Runtime configuration
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   if (request.headers.get('upgrade') !== 'websocket') {
@@ -9,25 +10,35 @@ export async function GET(request: Request) {
   }
 
   try {
-    const server = new Server({ noServer: true });
-    const clientConnection = new Promise((resolve, reject) => {
-      server.handleUpgrade(request, request.socket, Buffer.alloc(0), (ws) => {
-        resolve(ws);
-      });
+    const { searchParams } = new URL(request.url);
+    const token = searchParams.get('token');
+
+    // Validate token if needed
+    if (!token) {
+      return new Response('Unauthorized', { status: 401 });
+    }
+    
+    const { 0: client, 1: server } = new WebSocketPair();
+
+    server.accept();
+    server.addEventListener('message', (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        server.send(JSON.stringify({ received: true, data }));
+      } catch (error) {
+        console.error('Error handling message:', error);
+        server.send(JSON.stringify({ error: 'Invalid message format' }));
+      }
     });
 
-    const socket = await clientConnection;
-
-    socket.on('message', (message) => {
-      console.log('Received message:', message);
-      socket.send('Response to ' + message);
-    });
-
-    socket.on('close', () => {
+    server.addEventListener('close', () => {
       console.log('WebSocket closed');
     });
 
-    return new Response(null, { status: 101 });
+    return new Response(null, {
+      status: 101,
+      webSocket: client
+    });
 
   } catch (error) {
     console.error('WebSocket setup error:', error);

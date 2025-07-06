@@ -10,16 +10,12 @@
     "test": "jest"
   },
   "dependencies": {
-    "@types/ws": "^8.18.1",
-    "bufferutil": "^4.0.9",
     "framer-motion": "^10.16.0",
     "mongodb": "^5.9.2",
     "mongoose": "^8.16.1",
     "next": "14.0.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "utf-8-validate": "^6.0.5",
-    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/node": "^20.19.4",
