@@ -1,3 +1,26 @@
+## [1.3.0] — 2025-07-06T14:12:26Z
+
+### Added
+- Implemented VoteBattle component for 1v1 card comparisons
+- Added WebSocket infrastructure for real-time updates
+- Integrated Framer Motion animations for smooth transitions
+- Created progressive ELO-like ranking system
+
+### Changed
+- Enhanced PlayPage component with swipe and vote phases
+- Updated Activity and Ranking models for battle outcomes
+- Improved UI feedback and animations
+- Optimized WebSocket implementation for Edge runtime
+
+### Technical
+- Switched to Edge-compatible WebSocket APIs
+- Enhanced build configuration for Next.js Edge runtime
+- Updated documentation files:
+  - ARCHITECTURE.md: Updated system overview
+  - ROADMAP.md: Strategic development plans
+  - TASKLIST.md: Active tasks and priorities
+  - LEARNINGS.md: Development insights
+
 ## [1.2.0] - 2024-01-19T14:30:00.000Z
 
 ### Changed
