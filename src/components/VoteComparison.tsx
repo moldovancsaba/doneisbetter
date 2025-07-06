@@ -5,6 +5,7 @@ interface Card {
   _id: string;
   title: string;
   description: string;
+  imageUrl: string;
 }
 
 interface VoteComparisonProps {
@@ -44,7 +45,14 @@ export const VoteComparison: React.FC<VoteComparisonProps> = ({ cards, onVoteCom
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <div className="h-full flex flex-col">
+            <div className="h-48 w-full mb-4">
+              <img 
+                src={card.imageUrl} 
+                alt={card.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex flex-col flex-grow">
               <h3 className="text-xl font-semibold mb-2">{card.title}</h3>
               <p className="text-gray-600 flex-grow">{card.description}</p>
               <div className="mt-4 flex justify-center">

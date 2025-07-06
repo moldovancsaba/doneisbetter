@@ -6,6 +6,7 @@ interface Card {
   _id: string;
   title: string;
   description: string;
+  imageUrl: string;
 }
 
 type Phase = 'swipe' | 'vote';
@@ -124,9 +125,18 @@ export const PlayPage: React.FC = () => {
       <h2 className="text-2xl font-bold mb-4">Swipe Phase</h2>
       {currentCard && (
         <CardSwipeContainer onVote={handleVote}>
-          <div className="w-72 h-96 bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold mb-2">{currentCard.title}</h3>
-            <p className="text-gray-600">{currentCard.description}</p>
+          <div className="w-72 h-96 bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="h-48 w-full">
+              <img 
+                src={currentCard.imageUrl} 
+                alt={currentCard.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="p-6">
+              <h3 className="text-xl font-semibold mb-2">{currentCard.title}</h3>
+              <p className="text-gray-600">{currentCard.description}</p>
+            </div>
           </div>
         </CardSwipeContainer>
       )}
