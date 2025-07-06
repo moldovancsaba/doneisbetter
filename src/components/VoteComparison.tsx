@@ -13,6 +13,7 @@ export const VoteComparison: React.FC<VoteComparisonProps> = ({ leftCard, rightC
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
 
   const handleVote = async (winnerId: string) => {
+    if (selectedCard) return; // Prevent double votes
     const loserId = winnerId === leftCard._id ? rightCard._id : leftCard._id;
     setSelectedCard(winnerId);
     onVoteComplete(winnerId, loserId);
@@ -66,13 +67,15 @@ export const VoteComparison: React.FC<VoteComparisonProps> = ({ leftCard, rightC
                 Rank: {card.rank || 1400}
               </div>
               <div className="mt-4 flex justify-center">
-                <motion.button
-                  className="px-6 py-2 bg-blue-500 text-white rounded-lg font-medium"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Choose This One
-                </motion.button>
+                {!selectedCard && (
+                  <motion.button
+                    className="px-6 py-2 bg-blue-500 text-white rounded-lg font-medium"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Choose This One
+                  </motion.button>
+                )}
               </div>
             </div>
           </motion.div>

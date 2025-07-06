@@ -66,14 +66,14 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Card Area */}
-      <div className="relative flex-1 bg-white rounded-xl shadow-lg p-4 min-h-[400px] max-h-[70vh] mx-auto max-w-xl w-full">
+      <div className="relative flex-1 bg-white rounded-xl shadow-lg p-4 min-h-[400px] max-h-[70vh] mx-auto max-w-xl w-full flex items-center justify-center">
         <AnimatePresence>
           <CardSwipeContainer
             key={currentCard._id}
             onVote={handleVote}
           >
             <motion.div
-              className="relative w-full h-full rounded-lg overflow-hidden"
+              className="relative w-full h-full rounded-lg overflow-hidden flex items-center justify-center"
               layoutId={currentCard._id}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -83,7 +83,7 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
               <img
                 src={currentCard.imageUrl}
                 alt={currentCard.title}
-                className="w-full h-full object-contain bg-gray-100"
+                className="max-w-full max-h-full object-contain bg-gray-100"
               />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
                 <h2 className="text-white text-xl font-semibold">
