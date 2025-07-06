@@ -1,3 +1,4 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enhanced security headers
   headers: async () => [
@@ -49,6 +50,21 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
+  // WebSocket and Edge Runtime configuration
+  experimental: {
+    serverActions: true
+  },
+  
+  // Set runtime configuration
+  runtime: 'edge',
+  
+  // Webpack configuration for WebSocket
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = ['bufferutil', 'utf-8-validate']
+    }
+    return config
+  }
 };
 
 module.exports = nextConfig;
