@@ -1,3 +1,10 @@
+## [1.3.1] — 2025-07-06T14:18:53Z
+
+### Fixed
+- Fixed vote phase transition not occurring after liking two cards
+  - Added likedCards state monitoring with useEffect
+  - Removed timing-dependent phase transition check
+
 ## [1.3.0] — 2025-07-06T14:12:26Z
 
 ### Added

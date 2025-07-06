@@ -23,6 +23,13 @@ export const PlayPage: React.FC = () => {
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Watch likedCards and transition to vote phase when we have 2 or more
+  useEffect(() => {
+    if (likedCards.length >= 2) {
+      setPhase('vote');
+    }
+  }, [likedCards]);
+
   // Fetch initial card
   useEffect(() => {
     const fetchInitialCard = async () => {
@@ -67,10 +74,6 @@ export const PlayPage: React.FC = () => {
       const nextCard = await response.json();
       setCurrentCard(nextCard);
 
-      // Check if we should transition to vote phase
-      if (direction === 'right' && likedCards.length + 1 >= 2) {
-        setPhase('vote');
-      }
     } catch (error) {
       console.error('Failed to process vote:', error);
     }
