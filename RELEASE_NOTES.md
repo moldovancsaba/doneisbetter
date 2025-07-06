@@ -1,3 +1,60 @@
+## [3.0.0] — 2025-07-06T22:05:22Z
+
+### Major Update: Enhanced Image Handling System
+
+#### Added
+- Comprehensive image handling system in Card component:
+  - Automatic aspect ratio preservation across all contexts
+  - Cross-browser drag prevention mechanisms
+  - Touch interaction blocking for mobile devices
+  - Responsive sizing with container-based dimensions
+  - Error recovery with exponential backoff
+
+#### Changed
+- Complete overhaul of image display architecture:
+  - Removed unnecessary nested divs for better performance
+  - Implemented native aspect ratio calculations
+  - Optimized SwipePhase layout for better responsiveness
+  - Enhanced image scaling across all interaction phases
+  - Improved DOM structure for maintainability
+
+#### Performance Improvements
+- Optimized resize calculations:
+  - CSS-based sizing calculations
+  - Minimal JavaScript interventions
+  - Efficient aspect ratio handling
+  - Proper event listener cleanup
+  - Controlled component re-renders
+
+#### Technical Details
+- Added comprehensive component documentation
+- Updated architecture documentation with image handling system
+- Implemented proper error boundaries
+- Enhanced accessibility support
+- Added thorough code comments
+
+## [2.0.7] — 2025-07-06T21:32:25Z
+
+## [2.0.6] — 2025-07-06T21:27:29Z
+
+### Fixed
+- SwipePhase card image aspect ratio handling:
+  - Added proper container dimensions
+  - Ensured image fills container while preserving aspect ratio
+  - Matched card behavior with Vote and Ranking pages
+  - Removed unnecessary height constraints
+
+## [2.0.5] — 2025-07-06T21:14:54Z
+
+### Changed
+- Major UI improvements:
+  - Card images now preserve aspect ratio
+  - No text overlays on any cards
+  - Responsive vote layouts (landscape/portrait)
+  - Consistent card design across all views
+  - Improved ranking grid layout
+  - Proper image scaling in all contexts
+
 ## [2.0.4] — 2025-07-06T21:05:12Z
 
 ### Fixed

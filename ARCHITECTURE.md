@@ -116,13 +116,47 @@ GET    /api/rankings          # Get current rankings
 
 ### 📱 UI Components
 
+#### Image Handling System
+The application implements a robust image handling system through the Card component:
+
+**Features:**
+- Automatic aspect ratio preservation
+- Cross-browser drag prevention
+- Touch interaction blocking
+- Responsive sizing
+- Error recovery with exponential backoff
+
+**Technical Implementation:**
+```typescript
+// Aspect ratio handling
+const aspectRatio = img.width / img.height || 1;
+style={{ aspectRatio, width: '100%', maxWidth: '100%' }}
+
+// Interaction prevention
+className="touch-none select-none pointer-events-none"
+
+// Error handling with retries
+if (retryCount < maxRetries) {
+  setTimeout(() => retry(), Math.pow(2, retryCount) * 1000);
+}
+```
+
+**Performance Optimizations:**
+- CSS-based sizing calculations
+- Lazy loading for all images
+- Minimal resize operations
+- Proper event listener cleanup
+- Controlled component re-renders
+
 #### Core Components
-- `/components/common/Card.tsx` - Centralized card display component
+- `/components/common/Card.tsx` - Centralized card display component with image handling
 - `/components/layout/Navigation.tsx` - Centralized navigation component
+- `/components/layout/OrientationProvider.tsx` - Orientation management for responsive layout
 
 #### Feature Components
-- `/components/RankingList.tsx` - Ranking display
-- `/app/cards/page.tsx` - Card management page
+- `/components/SwipePhase.tsx` - Handles the swipe interaction phase
+- `/components/VoteBattle.v2.tsx` - Improved voting logic with orientation support
+- `/components/RankingPage` - Ranking display with responsive card layout
 
 All pages must use these centralized components to maintain consistency. Custom variations are not allowed.
 
