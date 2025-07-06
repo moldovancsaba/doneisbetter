@@ -7,18 +7,31 @@ export async function GET(request: NextRequest) {
   try {
     await connect();
     
-    const Ranking = await getRankingModel();
-    const rankings = await Ranking.find()
-      .populate('cardId')
-      .sort({ 'votes.total': -1 })
-      .lean();
+    const Card = await getCardModel();
+    
+    // Get all cards with ranks
+    const cards = await Card.find({ 
+      rank: { $exists: true },
+      imageUrl: {
+        $exists: true,
+        $ne: null,
+        $not: { 
+          $in: [
+            /x1x1x1/,
+            /x2x2x2/
+          ]
+        }
+      }
+    })
+    .sort({ rank: -1 })
+    .lean();
 
-    // Map the rankings to include card details
-    const mappedRankings = rankings.map(ranking => ({
-      cardId: ranking.cardId._id,
-      imageUrl: ranking.cardId.imageUrl || ranking.cardId.url,
-      title: ranking.cardId.title || 'Card',
-      votes: ranking.votes
+    // Map the cards to rankings format
+    const mappedRankings = cards.map(card => ({
+      cardId: card._id,
+      imageUrl: card.imageUrl,
+      title: card.title,
+      rank: card.rank
     }));
 
     return NextResponse.json(mappedRankings);

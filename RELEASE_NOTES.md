@@ -1,3 +1,12 @@
+## [2.0.0] — 2025-07-06T16:18:29Z
+
+### Changed
+- Redirected main page (/) to /play for better user experience:
+  - Removed old HomePage with voting UI
+  - Added clean redirect to /play page
+  - Simplified application flow
+  - Improved code maintainability
+
 ## [1.6.0] — 2025-07-06T14:52:51Z
 
 ### Changed

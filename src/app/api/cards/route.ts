@@ -10,7 +10,18 @@ export async function GET() {
     await connectDB();
     const Card = await getCardModel();
     
-    const cards = await Card.find().lean();
+    const cards = await Card.find({
+      imageUrl: {
+        $exists: true,
+        $ne: null,
+        $not: { 
+          $in: [
+            /x1x1x1/,
+            /x2x2x2/
+          ]
+        }
+      }
+    }).lean();
     console.log('Found cards:', cards);
     
     // Map cards to consistent format
@@ -54,10 +65,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate image URL format
-    if (!body.imageUrl.startsWith('https://i.ibb.co/') && !body.imageUrl.startsWith('https://image.ibb.co/')) {
+    // Validate image URL format and ensure it points to a real image
+    if (!body.imageUrl.startsWith('https://i.ibb.co/') || 
+        body.imageUrl.includes('x1x1x1') || 
+        body.imageUrl.includes('x2x2x2')) {
       return NextResponse.json(
-        { error: 'Invalid image URL. Only imgbb.com URLs are allowed' },
+        { error: 'Invalid image URL. Only real imgbb.com URLs are allowed' },
+        { status: 400 }
+      );
+    }
+
+    // Try to fetch the image to verify it exists
+    try {
+      const imageResponse = await fetch(body.imageUrl, { method: 'HEAD' });
+      if (!imageResponse.ok) {
+        return NextResponse.json(
+          { error: 'Image URL is not accessible' },
+          { status: 400 }
+        );
+      }
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Failed to validate image URL' },
         { status: 400 }
       );
     }

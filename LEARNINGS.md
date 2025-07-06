@@ -26,6 +26,18 @@
 - Ensure clear separation between gesture detection and action handling
 - Document component relationships explicitly
 
+## 2025-10-01T12:00:00.000Z - Main Page Redirect and Simplification
+
+**Change:** The main page was redirected to /play, removing the outdated HomePage with voting UI and simplifying the app flow.
+
+**Reasoning:** 
+- Improve maintainability by removing outdated components.
+- Streamline user experience by focusing directly on the /play path.
+
+**Insights:**
+- Ensure thorough checks on linked components when deprecating features.
+- Verify all documentation and entry points align with new routing.
+
 ## Dev
 
 ### Authentication

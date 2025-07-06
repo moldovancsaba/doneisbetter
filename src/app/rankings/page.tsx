@@ -7,11 +7,7 @@ interface Ranking {
   cardId: string;
   imageUrl: string;
   title: string;
-  votes: {
-    left: number;
-    right: number;
-    total: number;
-  };
+  rank: number;
 }
 
 export default function RankingsPage() {
@@ -78,19 +74,9 @@ export default function RankingsPage() {
                 </div>
                 <div className="ml-6 flex-grow">
                   <h2 className="text-xl font-semibold">{ranking.title}</h2>
-                  <div className="mt-2 flex space-x-8">
-                    <div>
-                      <p className="text-sm text-gray-500">Left Votes</p>
-                      <p className="text-lg font-medium">{ranking.votes.left}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Right Votes</p>
-                      <p className="text-lg font-medium">{ranking.votes.right}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Total Votes</p>
-                      <p className="text-lg font-medium">{ranking.votes.total}</p>
-                    </div>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500">Rank</p>
+                    <p className="text-lg font-medium">{ranking.rank}</p>
                   </div>
                 </div>
                 <div className="flex-shrink-0 ml-6">

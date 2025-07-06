@@ -64,12 +64,18 @@ export async function POST(request: NextRequest) {
 
     const cards = [
       { 
+        _id: winnerCardId,
         id: winnerCardId,
-        rating: winnerRanking?.rating || 1400
+        title: winner.title || 'Unknown Card',
+        imageUrl: winner.imageUrl || '',
+        rank: winnerRanking?.rating || 1400
       },
       {
+        _id: loserCardId,
         id: loserCardId,
-        rating: loserRanking?.rating || 1400
+        title: loser.title || 'Unknown Card',
+        imageUrl: loser.imageUrl || '',
+        rank: loserRanking?.rating || 1400
       }
     ];
 

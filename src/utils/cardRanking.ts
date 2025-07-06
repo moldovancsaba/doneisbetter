@@ -76,8 +76,8 @@ export const processComparisonOutcome = (
     throw new Error('Cards not found in liked collection');
   }
 
-  const preferredRating = preferredCard.rating ?? INITIAL_RATING;
-  const otherRating = otherCard.rating ?? INITIAL_RATING;
+  const preferredRating = preferredCard.rank ?? INITIAL_RATING;
+  const otherRating = otherCard.rank ?? INITIAL_RATING;
 
   const { newWinnerRating, newLoserRating } = updateRatings(preferredRating, otherRating);
 
@@ -95,10 +95,10 @@ export const processComparisonOutcome = (
  */
 export const determineCardPosition = (cardRating: number, likedCards: Card[]): number => {
   const sortedCards = [...likedCards].sort((a, b) => 
-    (b.rating ?? INITIAL_RATING) - (a.rating ?? INITIAL_RATING)
+    (b.rank ?? INITIAL_RATING) - (a.rank ?? INITIAL_RATING)
   );
   
   return sortedCards.findIndex(card => 
-    (card.rating ?? INITIAL_RATING) <= cardRating
+    (card.rank ?? INITIAL_RATING) <= cardRating
   );
 };
