@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 import type { Card } from '@/types/card';
@@ -17,6 +17,22 @@ export const VoteComparison: React.FC<VoteComparisonProps> = ({ leftCard, rightC
     setSelectedCard(winnerId);
     onVoteComplete(winnerId, loserId);
   };
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      switch(e.key) {
+        case 'ArrowLeft':
+          handleVote(leftCard._id);
+          break;
+        case 'ArrowRight':
+          handleVote(rightCard._id);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [leftCard._id, rightCard._id]); // Re-attach when cards change
 
   return (
     <div className="flex flex-col items-center w-full max-w-6xl mx-auto h-full">
@@ -63,7 +79,7 @@ export const VoteComparison: React.FC<VoteComparisonProps> = ({ leftCard, rightC
         ))}
       </div>
       <div className="mt-8 text-sm text-gray-500">
-        Click on the card you prefer to cast your vote
+        Click on the card you prefer or use arrow keys (← →) to cast your vote
       </div>
     </div>
   );

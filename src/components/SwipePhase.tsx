@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CardSwipeContainer } from './CardSwipeContainer';
 import type { Card } from '@/types/card';
@@ -45,6 +45,24 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
     );
   }
 
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (!currentCard) return;
+      
+      switch(e.key) {
+        case 'ArrowLeft':
+          handleVote('left');
+          break;
+        case 'ArrowRight':
+          handleVote('right');
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentCard]); // Re-attach when current card changes
+
   return (
     <div className="flex flex-col h-full">
       {/* Card Area */}
@@ -82,11 +100,11 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
         <h3 className="text-lg font-semibold mb-2">How to Swipe</h3>
         <div className="grid grid-cols-2 gap-4 text-center">
           <div className="p-3 bg-gray-50 rounded">
-            <p className="font-medium">Swipe Left</p>
+            <p className="font-medium">Swipe Left or ←</p>
             <p className="text-sm text-gray-500 mt-1">Dislike</p>
           </div>
           <div className="p-3 bg-gray-50 rounded">
-            <p className="font-medium">Swipe Right</p>
+            <p className="font-medium">Swipe Right or →</p>
             <p className="text-sm text-gray-500 mt-1">Like</p>
           </div>
         </div>
