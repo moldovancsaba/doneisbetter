@@ -91,35 +91,28 @@ export const VoteBattle: React.FC<VoteBattleProps> = ({
             key={`left-${leftCard.id}`}
             onVote={handleVote}
             disabled={isVoting}
+            mode="swipe"
           >
             <motion.div
-              className="relative w-full aspect-[3/4] rounded-xl overflow-hidden shadow-lg"
+              className="card-base"
               layoutId={`card-${leftCard.id}`}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <img
-                src={leftCard.imageUrl}
-                alt={leftCard.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                <h2 className="text-white text-xl font-semibold">
-                  {leftCard.title}
-                </h2>
-              </div>
-              {/* Vote Progress Indicator */}
-              <div className="absolute top-0 left-0 right-0 h-2 bg-gray-200">
-                <motion.div
-                  className="h-full bg-blue-500"
-                  initial={{ width: '0%' }}
-                  animate={{ 
-                    width: `${(voteProgress.left / (voteProgress.left + voteProgress.right || 1)) * 100}%` 
-                  }}
-                  transition={{ duration: 0.3 }}
+              <div className="card-image-container">
+                <img
+                  src={leftCard.imageUrl}
+                  alt={leftCard.title}
+                  className="card-image"
+                  loading="lazy"
                 />
+              </div>
+              <div className="card-content">
+                <div className="card-rank">
+                  🏆 A
+                </div>
               </div>
 
               {/* Loading State */}
@@ -142,7 +135,7 @@ export const VoteBattle: React.FC<VoteBattleProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                 >
-                  <div className="bg-white rounded-full p-4">
+                  <div className="bg-gray-900 rounded-full p-4">
                     <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -161,35 +154,28 @@ export const VoteBattle: React.FC<VoteBattleProps> = ({
             key={`right-${rightCard.id}`}
             onVote={handleVote}
             disabled={isVoting}
+            mode="swipe"
           >
             <motion.div
-              className="relative w-full aspect-[3/4] rounded-xl overflow-hidden shadow-lg"
+              className="card-base"
               layoutId={`card-${rightCard.id}`}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <img
-                src={rightCard.imageUrl}
-                alt={rightCard.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                <h2 className="text-white text-xl font-semibold">
-                  {rightCard.title}
-                </h2>
-              </div>
-              {/* Vote Progress Indicator */}
-              <div className="absolute top-0 left-0 right-0 h-2 bg-gray-200">
-                <motion.div
-                  className="h-full bg-blue-500"
-                  initial={{ width: '0%' }}
-                  animate={{ 
-                    width: `${(voteProgress.right / (voteProgress.left + voteProgress.right || 1)) * 100}%` 
-                  }}
-                  transition={{ duration: 0.3 }}
+              <div className="card-image-container">
+                <img
+                  src={rightCard.imageUrl}
+                  alt={rightCard.title}
+                  className="card-image"
+                  loading="lazy"
                 />
+              </div>
+              <div className="card-content">
+                <div className="card-rank">
+                  🏆 B
+                </div>
               </div>
 
               {/* Loading State */}
@@ -212,7 +198,7 @@ export const VoteBattle: React.FC<VoteBattleProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                 >
-                  <div className="bg-white rounded-full p-4">
+                  <div className="bg-gray-900 rounded-full p-4">
                     <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -222,21 +208,6 @@ export const VoteBattle: React.FC<VoteBattleProps> = ({
             </motion.div>
           </CardSwipeContainer>
         </AnimatePresence>
-      </div>
-
-      {/* Instructions */}
-      <div className="md:col-span-2 bg-white rounded-lg shadow p-4">
-        <h3 className="text-lg font-semibold mb-2">How to Vote</h3>
-        <div className="grid grid-cols-2 gap-4 text-center">
-          <div className="p-3 bg-gray-50 rounded">
-            <p className="font-medium">Vote Left</p>
-            <p className="text-sm text-gray-500 mt-1">Swipe left or press ←</p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded">
-            <p className="font-medium">Vote Right</p>
-            <p className="text-sm text-gray-500 mt-1">Swipe right or press →</p>
-          </div>
-        </div>
       </div>
     </div>
   );

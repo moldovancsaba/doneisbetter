@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
 
 interface WebSocketMessage {
   type: string;
@@ -7,71 +8,77 @@ interface WebSocketMessage {
   timestamp?: string;
 }
 
+/**
+ * Custom hook for managing Socket.IO connection and real-time updates
+ */
 export const useWebSocket = () => {
-  const ws = useRef<WebSocket | null>(null);
+  const socket = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
-  const reconnectTimeout = useRef<NodeJS.Timeout>();
-  const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 5;
+  const [error, setError] = useState<Error | null>(null);
 
   /**
-   * Initialize WebSocket connection
+   * Initialize Socket.IO connection with auto-reconnect
    */
   const connect = useCallback(() => {
-    if (ws.current?.readyState === WebSocket.OPEN) return;
+    if (socket.current?.connected) return;
 
-    const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3000'}/api/ws`;
-    ws.current = new WebSocket(wsUrl);
+    const socketUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    socket.current = io(socketUrl, {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
+    });
 
-    ws.current.onopen = () => {
-      console.log('WebSocket connected');
+    // Connection event handlers
+    socket.current.on('connect', () => {
+      console.log('Socket.IO connected');
       setIsConnected(true);
-      reconnectAttempts.current = 0;
-    };
+      setError(null);
+    });
 
-    ws.current.onclose = () => {
-      console.log('WebSocket disconnected');
+    socket.current.on('disconnect', (reason) => {
+      console.log('Socket.IO disconnected:', reason);
       setIsConnected(false);
-      
-      // Attempt reconnection if not at max attempts
-      if (reconnectAttempts.current < maxReconnectAttempts) {
-        reconnectTimeout.current = setTimeout(() => {
-          reconnectAttempts.current += 1;
-          connect();
-        }, 1000 * Math.pow(2, reconnectAttempts.current)); // Exponential backoff
-      }
-    };
+    });
 
-    ws.current.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        
-        // Handle ping messages for connection keepalive
-        if (message.type === 'ping') {
-          ws.current?.send(JSON.stringify({ type: 'pong' }));
-          return;
-        }
-        
-        setLastMessage(message);
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
+    socket.current.on('connect_error', (err) => {
+      console.error('Socket.IO connection error:', err);
+      setError(err);
+    });
 
-    ws.current.onerror = (error) => {
-      console.error('WebSocket error:', error);
+    // Message event handlers
+    socket.current.on('voteUpdate', (message) => {
+      setLastMessage({
+        type: 'voteUpdate',
+        ...message,
+        timestamp: new Date().toISOString(),
+      });
+    });
+
+    socket.current.on('rankingUpdate', (message) => {
+      setLastMessage({
+        type: 'rankingUpdate',
+        ...message,
+        timestamp: new Date().toISOString(),
+      });
+    });
+
+    return () => {
+      socket.current?.disconnect();
     };
   }, []);
 
   /**
-   * Send a message through the WebSocket connection
+   * Send a message through the Socket.IO connection
    */
   const sendMessage = useCallback((message: WebSocketMessage) => {
-    if (ws.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify(message));
+    if (socket.current?.connected) {
+      socket.current.emit(message.type, message);
     } else {
-      console.warn('WebSocket is not connected');
+      console.warn('Socket.IO is not connected');
     }
   }, []);
 
@@ -80,10 +87,10 @@ export const useWebSocket = () => {
    */
   const notifyVote = useCallback((cardId: string, voteData: any) => {
     sendMessage({
-      type: 'vote',
+      type: 'voteUpdate',
       cardId,
       data: voteData,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }, [sendMessage]);
 
@@ -92,31 +99,26 @@ export const useWebSocket = () => {
    */
   const notifyRankingUpdate = useCallback((rankings: any) => {
     sendMessage({
-      type: 'ranking',
+      type: 'rankingUpdate',
       data: rankings,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }, [sendMessage]);
 
   // Connect on mount, cleanup on unmount
   useEffect(() => {
     connect();
-
     return () => {
-      if (reconnectTimeout.current) {
-        clearTimeout(reconnectTimeout.current);
-      }
-      if (ws.current) {
-        ws.current.close();
-      }
+      socket.current?.disconnect();
     };
   }, [connect]);
 
   return {
     isConnected,
     lastMessage,
+    error,
     notifyVote,
     notifyRankingUpdate,
-    sendMessage
+    sendMessage,
   };
 };

@@ -1,3 +1,35 @@
+## [2.0.4] — 2025-07-06T21:05:12Z
+
+### Fixed
+- Removed duplicate /rankings route, keeping only /ranking
+- Fixed version mismatch in package.json
+- Cleaned up build output
+
+## [2.0.3] — 2025-07-06T21:03:26Z
+
+### Changed
+- Implemented centralized UI components:
+  - Created common/Card.tsx for unified card display
+  - Added proper ranking page layout with Navigation
+  - Ensured consistent styling across all pages
+  - Removed all page-specific component variations
+
+## [2.0.2] — 2025-07-06T20:59:36Z
+
+### Fixed
+- Removed custom navigation from ranking page
+- Removed unauthorized "Home" link
+- Enforced use of centralized Navigation component
+
+## [2.0.1] — 2025-07-06T20:57:00Z
+
+### Changed
+- Removed unnecessary white backgrounds and containers from layouts:
+  - Removed bg-white from play/layout.tsx
+  - Removed bg-white from (default)/layout.tsx
+  - Simplified error.tsx and not-found.tsx styling
+  - Enhanced minimal design consistency
+
 ## [2.0.0] — 2025-07-06T16:18:29Z
 
 ### Changed

@@ -100,27 +100,19 @@ export default function PlayPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h1 className="text-2xl font-bold mb-8 text-center">
-            {phase === 'swipe' ? 'Choose Your Cards' : 'Compare Cards'}
-          </h1>
-
-          {phase === 'swipe' ? (
-            <SwipePhase 
-              cards={cards}
-              onLeftSwipe={handleLeftSwipe}
-              onRightSwipe={handleRightSwipe}
-            />
-          ) : (
-            <VotePhase
-              likedCards={likedCards}
-              onVoteComplete={handleVoteComplete}
-            />
-          )}
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-800">
+      {phase === 'swipe' ? (
+        <SwipePhase 
+          cards={cards}
+          onLeftSwipe={handleLeftSwipe}
+          onRightSwipe={handleRightSwipe}
+        />
+      ) : (
+        <VotePhase
+          likedCards={likedCards}
+          onVoteComplete={handleVoteComplete}
+        />
+      )}
     </div>
   );
 }

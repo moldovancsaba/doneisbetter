@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { VoteComparison } from './VoteComparison';
+import { updateRanks, persistRanks } from '@/utils/rankingUtils';
 
 import type { Card } from '@/types/card';
 
@@ -61,37 +62,24 @@ export const VotePhase: React.FC<VotePhaseProps> = ({ likedCards, onVoteComplete
   }, []);
 
   const handleVoteComplete = async (winnerId: string, loserId: string) => {
-    const newCardWon = winnerId === voteState.newCard._id;
     const rightCard = voteState.rightCard;
     if (!rightCard) return;
 
-    // Update ranks
-    const newRank = voteState.newCard.rank || 1400;
-    const rightRank = rightCard.rank || 1400;
-    const rankChange = 32; // ELO-style ranking change
+    const newCardWon = winnerId === voteState.newCard._id;
+    const [winner, loser] = newCardWon
+      ? [voteState.newCard, rightCard]
+      : [rightCard, voteState.newCard];
 
-    if (newCardWon) {
-      voteState.newCard.rank = newRank + rankChange;
-      rightCard.rank = rightRank - rankChange;
-    } else {
-      voteState.newCard.rank = newRank - rankChange;
-      rightCard.rank = rightRank + rankChange;
-    }
+    // Update ranks using unified utility
+    const [updatedWinner, updatedLoser] = updateRanks(winner, loser);
 
-    // Persist ranks
+    // Update state with new ranks
+    voteState.newCard = newCardWon ? updatedWinner : updatedLoser;
+    voteState.rightCard = newCardWon ? updatedLoser : updatedWinner;
+
+    // Persist updated ranks
     try {
-      await Promise.all([
-        fetch('/api/cards/updateRank', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: voteState.newCard._id, rank: voteState.newCard.rank })
-        }),
-        fetch('/api/cards/updateRank', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: rightCard._id, rank: rightCard.rank })
-        })
-      ]);
+      await persistRanks([voteState.newCard, voteState.rightCard]);
     } catch (error) {
       console.error('Failed to persist ranks:', error);
     }
@@ -116,11 +104,7 @@ export const VotePhase: React.FC<VotePhaseProps> = ({ likedCards, onVoteComplete
   };
 
   if (!voteState.rightCard) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <p className="text-lg text-gray-600">Ranking complete!</p>
-      </div>
-    );
+    return null;
   }
 
   return (

@@ -2,32 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Core classes for card swipe interface */
+/* Core classes for card design and interactions */
 @layer components {
-  /* Container for swipeable cards */
-  .card-container {
-    @apply relative w-full max-w-sm mx-auto aspect-[3/4];
-    perspective: 1000px;
+  /* Base card design - used everywhere */
+  .card-base {
+    @apply bg-gray-900 rounded-lg overflow-hidden;
+    @apply w-full relative;
   }
 
-  /* Individual swipeable card */
-  .swipe-card {
-    @apply absolute w-full h-full rounded-lg shadow-lg;
-    @apply transition-transform duration-300 ease-in-out;
-    @apply will-change-transform;
-    @apply touch-none select-none;
-    @apply bg-white dark:bg-gray-800;
+  /* Card image container */
+  .card-image-container {
+    @apply w-full aspect-square;
+    @apply relative overflow-hidden;
   }
 
-  /* Swipe card hover and active states */
-  .swipe-card:hover {
-    @apply shadow-xl;
-    transform: scale(1.02);
+  /* Card image */
+  .card-image {
+    @apply w-full h-full object-cover;
+    @apply transition-transform duration-200;
   }
 
-  .swipe-card:active {
-    @apply shadow-md;
-    transform: scale(0.98);
+  /* Card content area */
+  .card-content {
+    @apply p-4 text-center;
+    @apply text-white;
+  }
+
+  /* Rank display */
+  .card-rank {
+    @apply text-2xl font-bold text-yellow-400 mb-2;
+  }
+
+  /* Container for swipeable/interactive cards */
+  .card-interactive-container {
+    @apply relative w-full h-full;
+    @apply flex items-center justify-center;
+    @apply max-h-[80vh] aspect-square;
+  }
+
+  /* Grid container for card layout */
+  .card-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+    @apply gap-6;
   }
 
   /* Input field styling */
@@ -53,18 +69,6 @@
     @apply scale-[0.98] shadow-md;
   }
 
-  /* Responsive adjustments */
-  @screen sm {
-    .card-container {
-      @apply max-w-md;
-    }
-  }
-
-  @screen lg {
-    .card-container {
-      @apply max-w-lg;
-    }
-  }
 }
 
 :root {

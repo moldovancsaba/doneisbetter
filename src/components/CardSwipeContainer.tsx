@@ -5,7 +5,11 @@ interface CardSwipeContainerProps {
   children: React.ReactNode;
   onVote: (direction: 'left' | 'right') => void;
   voteThreshold?: number;
-  disabled?: boolean; // Add to prevent navigation during animations
+  disabled?: boolean;
+  mode: 'swipe' | 'vote';
+  // Added to support responsive sizing
+  maxWidth?: string;
+  maxHeight?: string;
 }
 
 /**
@@ -19,62 +23,135 @@ export const CardSwipeContainer: React.FC<CardSwipeContainerProps> = ({
   onVote,
   voteThreshold = 100,
   disabled = false,
+  mode,
+  maxWidth = '100%',
+  maxHeight = '100vh',
 }) => {
   const controls = useAnimation();
-  const [keyPressed, setKeyPressed] = useState<'left' | 'right' | null>(null);
+  const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
 
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (disabled) return;
-      if (e.key === 'ArrowLeft') {
-        setKeyPressed('left');
-        onVote('left');
-      }
-      if (e.key === 'ArrowRight') {
-        setKeyPressed('right');
-        onVote('right');
+      
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const direction = e.key === 'ArrowLeft' ? 'left' : 'right';
+        const xOffset = direction === 'left' ? -voteThreshold * 1.5 : voteThreshold * 1.5;
+        
+        if (mode === 'swipe') {
+          // For swipe mode, animate and trigger vote
+          controls.start({ 
+            x: xOffset, 
+            opacity: 0.5,
+            rotate: direction === 'left' ? -30 : 30
+          }).then(() => {
+            onVote(direction);
+            controls.set({ x: 0, opacity: 1, rotate: 0 });
+          });
+        } else {
+          // For vote mode, just trigger vote immediately
+          onVote(direction);
+        }
       }
     };
     
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [onVote, disabled]);
+  }, [onVote, disabled, controls, voteThreshold, mode]);
 
-  // Reset key pressed state
-  useEffect(() => {
-    if (keyPressed) {
-      const timer = setTimeout(() => setKeyPressed(null), 200);
-      return () => clearTimeout(timer);
-    }
-  }, [keyPressed]);
+  // Enhanced drag handling with improved visual feedback
+  const handleDrag = (_: any, info: PanInfo) => {
+    if (disabled) return;
 
-  // Handle drag end and voting
+    const direction = info.offset.x > 0 ? 'right' : 'left';
+    setDragDirection(direction);
+    
+    // Enhanced rotation and scaling effects
+    const rotate = info.offset.x * 0.08; // Reduced rotation for smoother feel
+    const scale = 1 - Math.abs(info.offset.x) / (voteThreshold * 8); // Subtle scale effect
+    const opacity = 1 - Math.abs(info.offset.x) / (voteThreshold * 2.5); // Smoother opacity transition
+
+    controls.start({
+      rotate,
+      scale: Math.max(scale, 0.95), // Prevent scale from going too small
+      opacity: Math.max(opacity, 0.6), // Prevent opacity from going too low
+      transition: { type: 'spring', stiffness: 1000, damping: 50 } // Spring animation for smoother feel
+    });
+  };
+
+  // Enhanced drag end handling with improved animations
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
+    if (disabled) return;
+
     const direction = info.offset.x > 0 ? 'right' : 'left';
     const exceedsThreshold = Math.abs(info.offset.x) > voteThreshold;
 
     if (exceedsThreshold) {
-      onVote(direction);
-      // Reset position after vote
-      controls.set({ x: 0 });
+      // Enhanced exit animation
+      controls.start({
+        x: direction === 'left' ? -window.innerWidth * 1.5 : window.innerWidth * 1.5,
+        opacity: 0,
+        scale: 0.8,
+        transition: { 
+          type: 'spring',
+          stiffness: 400,
+          damping: 40,
+          duration: 0.3
+        }
+      }).then(() => {
+        onVote(direction);
+        controls.set({ x: 0, rotate: 0, opacity: 1, scale: 1 });
+      });
     } else {
-      // Return to center if threshold not met
+      // Enhanced return animation
       controls.start({
         x: 0,
-        transition: { duration: 0.2 },
+        rotate: 0,
+        opacity: 1,
+        scale: 1,
+        transition: { 
+          type: 'spring',
+          stiffness: 500,
+          damping: 25,
+          duration: 0.2
+        },
       });
     }
-  }, [controls, onVote, voteThreshold]);
+    setDragDirection(null);
+  }, [controls, onVote, voteThreshold, disabled]);
 
   return (
     <motion.div
       animate={controls}
-      drag="x"
+      drag={!disabled && mode === 'swipe' ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.7}
-      onDragEnd={handleDragEnd}
-      className="relative touch-none"
+      dragElastic={0.9} // Increased elasticity for better touch feel
+      dragTransition={{ 
+        bounceStiffness: 600,
+        bounceDamping: 20
+      }}
+      onDrag={mode === 'swipe' ? handleDrag : undefined}
+      onDragEnd={mode === 'swipe' ? handleDragEnd : undefined}
+      className={`
+        relative w-full h-full touch-none select-none
+        ${mode === 'swipe' ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
+        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+      `}
+      whileHover={!disabled && mode === 'vote' ? { scale: 1.02 } : undefined}
+      whileTap={!disabled ? (mode === 'swipe' ? { cursor: 'grabbing' } : { scale: 0.98 }) : undefined}
+      style={{
+        x: 0,
+        opacity: 1,
+        rotate: 0,
+        maxWidth,
+        maxHeight,
+        touchAction: 'none', // Prevent default touch behaviors
+        WebkitTapHighlightColor: 'transparent', // Remove tap highlight on mobile
+        WebkitUserSelect: 'none', // Prevent text selection
+        userSelect: 'none'
+      }}
+      onClick={!disabled && mode === 'vote' ? () => onVote('right') : undefined}
     >
       {children}
     </motion.div>

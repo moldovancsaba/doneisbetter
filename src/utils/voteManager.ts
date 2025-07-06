@@ -1,12 +1,6 @@
-interface Card {
-  _id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  rank?: number;
-  battlesWon?: number;
-  battlesLost?: number;
-}
+import type { Card } from '@/types/card';
+import { updateRanks } from '@/utils/rankingUtils';
+
 
 interface VoteState {
   newCard: Card;
@@ -101,20 +95,16 @@ export class VoteManager {
   recordResult(newCardWon: boolean): void {
     this.state.lastResult = newCardWon ? 'win' : 'loss';
     
-    // Update ranks
-    const newRank = this.state.newCard.rank || 1400;
-    const compRank = this.state.comparisonCard?.rank || 1400;
-    
-    if (newCardWon) {
-      this.state.newCard.rank = newRank + 32;
-      if (this.state.comparisonCard) {
-        this.state.comparisonCard.rank = compRank - 32;
-      }
-    } else {
-      this.state.newCard.rank = newRank - 32;
-      if (this.state.comparisonCard) {
-        this.state.comparisonCard.rank = compRank + 32;
-      }
+    // Update ranks using unified utility
+    if (this.state.comparisonCard) {
+      const [winner, loser] = newCardWon
+        ? [this.state.newCard, this.state.comparisonCard]
+        : [this.state.comparisonCard, this.state.newCard];
+
+      const [updatedWinner, updatedLoser] = updateRanks(winner, loser);
+
+      this.state.newCard = newCardWon ? updatedWinner : updatedLoser;
+      this.state.comparisonCard = newCardWon ? updatedLoser : updatedWinner;
     }
   }
 

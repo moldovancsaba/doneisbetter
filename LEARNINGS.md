@@ -38,6 +38,58 @@
 - Ensure thorough checks on linked components when deprecating features.
 - Verify all documentation and entry points align with new routing.
 
+## 2025-07-06T21:03:26Z - Critical Component Centralization
+
+**Issue:** Lack of proper component centralization led to inconsistent UI implementations across pages.
+
+**Root Cause:** Missing standardized component structure and unclear rules about component reuse.
+
+**Resolution:**
+- Created centralized Card component in common/Card.tsx
+- Established proper layout hierarchy for all pages
+- Enforced use of centralized Navigation and Card components
+- Added architectural documentation for component usage
+
+**Key Learnings:**
+- Core UI components must be centralized in /components/common
+- All pages must reuse these components without variation
+- Layout components must be standardized and consistent
+- Component documentation must explicitly state reuse requirements
+
+## 2025-07-06T20:59:36Z - Navigation Component Consistency
+
+**Issue:** Custom navigation implementation in ranking page deviated from centralized component, including unauthorized "Home" link.
+
+**Root Cause:** Direct implementation of navigation in page component instead of using the centralized Navigation component.
+
+**Resolution:**
+- Removed custom navigation from ranking page
+- Enforced use of centralized Navigation component
+- Eliminated unauthorized navigation items
+
+**Key Learnings:**
+- Always use centralized components for consistent UI elements
+- Never implement page-specific variations of global components
+- Validate navigation items against approved structure
+- Document component reuse requirements clearly
+
+## 2025-07-06T20:57:00Z - Minimal Design Implementation
+
+**Issue:** Inconsistent use of white backgrounds and containers across layouts affected visual consistency.
+
+**Root Cause:** Different components were independently styled with their own background colors and container elements, leading to visual inconsistency.
+
+**Resolution:**
+- Removed bg-white classes from layout components
+- Simplified container styling in error and not-found pages
+- Enforced consistent minimal design across all pages
+
+**Key Learnings:**
+- Maintain consistent styling patterns across layouts
+- Remove unnecessary decorative elements
+- Keep visual hierarchy simple and clear
+- Document styling decisions in component comments
+
 ## Dev
 
 ### Authentication

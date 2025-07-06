@@ -14,19 +14,8 @@ export function Navigation() {
     <nav className="bg-blue-600 text-white">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold">
-              DoneIsBetter
-            </Link>
-          </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Link
-              href="/cards"
-              className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 ${isActive('/cards')}`}
-            >
-              Cards
-            </Link>
             <Link
               href="/play"
               className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 ${isActive('/play')}`}

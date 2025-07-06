@@ -1,7 +1,6 @@
 import { Navigation } from '@/components/layout/Navigation';
-import { Footer } from '@/components/layout/Footer';
 
-export default function DefaultLayout({
+export default function RankingLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -9,8 +8,7 @@ export default function DefaultLayout({
   return (
     <>
       <Navigation />
-<main className="flex-grow">{children}</main>
-      <Footer />
+      <main className="flex-1">{children}</main>
     </>
   );
 }

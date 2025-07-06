@@ -2,7 +2,7 @@
 
 A simple card management and ranking application with an intuitive swipe interface.
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.4-blue.svg)
 
 ## Overview
 

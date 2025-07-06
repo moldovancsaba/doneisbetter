@@ -8,7 +8,7 @@ export default function PlayLayout({
   return (
     <>
       <Navigation />
-      <main className="flex-1 bg-white h-[calc(100vh-64px)] overflow-hidden">
+<main className="flex-1 h-[calc(100vh-64px)] overflow-hidden">
         {children}
       </main>
     </>
