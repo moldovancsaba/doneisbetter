@@ -52,19 +52,8 @@ const nextConfig = {
 
   // WebSocket and Edge Runtime configuration
   experimental: {
-    serverActions: true
+    serverComponentsExternalPackages: ['critters', 'buffer'],
   },
-  
-  // Set runtime configuration
-  runtime: 'edge',
-  
-  // Webpack configuration for WebSocket
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = ['bufferutil', 'utf-8-validate']
-    }
-    return config
-  }
 };
 
 module.exports = nextConfig;
