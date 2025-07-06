@@ -4,7 +4,9 @@ import { connectDB } from '../lib/db';
 export interface ICard {
   _id: mongoose.Types.ObjectId;
   title: string;      // Card title
+  description: string; // Card description
   imageUrl: string;   // Image URL
+  rank?: number;      // Card's current rank
   createdAt: string;  // ISO 8601 UTC with ms
 }
 
@@ -13,6 +15,15 @@ const cardSchema = new mongoose.Schema<ICard>({
     type: String,
     required: true,
     default: () => 'Card ' + new Date().toISOString(),
+  },
+  description: {
+    type: String,
+    required: false,
+    default: '',
+  },
+  rank: {
+    type: Number,
+    required: false,
   },
   imageUrl: {
     type: String,

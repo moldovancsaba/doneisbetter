@@ -1,3 +1,12 @@
+## [1.5.1] — 2025-07-06T14:46:41Z
+
+### Fixed
+- Fixed vote functionality:
+  - Added /api/cards/next endpoint for proper card fetching
+  - Updated Card model with description and rank fields
+  - Fixed data model mismatches between API and UI
+  - Added proper rank tracking in database
+
 ## [1.5.0] — 2025-07-06T14:36:53Z
 
 ### Changed
