@@ -2,7 +2,7 @@
 
 ### Fixed
 - Fixed card container in ranking page to properly fit images:
-  - Added aspect ratio constraint (3:4) for consistent sizing
+  - Preserved natural image aspect ratio for consistent sizing
   - Updated Card component to properly fill container
   - Improved image object-fit behavior
   - Enhanced responsive layout consistency

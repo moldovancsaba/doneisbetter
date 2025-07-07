@@ -63,7 +63,7 @@ export default function RankingPage() {
         <h2 className="text-2xl font-bold text-white mb-6">Greatest Memories</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
           {rankings.map((card) => (
-            <div key={card._id} className="relative aspect-[3/4] flex justify-center items-center">
+            <div key={card._id} className="relative w-full flex justify-center items-center">
               <CardComponent
                 card={card}
                 className="shadow-xl"
