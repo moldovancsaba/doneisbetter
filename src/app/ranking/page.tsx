@@ -48,10 +48,16 @@ export default function RankingPage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-[500px]">
-        <div className="text-red-500 text-center">
-          <p className="text-xl font-semibold">Error</p>
-          <p className="mt-2">{error}</p>
+      <div className="flex items-center justify-center h-[500px] bg-gray-800">
+        <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-md mx-4">
+          <p className="text-2xl font-semibold text-red-600 mb-4">Unable to Load Rankings</p>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );

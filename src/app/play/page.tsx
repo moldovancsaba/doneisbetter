@@ -1,8 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import { VotePhase } from '@/components/VotePhase';
 import { SwipePhase } from '@/components/SwipePhase';
+import { withNavigationGuard } from '@/components/hoc/withNavigationGuard';
 
 import type { Card } from '@/types/card';
 
@@ -15,7 +18,9 @@ type Phase = 'swipe' | 'vote';
  * - Swipe Phase: Users swipe cards left/right to indicate like/dislike
  * - Vote Phase: Compare liked cards to establish ranking
  */
-export default function PlayPage() {
+function PlayPage({ isRouteGuarded }: { isRouteGuarded?: boolean }) {
+  const router = useRouter();
+  
   // State Management
   const [phase, setPhase] = useState<Phase>('swipe');
   const [cards, setCards] = useState<Card[]>([]);
@@ -23,13 +28,32 @@ export default function PlayPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch initial cards
+  // Add notification when navigation is blocked
   useEffect(() => {
-    const fetchCards = async () => {
+    if (isRouteGuarded) {
+      toast.warning('Please finish reviewing all cards before viewing rankings');
+    }
+  }, [isRouteGuarded]);
+
+  // Fetch and manage cards
+  useEffect(() => {
+    const loadCards = async () => {
       try {
         setIsLoading(true);
         setError(null);
         
+        // First check if we have any unswiped cards
+        const availabilityResponse = await fetch('/api/cards/hasUnswiped');
+        if (!availabilityResponse.ok) throw new Error('Failed to check card availability');
+        const availabilityData = await availabilityResponse.json();
+        
+        // Commenting out redirection to help debug card loading
+        // if (!availabilityData.hasUnswiped) {
+        //   router.push('/ranking');
+        //   return;
+        // }
+
+        // If we have cards, fetch them
         const response = await fetch('/api/cards');
         if (!response.ok) throw new Error('Failed to fetch cards');
         
@@ -49,8 +73,8 @@ export default function PlayPage() {
       }
     };
 
-    fetchCards();
-  }, []);
+    loadCards();
+  }, [router]);
 
   // Handle left swipe (dislike)
   const handleLeftSwipe = useCallback((card: Card) => {
@@ -60,14 +84,16 @@ export default function PlayPage() {
   // Handle right swipe (like)
   const handleRightSwipe = useCallback((card: Card) => {
     // Add card to liked cards
-    setLikedCards(prev => [...prev, card]);
+    setLikedCards(prev => {
+      const newLikedCards = [...prev, card];
+      // If we have 2 or more liked cards, enter vote phase
+      if (newLikedCards.length > 1) {
+        setPhase('vote');
+      }
+      return newLikedCards;
+    });
     setCards(prev => prev.slice(1));
-
-    // If we have 2 or more liked cards, enter vote phase
-    if (likedCards.length > 0) {
-      setPhase('vote');
-    }
-  }, [likedCards.length]);
+  }, []);
 
   // Handle vote completion
   const handleVoteComplete = useCallback(() => {
@@ -99,6 +125,15 @@ export default function PlayPage() {
     );
   }
 
+  // Only render phase components if we have cards available
+  if (phase === 'swipe' && cards.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[500px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+      </div>
+    );
+  }
+
   return (
     <div className="h-full w-full flex items-center justify-center bg-gray-800">
       {phase === 'swipe' ? (
@@ -116,3 +151,5 @@ export default function PlayPage() {
     </div>
   );
 }
+
+export default withNavigationGuard(PlayPage);

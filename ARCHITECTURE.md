@@ -118,6 +118,21 @@
 - Impacts vertical centering
 - Requires offset calculations
 
+### Navigation Flow
+- /play → /ranking transition requires all cards to be swiped
+- Validation uses existing /api/cards/next endpoint
+- Guards implemented at both client and server side
+
+### Manual Testing Requirements
+To validate navigation flow:
+
+Navigation Validation:
+- Verify navigation blocked when unswiped cards exist
+- Confirm redirect to /play works correctly
+- Test successful navigation after all cards swiped
+- Validate user feedback notifications
+- Check error handling and edge cases
+
 ### Image Processing
 - Natural dimensions preserved
 - No forced resizing

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { VoteComparison } from './VoteComparison';
+import { Vote } from './Vote';
 import { updateRanks, persistRanks } from '@/utils/rankingUtils';
 
 import type { Card } from '@/types/card';
@@ -108,7 +108,7 @@ export const VotePhase: React.FC<VotePhaseProps> = ({ likedCards, onVoteComplete
   }
 
   return (
-    <VoteComparison
+    <Vote
       leftCard={voteState.newCard}
       rightCard={voteState.rightCard}
       onVoteComplete={handleVoteComplete}

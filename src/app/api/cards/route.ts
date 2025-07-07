@@ -20,15 +20,23 @@ export async function GET() {
             /x2x2x2/
           ]
         }
-      }
+      },
+      $or: [
+        { battlesWon: { $exists: false } },
+        { battlesLost: { $exists: false } },
+        { battlesWon: 0, battlesLost: 0 }
+      ]
     }).lean();
     console.log('Found cards:', cards);
     
     // Map cards to consistent format
-    const mappedCards = (cards as Array<{ _id: mongoose.Types.ObjectId; title?: string; imageUrl?: string; url?: string; createdAt?: string; }>).map(card => ({
+    const mappedCards = (cards as Array<{ _id: mongoose.Types.ObjectId; title?: string; imageUrl?: string; url?: string; createdAt?: string; battlesWon?: number; battlesLost?: number; rank?: number; }>).map(card => ({
       id: card._id.toString(),
       title: card.title || `Card ${(card.createdAt ? new Date(card.createdAt).toLocaleString() : 'Unknown Date')}`,
-      imageUrl: card.imageUrl || card.url
+      imageUrl: card.imageUrl || card.url,
+      rank: card.rank || 1400,
+      battlesWon: card.battlesWon || 0,
+      battlesLost: card.battlesLost || 0
     }));
     
     console.log('Mapped cards:', mappedCards);

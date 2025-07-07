@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { CardSwipeContainer } from './CardSwipeContainer';
 import type { Card as CardType } from '@/types/card';
 import { Card } from '@/components/common/Card';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface SwipePhaseProps {
   cards: CardType[];
@@ -17,8 +18,18 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
   onRightSwipe 
 }) => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [availableCards, setAvailableCards] = useState<CardType[]>([]);
   const [currentCard, setCurrentCard] = useState<CardType | null>(null);
+
+  // Initialize loading state and cards
+  useEffect(() => {
+    setIsLoading(true);
+    if (cards.length > 0) {
+      setAvailableCards(cards);
+      setIsLoading(false);
+    }
+  }, [cards]);
 
   // Initialize available cards
   useEffect(() => {
@@ -49,7 +60,17 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
     }
   };
 
-  if (!currentCard) {
+  // Show loading spinner while cards are being loaded
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Only redirect if we're not loading and there's no current card
+  if (!isLoading && !currentCard) {
     router.push('/ranking');
     return null;
   }
@@ -58,11 +79,12 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
 <div className="fixed inset-x-0 top-1/2 -translate-y-1/2 mx-auto w-full flex justify-center items-center gap-5">
       <div className="absolute inset-0 touch-none pointer-events-none"></div>
       <AnimatePresence>
-        <CardSwipeContainer
-          key={currentCard._id}
-          onVote={handleVote}
-          mode="swipe"
-        >
+        {currentCard && (
+          <CardSwipeContainer
+            key={currentCard._id}
+            onVote={handleVote}
+            mode="swipe"
+          >
           <div className="w-[min(90vw,500px)] mx-auto h-auto overflow-hidden pointer-events-auto">
             {/* Container preserves natural aspect ratio */}
             <Card
@@ -70,7 +92,8 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
               className="w-full shadow-xl"
             />
           </div>
-        </CardSwipeContainer>
+          </CardSwipeContainer>
+        )}
       </AnimatePresence>
     </div>
   );

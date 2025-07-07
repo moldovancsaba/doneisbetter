@@ -1,0 +1,16 @@
+'use client';
+
+import { useSearchParams } from 'next/navigation';
+
+export default function AuthError() {
+  const searchParams = useSearchParams();
+  const error = searchParams?.get('error');
+
+  return (
+    <div>
+      <h1>Authentication Error</h1>
+      <p>{error || 'An error occurred during authentication'}</p>
+      <a href="/auth/signin">Try again</a>
+    </div>
+  );
+}
