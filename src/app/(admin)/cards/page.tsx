@@ -40,12 +40,8 @@ export default function AdminCardsPage() {
       setError('');
       setSuccess('');
       
-      const response = await fetch('/api/cards', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ cardId }),
+      const response = await fetch(`/api/cards?id=${cardId}`, {
+        method: 'DELETE'
       });
 
       const data = await response.json();
@@ -140,13 +136,13 @@ export default function AdminCardsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
           {cards.map((card) => (
-<div key={card._id} className="relative flex justify-center items-center">
+<div key={card.id} className="relative flex justify-center items-center">
               <CardComponent
                 card={card}
                 className="shadow-xl"
               />
               <button
-onClick={() => handleDelete(card._id)}
+onClick={() => handleDelete(card.id)}
                 className="absolute bottom-2 right-2 bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
               >
                 Delete

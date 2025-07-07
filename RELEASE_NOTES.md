@@ -1,3 +1,11 @@
+## [4.2.2] — 2025-07-07T09:39:40Z
+
+### Fixed
+- Fixed card deletion functionality in admin cards page:
+  - Updated card ID reference from _id to id
+  - Fixed API request format to use query parameters
+  - Improved error handling for card deletion
+
 ## [4.2.1] — 2025-07-07T09:04:43Z
 
 ### Fixed

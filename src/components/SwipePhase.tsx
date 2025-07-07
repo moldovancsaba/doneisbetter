@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { CardSwipeContainer } from './CardSwipeContainer';
@@ -17,10 +17,31 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
   onRightSwipe 
 }) => {
   const router = useRouter();
-  const currentCard = cards[0];
+  const [availableCards, setAvailableCards] = useState<CardType[]>([]);
+  const [currentCard, setCurrentCard] = useState<CardType | null>(null);
+
+  // Initialize available cards
+  useEffect(() => {
+    setAvailableCards(cards);
+  }, [cards]);
+
+  // Select random card when available cards change
+  useEffect(() => {
+    if (availableCards.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableCards.length);
+      setCurrentCard(availableCards[randomIndex]);
+    } else {
+      setCurrentCard(null);
+    }
+  }, [availableCards]);
 
   const handleVote = (direction: 'left' | 'right') => {
     if (!currentCard) return;
+
+    // Remove current card from available cards
+    setAvailableCards(prev => prev.filter(card => card._id !== currentCard._id));
+
+    // Handle swipe callbacks
     if (direction === 'left' && onLeftSwipe) {
       onLeftSwipe(currentCard);
     } else if (direction === 'right' && onRightSwipe) {
