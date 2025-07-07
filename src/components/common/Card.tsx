@@ -57,7 +57,7 @@ const CardContent = ({ card, onClick, className = '' }: CardProps) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className={`card-base bg-gray-900 rounded-lg overflow-hidden relative touch-none ${className}`}
+      className={`card-base bg-gray-900 rounded-lg overflow-hidden relative touch-none w-full h-full ${className}`}
       onClick={onClick}
       style={{
       }}
@@ -93,7 +93,7 @@ const CardContent = ({ card, onClick, className = '' }: CardProps) => {
       <motion.img
         src={card.imageUrl}
         alt={card.title}
-        className={`w-full h-auto object-contain select-none pointer-events-none transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+        className={`w-full h-full object-cover select-none pointer-events-none transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         loading="lazy"
         draggable="false"
         animate={{ opacity: !isLoading && !hasError ? 1 : 0 }}

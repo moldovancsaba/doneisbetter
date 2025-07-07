@@ -1,3 +1,12 @@
+## [4.2.1] — 2025-07-07T09:04:43Z
+
+### Fixed
+- Fixed card container in ranking page to properly fit images:
+  - Added aspect ratio constraint (3:4) for consistent sizing
+  - Updated Card component to properly fill container
+  - Improved image object-fit behavior
+  - Enhanced responsive layout consistency
+
 ## [4.2.0] — 2025-07-07T08:55:05Z
 
 ### Changed

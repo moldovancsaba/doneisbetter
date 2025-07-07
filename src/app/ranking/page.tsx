@@ -63,19 +63,11 @@ export default function RankingPage() {
         <h2 className="text-2xl font-bold text-white mb-6">Greatest Memories</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
           {rankings.map((card) => (
-            <div key={card._id} className="aspect-[3/4] relative group">
+            <div key={card._id} className="relative aspect-[3/4] flex justify-center items-center">
               <CardComponent
                 card={card}
-                className="h-full"
+                className="shadow-xl"
               />
-              <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-md">
-                Rating: {card.rank || 1400}
-              </div>
-              {card.battles && (
-                <div className="absolute bottom-2 right-2 bg-gray-800/80 text-white px-2 py-1 rounded-md text-sm">
-                  W: {card.battles.won} L: {card.battles.lost}
-                </div>
-              )}
             </div>
           ))}
         </div>
