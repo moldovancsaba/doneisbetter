@@ -21,13 +21,11 @@ interface CardSwipeContainerProps {
  * A simplified container component that handles both swipe gestures and keyboard
  * navigation for voting. Uses framer-motion for gesture handling.
  */
-// Get optimal dimensions based on viewport size
-const getOptimalDimensions = () => {
-  const vw = window.innerWidth;
+// Get optimal dimensions based on viewport size and mode
+const getOptimalDimensions = (mode: 'swipe' | 'vote') => {
   const vh = window.innerHeight;
   return {
-    width: Math.min(vw * 0.9, 500),
-    height: Math.min(vh * 0.8, 700)
+    height: Math.min(vh * 0.8, 700), // reduce height by 10%
   };
 };
 
@@ -44,12 +42,12 @@ export const CardSwipeContainer: React.FC<CardSwipeContainerProps> = ({
 }) => {
 const controls = useAnimation();
   const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
-  const [dimensions, setDimensions] = useState(getOptimalDimensions());
+  const [dimensions, setDimensions] = useState(getOptimalDimensions(mode));
 
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      setDimensions(getOptimalDimensions());
+      setDimensions(getOptimalDimensions(mode));
     };
 
     window.addEventListener('resize', handleResize);
@@ -73,7 +71,7 @@ const controls = useAnimation();
             rotate: direction === 'left' ? -30 : 30
           }).then(() => {
             onVote(direction);
-            controls.set({ x: 0, opacity: 1, rotate: 0 });
+            setTimeout(() => controls.set({ x: 0, opacity: 1, rotate: 0 }), 0);
           });
         } else {
           // For vote mode, just trigger vote immediately
@@ -127,7 +125,7 @@ const controls = useAnimation();
         }
       }).then(() => {
         onVote(direction);
-        controls.set({ x: 0, rotate: 0, opacity: 1, scale: 1 });
+        setTimeout(() => controls.set({ x: 0, rotate: 0, opacity: 1, scale: 1 }), 0);
       });
     } else {
       // Enhanced return animation
@@ -170,11 +168,7 @@ const controls = useAnimation();
         x: 0,
         opacity: 1,
         rotate: 0,
-        width: maxWidth || dimensions.width,
-        height: maxHeight || dimensions.height,
-        maxWidth: maxWidth || `${widthRatio * 100}vw`,
-        maxHeight: maxHeight || `${heightRatio * 100}vh`,
-        touchAction: 'none', // Prevent default touch behaviors
+        touchAction: 'none',
         WebkitTapHighlightColor: 'transparent', // Remove tap highlight on mobile
         WebkitTouchCallout: 'none', // Disable touch callout
         WebkitUserSelect: 'none', // Prevent text selection

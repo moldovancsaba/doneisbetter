@@ -30,8 +30,7 @@ export interface SortOption {
 }
 
 interface RankingsResponse {
-  personal: RankingData[];
-  global: RankingData[];
+  rankings: RankingData[];
   total: number;
 }
 
@@ -147,8 +146,7 @@ export const useRankings = (
 
       return {
         ...prev,
-        personal: updateRankings(prev.personal),
-        global: updateRankings(prev.global),
+        rankings: updateRankings(prev.rankings),
       };
     });
   });

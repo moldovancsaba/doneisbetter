@@ -4,32 +4,38 @@ import React, { useEffect, useState } from 'react';
 import { Card as CardComponent } from '@/components/common/Card';
 import type { Card } from '@/types/card';
 
+interface BattleStats {
+  won: number;
+  lost: number;
+  total: number;
+}
+
 export default function RankingPage() {
-  const [cards, setCards] = useState<Card[]>([]);
+  const [rankings, setRankings] = useState<Array<Card & { battles?: BattleStats }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCards = async () => {
+    const fetchRankings = async () => {
       try {
         setIsLoading(true);
         setError(null);
         
-        const response = await fetch('/api/cards');
-        if (!response.ok) throw new Error('Failed to fetch cards');
-        
+        const response = await fetch('/api/rankings');
+        if (!response.ok) {
+          throw new Error('Failed to fetch rankings');
+        }
+
         const data = await response.json();
-        // Sort cards by rank in descending order
-        const sortedCards = data.sort((a: Card, b: Card) => (b.rank || 1400) - (a.rank || 1400));
-        setCards(sortedCards);
+        setRankings(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch cards');
+        setError(err instanceof Error ? err.message : 'Failed to fetch rankings');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCards();
+    fetchRankings();
   }, []);
 
   if (isLoading) {
@@ -54,13 +60,22 @@ export default function RankingPage() {
   return (
     <div className="min-h-screen bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold text-white mb-6">Greatest Memories</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
-          {cards.map((card) => (
-            <div key={card._id} className="aspect-[3/4]">
+          {rankings.map((card) => (
+            <div key={card._id} className="aspect-[3/4] relative group">
               <CardComponent
                 card={card}
                 className="h-full"
               />
+              <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-md">
+                Rating: {card.rank || 1400}
+              </div>
+              {card.battles && (
+                <div className="absolute bottom-2 right-2 bg-gray-800/80 text-white px-2 py-1 rounded-md text-sm">
+                  W: {card.battles.won} L: {card.battles.lost}
+                </div>
+              )}
             </div>
           ))}
         </div>

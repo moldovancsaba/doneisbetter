@@ -1,5 +1,135 @@
 # CardSwipe Architecture
 
+## UI Component Architecture
+
+### Core Container Rules
+
+#### 1. Card Component (`/src/components/common/Card.tsx`)
+- **Sacred Rule:** Original image aspect ratio MUST NEVER be modified
+- Uses natural image dimensions to determine display size
+- No width/height constraints that could affect aspect ratio
+- No CSS transforms that modify proportions
+
+#### 2. Container Hierarchy
+
+##### Root Container
+```tsx
+<div className="fixed inset-x-0 top-[calc(50%+40px)] -translate-y-1/2">
+```
+- Fixed positioning for viewport-relative placement
+- Accounts for 80px navigation height
+- Uses transform for perfect vertical centering
+
+##### Width Constraints
+```tsx
+<div className="max-w-[80vw] mx-auto">
+```
+- Maximum width of 80% viewport width
+- Auto margins for horizontal centering
+- Never forces aspect ratio changes
+
+##### Card Scaling
+```tsx
+<CardComponent className="shadow-xl scale-90">
+```
+- Scale transforms only affect size, not aspect ratio
+- Height-based scaling at 90%
+- Maintains image proportions
+
+### View-Specific Implementations
+
+#### 1. Swipe Phase
+- Fixed positioning with vertical center transform
+- Single card display with gesture controls
+- Natural image dimensions preserved
+- Container size adapts to content
+
+#### 2. Vote Phase
+- Side-by-side card comparison
+- Equal scaling for both cards
+- Navigation-aware vertical centering
+- 5vw gap between cards
+
+### Layout Management
+
+#### Vertical Centering Strategy
+1. Fixed positioning with inset-x-0
+2. top-[calc(50%+40px)] for nav offset
+3. -translate-y-1/2 for perfect centering
+4. Container adapts to content height
+
+#### Width Management
+1. max-w-[80vw] constraint
+2. Automatic horizontal margins
+3. Flexible inner containers
+4. Gap management with gap-[5vw]
+
+#### Height Considerations
+1. Natural height from content
+2. No fixed height constraints
+3. Proper scaling with scale-90
+4. Navigation offset (80px) factored in
+
+### Critical Implementation Rules
+
+#### 1. Aspect Ratio Preservation
+- NEVER modify image aspect ratios
+- NEVER use aspect-ratio CSS property
+- NEVER force square or specific ratios
+- ALWAYS let images determine dimensions
+
+#### 2. Container Guidelines
+- Use fixed positioning for root containers
+- Implement proper transform-based centering
+- Account for navigation height in calculations
+- Maintain consistent scaling across views
+
+#### 3. Scaling Rules
+- Scale by height, not width
+- Use uniform scale factor (90%)
+- Preserve aspect ratios during scaling
+- Apply scaling through transforms only
+
+#### 4. Responsiveness
+- Use viewport-relative units (vw/vh)
+- Implement proper max-width constraints
+- Maintain consistent gaps
+- Ensure cross-device compatibility
+
+### Testing Requirements
+
+1. Verify aspect ratio preservation
+2. Check vertical centering accuracy
+3. Validate navigation offset handling
+4. Ensure consistent card scaling
+5. Test responsive behavior
+
+### Performance Considerations
+
+1. Use transform for animations
+2. Implement proper event cleanup
+3. Optimize container reflows
+4. Manage render efficiency
+
+## Integration Points
+
+### Navigation System
+- 80px fixed height
+- Impacts vertical centering
+- Requires offset calculations
+
+### Image Processing
+- Natural dimensions preserved
+- No forced resizing
+- Aspect ratio maintenance
+
+### Interaction Layer
+- Touch/click handling
+- Gesture recognition
+- Animation management
+
+# CardSwipe Architecture
+
 ## System Components
 
 ### 🗃️ Data Models

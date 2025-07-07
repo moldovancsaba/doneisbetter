@@ -34,7 +34,7 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
   }
 
   return (
-    <div className="w-full h-[calc(100vh-80px)] flex items-center justify-center relative p-4 md:p-6 overflow-hidden">
+<div className="fixed inset-x-0 top-1/2 -translate-y-1/2 mx-auto w-full flex justify-center items-center gap-5">
       <div className="absolute inset-0 touch-none pointer-events-none"></div>
       <AnimatePresence>
         <CardSwipeContainer

@@ -1,12 +1,11 @@
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
 import { CardSwipeContainer } from './CardSwipeContainer';
-
-import type { Card } from '@/types/card';
+import { Card as CardComponent } from '@/components/common/Card';
+import type { Card as CardType } from '@/types/card';
 
 interface VoteComparisonProps {
-  leftCard: Card;
-  rightCard: Card;
+  leftCard: CardType;
+  rightCard: CardType;
   onVoteComplete: (winnerId: string, loserId: string) => void;
 }
 
@@ -16,33 +15,33 @@ export const VoteComparison: React.FC<VoteComparisonProps> = ({ leftCard, rightC
     onVoteComplete(winnerId, loserId);
   };
 
-
   return (
-    <div className="flex items-center justify-center gap-8 w-full">
-      {[leftCard, rightCard].map((card, index) => (
-        <CardSwipeContainer
-          key={card._id}
-          onVote={(direction) => {
-            const isLeft = index === 0;
-            const voteForCurrent = direction === (isLeft ? 'left' : 'right');
-            handleVote(voteForCurrent ? card._id : (isLeft ? rightCard._id : leftCard._id));
-          }}
-          mode="vote"
-        >
-          <motion.div
-            className="card-base max-w-[45vw]"
-            initial={{ opacity: 0, x: index === 0 ? -20 : 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: index === 0 ? -20 : 20 }}
-          >
-            <img 
-              src={card.imageUrl} 
-              alt={card.title}
-              className="card-image"
-            />
-          </motion.div>
-        </CardSwipeContainer>
-      ))}
+    /* Container positioned relative to navigation (80px height) */
+    /* Maintains full viewport width while accounting for nav */
+    /* Centers cards with consistent 5vw gap */
+<div className="fixed inset-x-0 top-[calc(50%+40px)] -translate-y-1/2 mx-auto max-w-[80vw] flex justify-center items-center gap-[5vw]">
+      <div className="w-full flex justify-center items-center gap-[5vw]">
+      <CardSwipeContainer
+        key={leftCard._id}
+        onVote={(direction) => handleVote(direction === 'right' ? leftCard._id : rightCard._id)}
+        mode="vote"
+      >
+        <CardComponent 
+          card={leftCard} 
+          className="shadow-xl scale-90" 
+        />
+      </CardSwipeContainer>
+      <CardSwipeContainer
+        key={rightCard._id}
+        onVote={(direction) => handleVote(direction === 'right' ? rightCard._id : leftCard._id)}
+        mode="vote"
+      >
+        <CardComponent 
+          card={rightCard} 
+          className="shadow-xl scale-90" 
+        />
+      </CardSwipeContainer>
+      </div>
     </div>
   );
 };

@@ -1,3 +1,12 @@
+## [4.0.0] — 2025-07-07T08:10:48Z
+
+### Major UI Update
+- **Vertical Centering:** Implemented fixed positioning and transforms for perfect vertical alignment in both swipe and vote phases.
+- **Card Scaling:** Cards are now scaled by height, maintaining aspect ratio integrity.
+- **Layout Adjustments:** `VoteComparison` and `SwipePhase` now use `max-w-80vw` with centered containers.
+- **Navigation Consideration:** Offsets added to account for navigation height ensuring proper centering.
+- **Strict Aspect Ratio Maintenance:** Enhanced policies to strictly rule out any aspect ratio adjustments under any circumstances.
+
 ## [3.0.0] — 2025-07-06T22:05:22Z
 
 ### Major Update: Enhanced Image Handling System

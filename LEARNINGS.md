@@ -2,6 +2,56 @@
 
 ## Frontend
 
+### 2025-07-06T23:43:02.000Z - Vote Component Integration Fix
+
+**Issue:** Vote card positioning was implemented in VoteBattle.v2.tsx but not being used, while the actual vote flow was using VoteComparison.tsx with old positioning.
+
+**Root Cause:** Multiple implementations of vote card layout existed in the codebase, leading to inconsistent behavior.
+
+**Resolution:**
+- Identified the actual component flow: PlayPage → VotePhase → VoteComparison
+- Updated VoteComparison.tsx with the correct positioning logic:
+  - Navigation-relative positioning (80px + vh units)
+  - 5% side margins with 90% width
+  - Proper aspect ratio preservation
+  - Consistent card spacing
+
+**Key Learnings:**
+- Always verify the complete component tree before implementing changes
+- Check for duplicate implementations of similar functionality
+- Ensure consistency across related components
+- Document component relationships in architecture files
+
+### 2025-07-06T23:39:02.000Z - Vote Card Navigation-Relative Positioning
+
+**Issue:** Card positioning needed to be calculated relative to navigation bar instead of viewport top.
+
+**Resolution:**
+- Updated card positioning to use calc() with navigation height (80px)
+- Implemented top-[calc(80px+5vh)] for first card
+- Implemented top-[calc(80px+55vh)] for second card
+- Maintained 90% width with 5% side margins
+
+**Key Learnings:**
+- Always position elements relative to their actual available space
+- Use calc() for combining fixed and relative measurements
+- Consider navigation height in viewport calculations
+
+### 2025-07-06T22:00:00.000Z - Vote Container Responsive Sizing
+
+**Issue:** Card containers needed responsive sizing while preserving aspect ratios.
+
+**Resolution:**
+- Implemented viewport-based container calculations
+- Used min() function for responsive gaps
+- Maintained aspect ratios through container constraints
+- Added proper viewport height calculations
+
+**Key Learnings:**
+- Container-based sizing provides better control than direct card manipulation
+- Viewport units enable consistent proportional spacing
+- Gap calculations must account for total container height
+
 ### 2025-07-06T21:20:58Z - Image Aspect Ratio and Responsive Layout
 
 **Issue:** Images were being cropped and distorted across different view modes (swipe, vote, ranking).
@@ -103,9 +153,14 @@
 
 ## Design Guidelines
 
+### Critical Fix: Ensuring Aspect Ratio Preservation
+- Updated project to remove previous aspect ratio adjustments that led to distortion
+- Implemented checks to prevent future modifications to image ratios
+- Fixed handling in VoteComparison and Card components to preserve natural aspect ratios
+
+### General Guidelines
 - No breadcrumb navigation as per design policy
 - Core UI flows (SWIPE → VOTE → RANKING) must be strictly linear
-- Image aspect ratios must always be preserved
 - Card designs must be consistent across all views
 - No text overlays on cards in any view
 - Responsive layouts must handle both portrait and landscape orientations

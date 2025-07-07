@@ -14,7 +14,7 @@ interface Card {
 export default function AdminCardsPage() {
   const router = useRouter();
   const [cards, setCards] = useState<Card[]>([]);
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrls, setImageUrls] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -75,23 +75,29 @@ export default function AdminCardsPage() {
     setSuccess('');
 
     try {
-      const response = await fetch('/api/cards', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          imageUrl: imageUrl,
-          title: 'Card ' + new Date().toISOString(),
-        }),
-      });
+      const urls = imageUrls.split('\n');
 
-      if (!response.ok) {
-        throw new Error('Failed to create card');
+      for (const url of urls) {
+        if (url.trim()) {
+          const response = await fetch('/api/cards', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              imageUrl: url.trim(),
+              title: 'Card ' + new Date().toISOString(),
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to create card for one or more URLs');
+          }
+        }
       }
 
-      setSuccess('Card created successfully!');
-      setImageUrl('');
+      setSuccess('Cards created successfully!');
+      setImageUrls('');
       fetchCards();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -105,18 +111,20 @@ export default function AdminCardsPage() {
       <h1 className="text-2xl font-bold mb-6">Card Management</h1>
       
       <form onSubmit={handleSubmit} className="max-w-lg space-y-4 bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Add New Card Image</h2>
+        <h2 className="text-xl font-semibold mb-4">Add New Card Images</h2>
         <div>
           <label htmlFor="url" className="block text-sm font-medium text-gray-700">
-            Image URL
+            Image URLs (one per line)
           </label>
-          <input
-            type="url"
-            id="url"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
+          <textarea
+            id="urls"
+            value={imageUrls}
+            onChange={(e) => setImageUrls(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            placeholder="https://example.com/image.jpg"
+            placeholder="https://example.com/image1.jpg
+https://example.com/image2.jpg
+https://example.com/image3.jpg"
+            rows={5}
             required
           />
         </div>
@@ -134,7 +142,7 @@ export default function AdminCardsPage() {
           disabled={isSubmitting}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
         >
-          {isSubmitting ? 'Adding...' : 'Add Card Image'}
+          {isSubmitting ? 'Adding...' : 'Add Card Images'}
         </button>
       </form>
 

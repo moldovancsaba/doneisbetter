@@ -11,7 +11,6 @@ interface CardProps {
 }
 
 const CardContent = ({ card, onClick, className = '' }: CardProps) => {
-  const [aspectRatio, setAspectRatio] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -24,7 +23,6 @@ const CardContent = ({ card, onClick, className = '' }: CardProps) => {
     const img = new Image();
     
     const handleLoad = () => {
-      setAspectRatio(img.width / img.height || 1); // Fallback to 1 if calculation fails
       setIsLoading(false);
     };
 
@@ -40,7 +38,6 @@ const CardContent = ({ card, onClick, className = '' }: CardProps) => {
         // After max retries, show error state
         setIsLoading(false);
         setHasError(true);
-        setAspectRatio(1); // Default to square aspect ratio on error
         console.error('Failed to load image after retries:', card.imageUrl);
       }
     };
@@ -60,13 +57,9 @@ const CardContent = ({ card, onClick, className = '' }: CardProps) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className={`card-base bg-gray-900 rounded-lg overflow-hidden relative flex items-center justify-center touch-none ${className}`}
+      className={`card-base bg-gray-900 rounded-lg overflow-hidden relative touch-none ${className}`}
       onClick={onClick}
       style={{
-        aspectRatio,
-        width: '100%',
-        maxWidth: '100%',
-        maxHeight: '100%'
       }}
     >
       {/* Loading State */}
@@ -100,7 +93,7 @@ const CardContent = ({ card, onClick, className = '' }: CardProps) => {
       <motion.img
         src={card.imageUrl}
         alt={card.title}
-        className={`w-full h-full object-contain select-none pointer-events-none transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+        className={`w-full h-auto object-contain select-none pointer-events-none transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         loading="lazy"
         draggable="false"
         animate={{ opacity: !isLoading && !hasError ? 1 : 0 }}

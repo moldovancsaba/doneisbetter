@@ -1,1 +1,1 @@
-export * from './VoteBattle.v2';
+export { VoteComparison as VoteBattle } from './VoteComparison';
