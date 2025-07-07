@@ -1,3 +1,23 @@
+## [4.2.0] — 2025-07-07T08:55:05Z
+
+### Changed
+- Enhanced admin cards page with improved layout and functionality:
+  - Added batch image URL input form for efficient card creation
+  - Implemented grid layout matching ranking page design
+  - Added delete functionality with confirmation
+  - Enhanced error handling and success messages
+  - Improved responsive design with proper spacing
+  - Added consistent shadows and styling
+
+## [4.1.0] — 2025-07-07T08:24:48Z
+
+### Added
+- Random card selection in swipe phase
+  - Each card is now randomly selected from available pool
+  - Prevents sequential card order bias
+  - Maintains state of available cards
+  - Seamless transition between selections
+
 ## [4.0.0] — 2025-07-07T08:10:48Z
 
 ### Major UI Update

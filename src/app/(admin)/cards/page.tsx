@@ -2,14 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { Card as CardComponent } from '@/components/common/Card';
 
-interface Card {
-  id: string;
-  imageUrl: string;
-  title: string;
-  createdAt?: string;
-}
+import type { Card } from '@/types/card';
 
 export default function AdminCardsPage() {
   const router = useRouter();
@@ -35,7 +30,6 @@ export default function AdminCardsPage() {
       setError(err instanceof Error ? err.message : 'Failed to fetch cards');
     }
   };
-
 
   const handleDelete = async (cardId: string) => {
     if (!confirm('Are you sure you want to delete this card?')) {
@@ -76,7 +70,6 @@ export default function AdminCardsPage() {
 
     try {
       const urls = imageUrls.split('\n');
-
       for (const url of urls) {
         if (url.trim()) {
           const response = await fetch('/api/cards', {
@@ -107,69 +100,57 @@ export default function AdminCardsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      <h1 className="text-2xl font-bold mb-6">Card Management</h1>
-      
-      <form onSubmit={handleSubmit} className="max-w-lg space-y-4 bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Add New Card Images</h2>
-        <div>
-          <label htmlFor="url" className="block text-sm font-medium text-gray-700">
-            Image URLs (one per line)
-          </label>
-          <textarea
-            id="urls"
-            value={imageUrls}
-            onChange={(e) => setImageUrls(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            placeholder="https://example.com/image1.jpg
-https://example.com/image2.jpg
-https://example.com/image3.jpg"
-            rows={5}
-            required
-          />
-        </div>
+    <div className="min-h-screen bg-gray-800">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold text-white mb-6">Card Management</h2>
+        
+        <form onSubmit={handleSubmit} className="mb-8 p-6 bg-white rounded-lg shadow-xl">
+          <h3 className="text-xl font-semibold mb-4">Add New Cards</h3>
+          <div>
+            <label htmlFor="urls" className="block text-sm font-medium text-gray-700 mb-2">
+              Image URLs (one per line)
+            </label>
+            <textarea
+              id="urls"
+              value={imageUrls}
+              onChange={(e) => setImageUrls(e.target.value)}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              placeholder="https://example.com/image1.jpg\nhttps://example.com/image2.jpg"
+              rows={5}
+              required
+            />
+          </div>
 
-        {error && (
-          <div className="text-red-600 text-sm">{error}</div>
-        )}
+          {error && (
+            <div className="mt-2 text-red-600 text-sm">{error}</div>
+          )}
 
-        {success && (
-          <div className="text-green-600 text-sm">{success}</div>
-        )}
+          {success && (
+            <div className="mt-2 text-green-600 text-sm">{success}</div>
+          )}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-        >
-          {isSubmitting ? 'Adding...' : 'Add Card Images'}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          >
+            {isSubmitting ? 'Adding...' : 'Add Cards'}
+          </button>
+        </form>
 
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Existing Cards</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
           {cards.map((card) => (
-            <div key={card.id} className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="aspect-w-16 aspect-h-9 relative">
-                <Image
-                  src={card.imageUrl}
-                  alt={card.title || 'Card image'}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-3 flex justify-between items-center">
-                <span className="text-sm text-gray-500">
-                  {card.createdAt ? new Date(card.createdAt).toLocaleDateString() : 'No date'}
-                </span>
-                <button
-                  onClick={() => handleDelete(card.id)}
-                  className="text-sm text-red-600 hover:text-red-800"
-                >
-                  Delete
-                </button>
-              </div>
+<div key={card._id} className="relative flex justify-center items-center">
+              <CardComponent
+                card={card}
+                className="shadow-xl"
+              />
+              <button
+onClick={() => handleDelete(card._id)}
+                className="absolute bottom-2 right-2 bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
             </div>
           ))}
         </div>
