@@ -1,3 +1,14 @@
+## [6.0.0] — 2025-07-07T11:30:00.000Z
+
+### Changed
+- Enhanced vertical card centering in SWIPE phase:
+  - Implemented navigation-aware vertical centering using transform and fixed positioning
+  - Added proper height offset calculation with top-[calc(50%+40px)]
+  - Achieved perfect vertical centering using -translate-y-1/2
+  - Implemented 80px navigation height compensation
+  - Enhanced responsive behavior across all device sizes
+  - Improved user experience with consistent card positioning
+
 ## [5.0.0] — 2025-07-07T11:00:00.000Z
 
 ### Removed

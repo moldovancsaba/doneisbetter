@@ -69,14 +69,20 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
     );
   }
 
-  // Only redirect if we're not loading and there's no current card
+  // Show message if we're not loading and there's no current card
   if (!isLoading && !currentCard) {
-    router.push('/ranking');
-    return null;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">No More Cards</h2>
+          <p className="text-gray-600">You've reviewed all available cards!</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-<div className="fixed inset-x-0 top-1/2 -translate-y-1/2 mx-auto w-full flex justify-center items-center gap-5">
+    <div className="fixed inset-0 flex justify-center items-center top-[calc(50%+40px)] -translate-y-1/2">
       <div className="absolute inset-0 touch-none pointer-events-none"></div>
       <AnimatePresence>
         {currentCard && (
@@ -85,11 +91,11 @@ export const SwipePhase: React.FC<SwipePhaseProps> = ({
             onVote={handleVote}
             mode="swipe"
           >
-          <div className="w-[min(90vw,500px)] mx-auto h-auto overflow-hidden pointer-events-auto">
-            {/* Container preserves natural aspect ratio */}
+          <div className="w-[min(calc(100vh_-_4rem),calc(100vw_-_2rem))] mx-auto pointer-events-auto">
+            {/* Container adapts to image aspect ratio */}
             <Card
               card={currentCard}
-              className="w-full shadow-xl"
+              className="w-full"
             />
           </div>
           </CardSwipeContainer>
