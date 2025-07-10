@@ -4,7 +4,6 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { SessionProvider } from 'next-auth/react';
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -22,10 +21,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`${inter.variable} font-sans antialiased h-full bg-gray-50 dark:bg-gray-900 flex flex-col`}>
-        <SessionProvider>
-          {children}
-          <ToastContainer position="top-right" autoClose={3000} />
-        </SessionProvider>
+        {children}
+        <ToastContainer position="top-right" autoClose={3000} />
       </body>
     </html>
   );

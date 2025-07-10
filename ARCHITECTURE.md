@@ -256,7 +256,7 @@ DELETE /api/cards/:id          # Delete card
 POST   /api/cards/updateRank   # Update card's ranking score
 
 POST   /api/activities         # Log user activity
-GET    /api/rankings          # Get current rankings
+GET    /api/rankings           # Get current rankings
 ```
 
 ### 📱 UI Components

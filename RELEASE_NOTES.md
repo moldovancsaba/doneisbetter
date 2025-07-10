@@ -1,3 +1,21 @@
+## [5.0.0] — 2025-07-07T11:00:00.000Z
+
+### Removed
+- SSO authentication system:
+  - Removed next-auth integration
+  - Removed OAuth configuration
+  - Removed auth-related routes and components
+  - Simplified system architecture
+
+## [4.2.3] — 2025-07-07T10:15:23.789Z
+
+### Documentation
+- Updated documentation to reflect completion of Card Image Aspect Ratio task:
+  - Moved task to completed section in TASKLIST.md
+  - Added implementation learnings to LEARNINGS.md
+  - Synchronized all documentation files
+  - Updated version according to protocol
+
 ## [4.2.2] — 2025-07-07T09:39:40Z
 
 ### Fixed

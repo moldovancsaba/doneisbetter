@@ -1,16 +1,11 @@
-import { withAuth } from '@/lib/withAuth';
-import { useSession } from 'next-auth/react';
+"use client";
 
-function ProtectedPage() {
-  const { data: session } = useSession();
+export default function ProtectedPage() {
 
   return (
     <div>
       <h1>Protected Page</h1>
-      <p>Welcome {session?.user?.name}</p>
-      <p>Your role: {session?.userRole}</p>
+      <p>Welcome to the protected page</p>
     </div>
   );
 }
-
-export default withAuth(ProtectedPage);
