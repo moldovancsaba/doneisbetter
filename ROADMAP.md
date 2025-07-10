@@ -3,6 +3,8 @@
 ## Q3 2025 - Vote and Swipe Integration
 
 ### Milestone 1: Core Integration (July 2025)
+- Authentication system simplification ✅
+- SwipePhase UX optimization ✅
 - Unified Vote component implementation
 - Enhanced swipe detection system
 - Real-time ranking updates

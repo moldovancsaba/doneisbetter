@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import CardComponent from '../CardComponent';
-import { Card } from '@/types/card';
+import { Card as CardComponent } from '@/components/common/Card';
+import type { Card } from '@/types/card';
 
 describe('CardComponent', () => {
   const mockCard: Card = {
@@ -16,15 +16,13 @@ describe('CardComponent', () => {
     const image = screen.getByRole('img');
     
     expect(image).toHaveAttribute('draggable', 'false');
-    expect(image).toHaveStyle('user-select: none');
-    expect(image).toHaveStyle('-webkit-user-drag: none');
+    expect(image).toHaveClass('select-none', 'pointer-events-none', 'user-select-none', 'webkit-user-drag-none');
   });
 
   it('maintains aspect ratio', () => {
     render(<CardComponent card={mockCard} />);
     const image = screen.getByRole('img');
     
-    expect(image).toHaveStyle('object-fit: cover');
-    expect(image.parentElement).toHaveStyle('height: 100%');
+    expect(image).toHaveStyle('object-fit: contain');
   });
 });

@@ -2,7 +2,7 @@
 
 A simple card management and ranking application with an intuitive swipe interface.
 
-![Version](https://img.shields.io/badge/version-2.0.7-blue.svg)
+![Version](https://img.shields.io/badge/version-7.0.0-blue.svg)
 
 ## Overview
 
@@ -13,6 +13,8 @@ CardSwipe is a straightforward card management system that lets you create, orga
 - **Simple Ranking**: Swipe to rank cards
 - **Basic Filtering**: Search and sort cards
 - **Personal Rankings**: Track your card preferences
+- **Grid Layout**: Responsive grid display for ranked cards
+- **Image Optimization**: Automatic aspect ratio preservation and responsive sizing
 
 ## Quick Start
 
@@ -30,6 +32,8 @@ Visit `http://localhost:3003` to start using the application.
 
 - `/src/app` - Next.js pages and layouts
 - `/src/components` - React components
+  - `/common/Card` - Core card component and related utilities
+  - `RankingGrid.tsx` - Grid layout for ranked cards
 - `/src/models` - MongoDB models
 - `/src/types` - TypeScript types
 

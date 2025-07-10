@@ -9,6 +9,8 @@
 - Uses natural image dimensions to determine display size
 - No width/height constraints that could affect aspect ratio
 - No CSS transforms that modify proportions
+- Container dimensions adapt to viewport and content
+- Implements responsive scaling through viewport units
 
 #### 2. Container Hierarchy
 
@@ -245,6 +247,22 @@ interface Ranking {
    - Progressive difficulty (battle better cards after wins)
    - Immediate rank updates and persistence
    - Sorted display in rankings view
+
+### 👥 Components Overview
+
+#### RankingGrid Component
+- **Location:** `/src/components/RankingGrid.tsx`
+- **Responsibilities:**
+  - Displays cards in a responsive grid layout.
+  - Handles card click events and passes card data.
+  - Adapts to different screen sizes.
+
+#### Card Directory Structure
+- **Location:** `/src/components/common/Card`
+- **Core Components:**
+  - `Card.tsx`: Main card component preserving image aspect ratios.
+  - `CardContainer.tsx`: Manages layout and spacing.
+  - `CardImage.tsx`: Handles image rendering and loading.
 
 ### 🌐 API Routes
 

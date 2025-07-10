@@ -26,6 +26,24 @@
 
 ## Frontend
 
+### 2025-07-10T16:27:32.000Z - Component Architecture Restructuring
+
+**Issue:** Card and voting components were scattered across different directories with inconsistent implementation patterns.
+
+**Root Cause:** Organic growth of features led to component duplication and inconsistent structure.
+
+**Resolution:**
+- Centralized card components under src/components/common/Card/
+- Consolidated voting logic in src/components/common/Vote/
+- Updated all dependent components to use new structure
+- Implemented comprehensive test coverage in src/test/
+
+**Key Learnings:**
+- Component organization should follow clear hierarchical structure
+- Test files must be organized to mirror component structure
+- Documentation must be updated synchronously with structural changes
+- Component migrations require careful dependency management
+
 ### Perfect Vertical Centering with Navigation Offset
 - Challenge: Achieving true vertical centering while accounting for navigation height
 - Solution: Combined fixed positioning with transform and calculated offsets

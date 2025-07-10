@@ -18,7 +18,7 @@ type Phase = 'swipe' | 'vote';
  * - Swipe Phase: Users swipe cards left/right to indicate like/dislike
  * - Vote Phase: Compare liked cards to establish ranking
  */
-function PlayPage({ isRouteGuarded }: { isRouteGuarded?: boolean }) {
+function PlayPage() {
   const router = useRouter();
   
   // State Management
@@ -28,12 +28,6 @@ function PlayPage({ isRouteGuarded }: { isRouteGuarded?: boolean }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Add notification when navigation is blocked
-  useEffect(() => {
-    if (isRouteGuarded) {
-      toast.warning('Please finish reviewing all cards before viewing rankings');
-    }
-  }, [isRouteGuarded]);
 
   // Fetch and manage cards
   useEffect(() => {

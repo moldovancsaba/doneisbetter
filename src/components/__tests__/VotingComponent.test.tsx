@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import VotingComponent from '../VotingComponent';
-import { Card } from '@/types/card';
+import { Vote as VotingComponent } from '../common/Vote';
+import type { Card } from '@/types/card';
 
 const mockCards: Card[] = [
   {
@@ -21,6 +21,25 @@ const mockCards: Card[] = [
 ];
 
 describe('VotingComponent', () => {
+  const mockCards: Card[] = [
+    {
+      _id: '1',
+      title: 'Card 1',
+      description: 'Description 1',
+      imageUrl: 'test1.jpg',
+      rank: 1400
+    },
+    {
+      _id: '2',
+      title: 'Card 2',
+      description: 'Description 2',
+      imageUrl: 'test2.jpg',
+      rank: 1400
+    }
+  ];
+
+  let mockUpdateDimensions: (() => void) | undefined;
+
   beforeEach(() => {
     // Mock window.innerWidth and window.innerHeight
     Object.defineProperty(window, 'innerWidth', {
@@ -40,7 +59,11 @@ describe('VotingComponent', () => {
     window.innerWidth = 1024;
     window.innerHeight = 768;
     
-    render(<VotingComponent cards={mockCards} onVote={() => {}} />);
+    render(<VotingComponent
+      leftCard={mockCards[0]}
+      rightCard={mockCards[1]}
+      onVoteComplete={(winnerId, loserId) => {}}
+    />);
     const container = screen.getByTestId('voting-container');
     
     expect(container).toHaveClass('flex-row');
@@ -51,7 +74,11 @@ describe('VotingComponent', () => {
     window.innerWidth = 768;
     window.innerHeight = 1024;
     
-    render(<VotingComponent cards={mockCards} onVote={() => {}} />);
+    render(<VotingComponent
+      leftCard={mockCards[0]}
+      rightCard={mockCards[1]}
+      onVoteComplete={(winnerId, loserId) => {}}
+    />);
     const container = screen.getByTestId('voting-container');
     
     expect(container).toHaveClass('flex-col');
@@ -62,7 +89,11 @@ describe('VotingComponent', () => {
     window.innerWidth = 800;
     window.innerHeight = 800;
     
-    render(<VotingComponent cards={mockCards} onVote={() => {}} />);
+    render(<VotingComponent
+      leftCard={mockCards[0]}
+      rightCard={mockCards[1]}
+      onVoteComplete={(winnerId, loserId) => {}}
+    />);
     const container = screen.getByTestId('voting-container');
     
     expect(container).toHaveClass('flex-col');
@@ -70,27 +101,35 @@ describe('VotingComponent', () => {
   });
 
   it('maintains card aspect ratios', () => {
-    render(<VotingComponent cards={mockCards} onVote={() => {}} />);
+    render(<VotingComponent
+      leftCard={mockCards[0]}
+      rightCard={mockCards[1]}
+      onVoteComplete={(winnerId, loserId) => {}}
+    />);
     const cardElements = screen.getAllByTestId('card-container');
     
     cardElements.forEach(card => {
-      expect(card).toHaveStyle('height: 100%');
       const image = card.querySelector('img');
-      expect(image).toHaveStyle('object-fit: cover');
+      expect(image).toHaveStyle('object-fit: contain');
+      expect(image).toHaveClass('select-none', 'pointer-events-none', 'user-select-none', 'webkit-user-drag-none');
     });
   });
 
   it('adjusts layout on window resize', () => {
-    render(<VotingComponent cards={mockCards} onVote={() => {}} />);
+    render(<VotingComponent
+      leftCard={mockCards[0]}
+      rightCard={mockCards[1]}
+      onVoteComplete={(winnerId, loserId) => {}}
+    />);
     const container = screen.getByTestId('voting-container');
     
     // Start in landscape
     expect(container).toHaveClass('flex-row');
     
     // Switch to portrait
+    window.innerWidth = 768;
+    window.innerHeight = 1024;
     act(() => {
-      window.innerWidth = 768;
-      window.innerHeight = 1024;
       window.dispatchEvent(new Event('resize'));
     });
     

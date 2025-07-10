@@ -4,9 +4,27 @@
 The Card component's image fitting behavior is strictly protected and MUST NOT be modified unless explicitly requested. This behavior is fundamental to the application's design and user experience.
 
 ## 📐 Current Implementation
-The Card component (`src/components/common/Card.tsx`) maintains perfect image fitting through:
+The Card component (`src/components/common/Card.tsx`) maintains perfect image fitting through a sophisticated viewport-aware sizing system that preserves aspect ratios while adapting to available space.
 
-1. **Automatic Aspect Ratio Calculation**
+### Core Principles
+1. **Viewport-Relative Sizing**
+   - Containers use relative units (vh, vw) for dynamic sizing
+   - Content dimensions adapt to viewport changes
+   - Natural scaling based on available space
+
+2. **Container Hierarchy**
+   - Root container manages viewport positioning
+   - Inner container handles content dimensions
+   - Proper spacing and gaps maintained through relative units
+
+3. **Responsive Behavior**
+   - Content scales naturally with viewport
+   - Maintains visual consistency across devices
+   - Preserves spacing ratios at all sizes
+
+### Technical Implementation
+
+1.
 ```typescript
 const [aspectRatio, setAspectRatio] = useState(1);
 
@@ -34,6 +52,9 @@ Unless explicitly requested, the following modifications are strictly forbidden:
 - Modifying the style properties controlling image fitting
 - Altering the image's object-fit behavior
 - Adding wrappers that override the natural image dimensions
+- Implementing fixed dimensions or breakpoints
+- Forcing specific sizes that could compromise responsiveness
+- Overriding the viewport-relative sizing system
 
 ## ✅ Proper Usage
 When using the Card component:

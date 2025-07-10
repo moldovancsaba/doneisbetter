@@ -2,6 +2,20 @@
 
 ## 🔄 Active Tasks
 
+### Architecture
+- [ ] Optimize Edge Runtime Performance @dev (2025-07-17T23:59:59.999Z)
+  - Review and optimize edge runtime pages
+  - Evaluate static generation opportunities
+  - Implement performance monitoring
+  - Document edge runtime constraints
+
+### UI/UX Enhancement
+- [ ] Complete SwipePhase UX Refinements @frontend (2025-07-15T23:59:59.999Z)
+  - Fine-tune vertical centering calculations
+  - Optimize responsive behavior
+  - Add visual feedback for navigation offset
+  - Implement smooth transitions
+
 ## ✅ Completed Tasks
 
 ### System Architecture

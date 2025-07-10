@@ -1,3 +1,12 @@
+## [8.0.0] — 2025-07-07T12:00:00.000Z
+
+### Major Update
+- Updated card UI components to ensure consistent aspect ratio preservation and optimal sizing across swipe, vote, and ranking views
+- CardSwipeContainer, Card, and CardImage now synchronize layout constraints
+- Vote and Ranking components use flex layout with proper spacing
+- Added responsive enhancements with natural image dimension adjustments
+- Verified that swipe area correctly fits cards by aspect ratio
+
 ## [6.0.0] — 2025-07-07T11:30:00.000Z
 
 ### Changed

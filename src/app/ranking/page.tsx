@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card as CardComponent } from '@/components/common/Card';
 import type { Card } from '@/types/card';
+import { RankingGrid } from '@/components/RankingGrid';
 
 interface BattleStats {
   won: number;
@@ -67,16 +67,7 @@ export default function RankingPage() {
     <div className="min-h-screen bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-white mb-6">Greatest Memories</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
-          {rankings.map((card) => (
-            <div key={card._id} className="relative w-full flex justify-center items-center">
-              <CardComponent
-                card={card}
-                className="shadow-xl"
-              />
-            </div>
-          ))}
-        </div>
+        <RankingGrid cards={rankings} />
       </div>
     </div>
   );

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { CardSwipeContainer } from './CardSwipeContainer';
 import type { Card as CardType } from '@/types/card';
-import { Card } from '@/components/common/Card';
+import { Card, CardSwipeContainer } from '@/components/common/Card';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface SwipePhaseProps {

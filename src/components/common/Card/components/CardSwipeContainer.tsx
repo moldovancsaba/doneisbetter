@@ -21,13 +21,6 @@ interface CardSwipeContainerProps {
  * A simplified container component that handles both swipe gestures and keyboard
  * navigation for voting. Uses framer-motion for gesture handling.
  */
-// Get optimal dimensions based on viewport size and mode
-const getOptimalDimensions = (mode: 'swipe' | 'vote') => {
-  const vh = window.innerHeight;
-  return {
-    height: Math.min(vh * 0.8, 700), // reduce height by 10%
-  };
-};
 
 export const CardSwipeContainer: React.FC<CardSwipeContainerProps> = ({
   children,
@@ -42,17 +35,6 @@ export const CardSwipeContainer: React.FC<CardSwipeContainerProps> = ({
 }) => {
 const controls = useAnimation();
   const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
-  const [dimensions, setDimensions] = useState(getOptimalDimensions(mode));
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      setDimensions(getOptimalDimensions(mode));
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -158,7 +140,9 @@ const controls = useAnimation();
       onDrag={mode === 'swipe' ? handleDrag : undefined}
       onDragEnd={mode === 'swipe' ? handleDragEnd : undefined}
       className={`
-        relative w-full h-full touch-none select-none
+        relative touch-none select-none
+        flex items-center justify-center
+        w-fit h-fit
         ${mode === 'swipe' ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
       `}
