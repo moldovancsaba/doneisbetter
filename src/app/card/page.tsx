@@ -1,16 +1,26 @@
 "use client";
 import { useEffect, useState } from "react";
 
+// Define the structure of a Card document
+interface Card {
+  _id: string;
+  url: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function CardPage() {
   const [input, setInput] = useState("");
-  const [cards, setCards] = useState([]);
+  const [cards, setCards] = useState<Card[]>([]);
 
+  // Load all cards from the database
   const fetchCards = async () => {
     const res = await fetch("/api/cards");
     const data = await res.json();
     setCards(data);
   };
 
+  // Submit new cards from multiline input
   const submit = async () => {
     const urls = input
       .split("\n")
@@ -26,6 +36,7 @@ export default function CardPage() {
     fetchCards();
   };
 
+  // Delete card by ID
   const remove = async (id: string) => {
     await fetch(`/api/cards/${id}`, { method: "DELETE" });
     fetchCards();
@@ -53,8 +64,9 @@ export default function CardPage() {
       </button>
 
       <div className="mt-8 space-y-4">
-        {cards.map((card: any) => (
+        {cards.map((card: Card) => (
           <div key={card._id} className="border p-2 rounded shadow flex items-center justify-between">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={card.url} alt="card" className="w-24 h-auto rounded" />
             <code className="text-xs break-all ml-4 flex-1">{card._id}</code>
             <button
