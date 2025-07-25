@@ -3,8 +3,7 @@
 
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.VERCEL_MONGODB_URI || process.env.MONGODB_URI;
-
+const MONGO_URI = process.env.MONGODB_URI;
 
 /**
  * Connects to the MongoDB database using Mongoose
@@ -14,14 +13,12 @@ export const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) return;
 
   if (!MONGO_URI) {
-    console.error("❌ MONGODB_URI is not defined in environment variables");
-    return;
+    throw new Error("❌ MONGODB_URI is not defined in environment variables");
   }
 
   try {
     await mongoose.connect(MONGO_URI, {
       dbName: "doneisbetter",
-      connectTimeoutMS: 30000,
     });
     console.log("✅ MongoDB connected");
   } catch (error) {
