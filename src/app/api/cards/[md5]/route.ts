@@ -2,14 +2,11 @@ import { connectDB } from "@/lib/db";
 import { Card } from "@/models/Card";
 import { NextRequest, NextResponse } from "next/server";
 
-type Params = {
-  params: {
-    md5: string;
-  };
-};
-
 // GET /api/cards/[md5] → returns a card by its md5
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { md5: string } }
+) {
   await connectDB();
   const card = await Card.findOne({ md5: params.md5 });
   if (!card) {
@@ -19,7 +16,10 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 // PUT /api/cards/[md5] → updates a card
-export async function PUT(req: NextRequest, { params }: Params) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { md5: string } }
+) {
   await connectDB();
   const body = await req.json();
   const updatedCard = await Card.findOneAndUpdate({ md5: params.md5 }, body, {
@@ -32,7 +32,10 @@ export async function PUT(req: NextRequest, { params }: Params) {
 }
 
 // DELETE /api/cards/[md5] → deletes a card
-export async function DELETE(req: NextRequest, { params }: Params) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { md5: string } }
+) {
   await connectDB();
   const deletedCard = await Card.findOneAndDelete({ md5: params.md5 });
   if (!deletedCard) {
