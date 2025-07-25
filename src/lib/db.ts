@@ -2,12 +2,10 @@
 // Connects to MongoDB using Mongoose and ensures a stable reusable connection
 
 import mongoose from "mongoose";
+import { MONGODB_URI } from "./config";
 
-const MONGO_URI = process.env.MONGO_URI || "";
+const MONGO_URI = MONGODB_URI;
 
-if (!MONGO_URI) {
-  throw new Error("❌ MONGO_URI is not defined in environment variables");
-}
 
 /**
  * Connects to the MongoDB database using Mongoose
