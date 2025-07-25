@@ -3,11 +3,21 @@ import { Card } from "@/models/Card";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
-// GET /api/cards → returns all cards
-export async function GET() {
+// GET /api/cards → returns all cards or a single card by md5
+export async function GET(req: NextRequest) {
   await connectDB();
-  const cards = await Card.find().sort({ createdAt: -1 });
-  return NextResponse.json(cards);
+  const md5 = req.nextUrl.searchParams.get("md5");
+
+  if (md5) {
+    const card = await Card.findOne({ md5 });
+    if (!card) {
+      return NextResponse.json({ error: "Card not found" }, { status: 404 });
+    }
+    return NextResponse.json(card);
+  } else {
+    const cards = await Card.find().sort({ createdAt: -1 });
+    return NextResponse.json(cards);
+  }
 }
 
 // POST /api/cards → create a new card
@@ -50,4 +60,37 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
   }
+}
+
+// PUT /api/cards → updates a card
+export async function PUT(req: NextRequest) {
+  await connectDB();
+  const md5 = req.nextUrl.searchParams.get("md5");
+  if (!md5) {
+    return NextResponse.json({ error: "Missing md5 parameter" }, { status: 400 });
+  }
+
+  const body = await req.json();
+  const updatedCard = await Card.findOneAndUpdate({ md5 }, body, {
+    new: true,
+  });
+  if (!updatedCard) {
+    return NextResponse.json({ error: "Card not found" }, { status: 404 });
+  }
+  return NextResponse.json(updatedCard);
+}
+
+// DELETE /api/cards → deletes a card
+export async function DELETE(req: NextRequest) {
+  await connectDB();
+  const md5 = req.nextUrl.searchParams.get("md5");
+  if (!md5) {
+    return NextResponse.json({ error: "Missing md5 parameter" }, { status: 400 });
+  }
+
+  const deletedCard = await Card.findOneAndDelete({ md5 });
+  if (!deletedCard) {
+    return NextResponse.json({ error: "Card not found" }, { status: 404 });
+  }
+  return NextResponse.json({ message: "Card deleted successfully" });
 }
