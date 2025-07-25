@@ -2,9 +2,8 @@
 // Connects to MongoDB using Mongoose and ensures a stable reusable connection
 
 import mongoose from "mongoose";
-import { MONGODB_URI } from "./config";
 
-const MONGO_URI = MONGODB_URI;
+const MONGO_URI = process.env.VERCEL_MONGODB_URI || process.env.MONGODB_URI;
 
 
 /**
@@ -13,6 +12,11 @@ const MONGO_URI = MONGODB_URI;
  */
 export const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) return;
+
+  if (!MONGO_URI) {
+    console.error("❌ MONGODB_URI is not defined in environment variables");
+    return;
+  }
 
   try {
     await mongoose.connect(MONGO_URI, {

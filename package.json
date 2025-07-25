@@ -6,12 +6,13 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "next lint"
   },
   "dependencies": {
-    "dotenv": "^17.2.1",
     "mongoose": "^8.16.4",
     "next": "15.4.3",
+    "next-runtime-dotenv": "^1.5.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
