@@ -3,6 +3,7 @@ import { Card } from "@/models/Card";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  console.log("Attempting to delete all cards...");
   await connectDB();
 
   try {

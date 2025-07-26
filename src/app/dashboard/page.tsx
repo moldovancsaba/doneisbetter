@@ -12,6 +12,7 @@ const DashboardPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async (md5: string) => {
+    console.log("Deleting card with md5 from dashboard:", md5);
     if (window.confirm('Are you sure you want to delete this card?')) {
       try {
         const res = await fetch(`/api/cards?md5=${md5}`, {
