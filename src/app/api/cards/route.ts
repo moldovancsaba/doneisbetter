@@ -7,6 +7,7 @@ import crypto from "crypto";
 export async function GET(req: NextRequest) {
   await connectDB();
   const md5 = req.nextUrl.searchParams.get("md5");
+  console.log("Fetching card with md5:", md5);
 
   if (md5) {
     const card = await Card.findOne({ md5 });
@@ -84,6 +85,7 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   await connectDB();
   const md5 = req.nextUrl.searchParams.get("md5");
+  console.log("Deleting card with md5:", md5);
   if (!md5) {
     return NextResponse.json({ error: "Missing md5 parameter" }, { status: 400 });
   }
