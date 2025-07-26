@@ -47,7 +47,8 @@ export async function POST(req: NextRequest) {
 
   try {
     await newCard.save();
-    return NextResponse.json(newCard, { status: 201 });
+    const savedCard = await newCard.save();
+    return NextResponse.json(savedCard, { status: 201 });
   } catch (error: unknown) {
     if (error instanceof Error) {
       // Check if it's a duplicate key error
