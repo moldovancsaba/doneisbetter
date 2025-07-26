@@ -4,13 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import CardList from '@/components/CardList';
 
-interface ICard {
-  _id: string;
-  md5: string;
-  slug: string;
-  type: 'image' | 'text';
-  content: string;
-}
+import { ICard } from '@/interfaces/Card';
 
 const DashboardPage: React.FC = () => {
   const [cards, setCards] = useState<ICard[]>([]);

@@ -3,13 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-interface ICard {
-  _id: string;
-  md5: string;
-  slug: string;
-  type: 'image' | 'text';
-  content: string;
-}
+import { ICard } from '@/interfaces/Card';
 
 interface EditCardFormProps {
   md5: string;

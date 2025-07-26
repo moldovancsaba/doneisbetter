@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { ICard } from '@/interfaces/Card';
+
 const CreateCardForm: React.FC = () => {
   const router = useRouter();
   const [slug, setSlug] = useState('');
-  const [type, setType] = useState<'text' | 'image'>('text');
+  const [type, setType] = useState<ICard['type']>('text');
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);

@@ -3,13 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-interface ICard {
-  _id: string;
-  md5: string;
-  slug: string;
-  type: 'image' | 'text';
-  content: string;
-}
+import { ICard } from '@/interfaces/Card';
 
 interface CardListProps {
   cards: ICard[];

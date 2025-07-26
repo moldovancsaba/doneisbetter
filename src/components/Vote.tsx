@@ -1,29 +1,25 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Card from '@/components/Card';
 import CardContainer from '@/components/CardContainer';
-
-interface ICard {
-  _id: string;
-  md5: string;
-  slug: string;
-  type: 'image' | 'text';
-  content: string;
-  metadata?: {
-    aspectRatio?: number;
-  };
-}
+import { ICard } from '@/interfaces/Card';
+import { getComparisonCard, updateRankings } from '@/lib/logic';
 
 const Vote: React.FC = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const cardMd5 = searchParams.get('card');
 
-  const [card, setCard] = useState<ICard | null>(null);
+  const [cardToRank, setCardToRank] = useState<ICard | null>(null);
   const [comparisonCard, setComparisonCard] = useState<ICard | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [rankedCards, setRankedCards] = useState<ICard[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [lastComparison, setLastComparison] = useState<{
+    opponent: ICard;
+    result: "win" | "loss";
+  } | null>(null);
 
   useEffect(() => {
     const fetchCard = async () => {
@@ -33,7 +29,7 @@ const Vote: React.FC = () => {
           throw new Error('Failed to fetch card');
         }
         const data = await res.json();
-        setCard(data);
+        setCardToRank(data);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -58,40 +54,49 @@ const Vote: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (rankedCards.length > 0) {
-      setComparisonCard(rankedCards[rankedCards.length - 1]);
-    } else {
-      // If there are no ranked cards, go back to the swipe page
-      // router.push('/swipe');
+    if (cardToRank) {
+      setComparisonCard(getComparisonCard(rankedCards, cardToRank, lastComparison || undefined));
     }
-  }, [rankedCards]);
+  }, [cardToRank, rankedCards, lastComparison]);
 
-  const handleVote = (winner: 'card' | 'comparison') => {
-    // Handle the voting logic here
-    // For now, we will just log the winner
-    console.log('Winner:', winner);
+  const handleVote = (result: 'win' | 'loss') => {
+    if (cardToRank && comparisonCard) {
+      const newRankedCards = updateRankings(
+        rankedCards,
+        cardToRank,
+        comparisonCard,
+        result
+      );
+      setRankedCards(newRankedCards);
+      setLastComparison({ opponent: comparisonCard, result });
+    }
   };
 
   if (error) {
     return <div>Error: {error}</div>;
   }
 
-  if (!card || !comparisonCard) {
-    // This should be handled more gracefully in a real application
-    return <div>Not enough cards to vote.</div>;
+  if (!cardToRank) {
+    return <div>Loading...</div>;
+  }
+
+  if (!comparisonCard) {
+    // No more valid comparisons, go back to swipe
+    router.push('/swipe');
+    return null;
   }
 
   return (
     <CardContainer cardCount={2}>
-      <div onClick={() => handleVote('card')}>
+      <div onClick={() => handleVote('win')}>
         <Card
-          key={card._id}
-          type={card.type}
-          content={card.content}
-          metadata={card.metadata}
+          key={cardToRank._id}
+          type={cardToRank.type}
+          content={cardToRank.content}
+          metadata={cardToRank.metadata}
         />
       </div>
-      <div onClick={() => handleVote('comparison')}>
+      <div onClick={() => handleVote('loss')}>
         <Card
           key={comparisonCard._id}
           type={comparisonCard.type}

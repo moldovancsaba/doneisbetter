@@ -4,25 +4,16 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/Card';
 import CardContainer from '@/components/CardContainer';
-
-interface ICard {
-  _id: string;
-  md5: string;
-  slug: string;
-  type: 'image' | 'text';
-  content: string;
-  metadata?: {
-    aspectRatio?: number;
-  };
-}
+import { ICard } from '@/interfaces/Card';
+import { getNextCardToSwipe } from '@/lib/logic';
 
 const SwipePage: React.FC = () => {
   const router = useRouter();
   const [cards, setCards] = useState<ICard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [seenCards, setSeenCards] = useState<string[]>([]);
+  const [nextCard, setNextCard] = useState<ICard | null>(null);
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -37,7 +28,7 @@ const SwipePage: React.FC = () => {
         if (err instanceof Error) {
           setError(err.message);
         } else {
-          setError("An unknown error occurred");
+          setError('An unknown error occurred');
         }
       } finally {
         setLoading(false);
@@ -47,13 +38,17 @@ const SwipePage: React.FC = () => {
     fetchCards();
   }, []);
 
+  useEffect(() => {
+    setNextCard(getNextCardToSwipe(cards, seenCards));
+  }, [cards, seenCards]);
+
   const handleSwipe = (direction: 'left' | 'right') => {
-    setSeenCards([...seenCards, cards[currentIndex].md5]);
-    if (direction === 'right') {
-      // Navigate to vote page
-      router.push(`/vote?card=${cards[currentIndex].md5}`);
+    if (nextCard) {
+      setSeenCards([...seenCards, nextCard.md5]);
+      if (direction === 'right') {
+        router.push(`/vote?card=${nextCard.md5}`);
+      }
     }
-    setCurrentIndex(currentIndex + 1);
   };
 
   if (loading) {
@@ -64,23 +59,17 @@ const SwipePage: React.FC = () => {
     return <div>Error: {error}</div>;
   }
 
-  if (currentIndex >= cards.length) {
-    return <div>No more cards to swipe.</div>;
-  }
-
-  const unseenCards = cards.filter((card) => !seenCards.includes(card.md5));
-
-  if (unseenCards.length === 0) {
+  if (!nextCard) {
     return <div>No more cards to swipe.</div>;
   }
 
   return (
     <CardContainer cardCount={1}>
       <Card
-        key={unseenCards[0]._id}
-        type={unseenCards[0].type}
-        content={unseenCards[0].content}
-        metadata={unseenCards[0].metadata}
+        key={nextCard._id}
+        type={nextCard.type}
+        content={nextCard.content}
+        metadata={nextCard.metadata}
       />
       <div>
         <button onClick={() => handleSwipe('left')}>Swipe Left</button>

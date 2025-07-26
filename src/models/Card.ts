@@ -1,21 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-interface ICard extends Document {
-  md5: string;
-  slug: string;
-  type: 'image' | 'text';
-  content: string;
-  translations?: { language: string; content: string }[];
-  parentId?: string;
-  projectId?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  metadata?: {
-    aspectRatio?: number;
-    originalUrl?: string;
-    language?: string;
-  };
-}
+import mongoose, { Schema } from "mongoose";
+import { ICard } from "@/interfaces/Card";
 
 const cardSchema = new Schema<ICard>(
   {
