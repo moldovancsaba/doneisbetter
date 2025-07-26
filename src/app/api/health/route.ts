@@ -12,7 +12,8 @@ export async function GET() {
   try {
     await connectDB();
     return NextResponse.json({ status: "ok", db: "connected" });
-  } catch (e) {
+  } catch (error) {
+    console.error("Health check failed:", error);
     return NextResponse.json({ status: "error", db: "failed" }, { status: 500 });
   }
 }

@@ -3,11 +3,7 @@
 
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.MONGODB_URI || "";
-
-if (!MONGO_URI) {
-  throw new Error("❌ MONGODB_URI is not defined in environment variables");
-}
+const MONGO_URI = process.env.MONGODB_URI;
 
 /**
  * Connects to the MongoDB database using Mongoose
@@ -15,6 +11,10 @@ if (!MONGO_URI) {
  */
 export const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) return;
+
+  if (!MONGO_URI) {
+    throw new Error("❌ MONGODB_URI is not defined in environment variables");
+  }
 
   try {
     await mongoose.connect(MONGO_URI, {
