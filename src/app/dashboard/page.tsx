@@ -74,6 +74,15 @@ const DashboardPage: React.FC = () => {
           Create New Card
         </a>
       </Link>
+      <button
+        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-4"
+        onClick={async () => {
+          await fetch('/api/cards/delete-all');
+          window.location.reload();
+        }}
+      >
+        Delete All Cards
+      </button>
       <div className="mt-4">
         <CardList cards={cards} onDelete={handleDelete} />
       </div>
