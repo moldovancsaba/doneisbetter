@@ -22,14 +22,22 @@ const Vote: React.FC = () => {
   } | null>(null);
 
   useEffect(() => {
-    const fetchCard = async () => {
+    const cardJson = sessionStorage.getItem('cardToVote');
+    if (cardJson) {
+      setCardToRank(JSON.parse(cardJson));
+    } else {
+      // Handle the case where the card is not in session storage
+      setError("Card to vote not found in session storage.");
+    }
+
+    const fetchRankings = async () => {
       try {
-        const res = await fetch(`/api/cards?md5=${cardMd5}`);
+        const res = await fetch('/api/rankings');
         if (!res.ok) {
-          throw new Error('Failed to fetch card');
+          throw new Error('Failed to fetch rankings');
         }
         const data = await res.json();
-        setCardToRank(data);
+        setRankedCards(data);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -39,18 +47,7 @@ const Vote: React.FC = () => {
       }
     };
 
-    if (cardMd5) {
-      fetchCard();
-    }
-  }, [cardMd5]);
-
-  useEffect(() => {
-    // In a real application, you would fetch the ranked cards from the database
-    // For now, we will use a hardcoded list of ranked cards
-    const hardcodedRankedCards: ICard[] = [
-      // Add some hardcoded ranked cards here
-    ];
-    setRankedCards(hardcodedRankedCards);
+    fetchRankings();
   }, []);
 
   useEffect(() => {
@@ -59,7 +56,7 @@ const Vote: React.FC = () => {
     }
   }, [cardToRank, rankedCards, lastComparison]);
 
-  const handleVote = (result: 'win' | 'loss') => {
+  const handleVote = async (result: 'win' | 'loss') => {
     if (cardToRank && comparisonCard) {
       const newRankedCards = updateRankings(
         rankedCards,
@@ -69,6 +66,28 @@ const Vote: React.FC = () => {
       );
       setRankedCards(newRankedCards);
       setLastComparison({ opponent: comparisonCard, result });
+
+      // Record vote in rankings
+      await fetch('/api/rankings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newRankedCards }),
+      });
+
+      const nextComparisonCard = getComparisonCard(newRankedCards, cardToRank, {
+        opponent: comparisonCard,
+        result,
+      });
+
+      if (!nextComparisonCard) {
+        // Voting complete
+        // Update progress state to "voting_complete"
+        // TODO: Implement the API call to update the progress
+        console.log(`Updating progress for card ${cardToRank.md5} to voting_complete`);
+        router.push('/swipe');
+      }
     }
   };
 

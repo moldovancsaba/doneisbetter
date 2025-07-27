@@ -16,14 +16,28 @@ const SwipePage: React.FC = () => {
   const [nextCard, setNextCard] = useState<ICard | null>(null);
 
   useEffect(() => {
-    const fetchCards = async () => {
+    const fetchInitialData = async () => {
       try {
-        const res = await fetch('/api/cards');
-        if (!res.ok) {
+        const [cardsRes, progressRes] = await Promise.all([
+          fetch('/api/cards'),
+          fetch('/api/progress'),
+        ]);
+
+        if (!cardsRes.ok) {
           throw new Error('Failed to fetch cards');
         }
-        const data = await res.json();
-        setCards(data);
+        if (!progressRes.ok) {
+          throw new Error('Failed to fetch progress');
+        }
+
+        const cardsData = await cardsRes.json();
+        const progressData = await progressRes.json();
+
+        // TODO: This is a placeholder. Implement the actual logic.
+        const availableCards = cardsData.filter(
+          (card: ICard) => !progressData.seenCards.includes(card.md5)
+        );
+        setCards(availableCards);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -35,17 +49,49 @@ const SwipePage: React.FC = () => {
       }
     };
 
-    fetchCards();
+    fetchInitialData();
   }, []);
 
   useEffect(() => {
-    setNextCard(getNextCardToSwipe(cards, seenCards));
+    const card = getNextCardToSwipe(cards, seenCards);
+    setNextCard(card);
+
+    if (card) {
+      // Mark the card as "in_progress"
+      // TODO: Implement the API call to update the progress
+      console.log(`Marking card ${card.md5} as in_progress`);
+    }
   }, [cards, seenCards]);
 
-  const handleSwipe = (direction: 'left' | 'right') => {
+  const handleSwipe = async (direction: 'left' | 'right') => {
     if (nextCard) {
       setSeenCards([...seenCards, nextCard.md5]);
-      if (direction === 'right') {
+
+      // Record the swipe
+      await fetch('/api/swipe/record', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cardId: nextCard.md5, direction }),
+      });
+
+      if (direction === 'left') {
+        // Update progress to "swiped_left"
+        // TODO: Implement the API call to update the progress
+        console.log(`Updating progress for card ${nextCard.md5} to swiped_left`);
+      } else {
+        // Update progress to "voting_incomplete"
+        // TODO: Implement the API call to update the progress
+        console.log(`Updating progress for card ${nextCard.md5} to voting_incomplete`);
+
+        // Add card to rankings
+        // TODO: Implement the API call to add the card to the rankings
+        console.log(`Adding card ${nextCard.md5} to rankings`);
+
+        // Store current card in session storage for voting
+        sessionStorage.setItem('cardToVote', JSON.stringify(nextCard));
+
         router.push(`/vote?card=${nextCard.md5}`);
       }
     }
@@ -60,6 +106,13 @@ const SwipePage: React.FC = () => {
   }
 
   if (!nextCard) {
+    // TODO: Fetch new batch of cards from "available cards" group
+    // If new cards available:
+    //   Set first card as active
+    //   remove the active card from the "available cards" group
+    //   Mark it as "in_progress"
+    // If no new cards:
+    //   Navigate to rankings page
     return <div>No more cards to swipe.</div>;
   }
 
