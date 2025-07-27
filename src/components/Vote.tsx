@@ -59,8 +59,13 @@ const Vote: React.FC = () => {
   }, [cardToRank]);
 
   useEffect(() => {
+    console.log("cardToRank:", cardToRank);
+    console.log("rankedCards:", rankedCards);
+    console.log("lastComparison:", lastComparison);
     if (cardToRank) {
-      setComparisonCard(getComparisonCard(rankedCards, cardToRank, lastComparison || undefined));
+      const newComparisonCard = getComparisonCard(rankedCards, cardToRank, lastComparison || undefined);
+      console.log("newComparisonCard:", newComparisonCard);
+      setComparisonCard(newComparisonCard);
     }
   }, [cardToRank, rankedCards, lastComparison]);
 
