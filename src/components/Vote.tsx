@@ -54,17 +54,18 @@ const Vote: React.FC = () => {
   }, [router]);
 
   useEffect(() => {
-    if (unrankedCard) {
-      if (rankedCards.length === 0) {
+    const rankFirstCard = async () => {
+      if (unrankedCard && rankedCards.length === 0) {
         // This is the first card to be ranked
-        updateRanking(unrankedCard, 1);
-        router.push('/swipe');
-      } else {
+        await updateRanking(unrankedCard, 1);
+        setUnrankedCard(null); // This will trigger a re-render and a redirect in the fetchInitialData useEffect
+      } else if (unrankedCard && rankedCards.length > 0) {
         // Start with the most recently ranked card
         setComparisonCard(rankedCards[rankedCards.length - 1]);
       }
-    }
-  }, [unrankedCard, rankedCards, router]);
+    };
+    rankFirstCard();
+  }, [unrankedCard, rankedCards]);
 
   const handleVote = async (winner: 'left' | 'right') => {
     if (unrankedCard && comparisonCard) {
@@ -113,6 +114,7 @@ const Vote: React.FC = () => {
   };
 
   const updateRanking = async (card: ICard, newRanking: number) => {
+    // Update the ranked card
     await fetch(`/api/cards?md5=${card.md5}`, {
       method: 'PUT',
       headers: {
@@ -120,6 +122,18 @@ const Vote: React.FC = () => {
       },
       body: JSON.stringify({ ranking: newRanking }),
     });
+
+    // Re-rank the other cards
+    const otherCards = rankedCards.filter((c) => c.ranking && c.ranking >= newRanking);
+    for (const otherCard of otherCards) {
+      await fetch(`/api/cards?md5=${otherCard.md5}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ranking: (otherCard.ranking || 0) + 1 }),
+      });
+    }
   };
 
   if (loading) {
