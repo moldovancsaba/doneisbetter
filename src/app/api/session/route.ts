@@ -3,7 +3,7 @@ import { UserResult } from "@/models/UserResult";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from 'uuid';
 
-export async function POST(request: Request) {
+export async function POST() {
   await connectDB();
 
   const session_id = uuidv4();
