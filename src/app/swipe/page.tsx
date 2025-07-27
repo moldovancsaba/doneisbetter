@@ -31,7 +31,7 @@ const SwipePage: React.FC = () => {
         }
 
         const cardsData = await cardsRes.json();
-        const progressData = await progressRes.json();
+        const progressData = (await progressRes.json()) || { seenCards: [] };
 
         // TODO: This is a placeholder. Implement the actual logic.
         const availableCards = cardsData.filter(
