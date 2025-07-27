@@ -21,6 +21,8 @@ const Vote: React.FC = () => {
     result: "win" | "loss";
   } | null>(null);
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const cardJson = sessionStorage.getItem('cardToVote');
     if (cardJson) {
@@ -29,26 +31,32 @@ const Vote: React.FC = () => {
       // Handle the case where the card is not in session storage
       setError("Card to vote not found in session storage.");
     }
-
-    const fetchRankings = async () => {
-      try {
-        const res = await fetch('/api/rankings');
-        if (!res.ok) {
-          throw new Error('Failed to fetch rankings');
-        }
-        const data = await res.json();
-        setRankedCards(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred');
-        }
-      }
-    };
-
-    fetchRankings();
   }, []);
+
+  useEffect(() => {
+    if (cardToRank) {
+      const fetchRankings = async () => {
+        try {
+          const res = await fetch('/api/rankings');
+          if (!res.ok) {
+            throw new Error('Failed to fetch rankings');
+          }
+          const data = await res.json();
+          setRankedCards(data);
+        } catch (err) {
+          if (err instanceof Error) {
+            setError(err.message);
+          } else {
+            setError('An unknown error occurred');
+          }
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchRankings();
+    }
+  }, [cardToRank]);
 
   useEffect(() => {
     if (cardToRank) {
@@ -91,12 +99,12 @@ const Vote: React.FC = () => {
     }
   };
 
-  if (error) {
-    return <div>Error: {error}</div>;
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
-  if (!cardToRank) {
-    return <div>Loading...</div>;
+  if (error) {
+    return <div>Error: {error}</div>;
   }
 
   if (!comparisonCard) {
