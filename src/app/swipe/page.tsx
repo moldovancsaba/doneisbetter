@@ -1,102 +1,84 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Card from '@/components/Card';
-import CardContainer from '@/components/CardContainer';
+import { useSwipeable } from 'react-swipeable';
+import { Card as CardComponent } from '@/components/Card';
 import { ICard } from '@/interfaces/Card';
 
-const SwipePage: React.FC = () => {
-  const router = useRouter();
-  const [deck, setDeck] = useState<ICard[]>([]);
-  const [currentCard, setCurrentCard] = useState<ICard | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+export default function SwipePage() {
+  const [session, setSession] = useState(null);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    const startSession = async () => {
-      try {
-        const sessionRes = await fetch('/api/session', { method: 'POST' });
-        if (!sessionRes.ok) {
-          throw new Error('Failed to start session');
-        }
-        const { session_id } = await sessionRes.json();
-        setSessionId(session_id);
-
-        const cardsRes = await fetch('/api/cards');
-        if (!cardsRes.ok) {
-          throw new Error('Failed to fetch cards');
-        }
-        const cardsData = await cardsRes.json();
-        setDeck(cardsData);
-        setCurrentCard(cardsData[0]);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    startSession();
+    const sessionData = localStorage.getItem('session');
+    if (sessionData) {
+      setSession(JSON.parse(sessionData));
+    }
+    setLoading(false);
   }, []);
 
-  const handleSwipe = async (action: 'left' | 'right') => {
-    if (currentCard && sessionId) {
-      await fetch('/api/swipe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          card_id: currentCard.md5,
-          action,
-        }),
-      });
+  const handleSwipe = async (direction: 'left' | 'right') => {
+    if (!session) return;
 
-      const newDeck = deck.slice(1);
-      setDeck(newDeck);
+    const card = session.deck[currentCardIndex];
+    const response = await fetch('/api/v1/swipe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionData: session,
+        swipeData: {
+          sessionId: session.sessionId,
+          cardId: card.uuid,
+          direction,
+        }
+      }),
+    });
 
-      if (newDeck.length === 0) {
-        router.push(`/rankings?session_id=${sessionId}`);
-        return;
-      }
+    const data = await response.json();
 
-      setCurrentCard(newDeck[0]);
-
-      if (action === 'right') {
-        sessionStorage.setItem('rightSwipedCard', JSON.stringify(currentCard));
-        router.push(`/vote?session_id=${sessionId}`);
-      }
+    if (data.requiresVoting) {
+        localStorage.setItem('votingContext', JSON.stringify(data.votingContext));
+        router.push('/vote');
+    } else {
+        if (currentCardIndex < session.deck.length - 1) {
+            setCurrentCardIndex(currentCardIndex + 1);
+        } else {
+            await fetch('/api/v1/session/complete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId: session.sessionId }),
+            });
+            router.push('/rankings');
+        }
     }
   };
 
+  const handlers = useSwipeable({
+    onSwipedLeft: () => handleSwipe('left'),
+    onSwipedRight: () => handleSwipe('right'),
+    trackMouse: true,
+  });
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        No active session. <a href="/" className="ml-2 text-blue-500">Start a new one</a>.
+      </div>
+    );
   }
 
-  if (!currentCard) {
-    return <div>No more cards to swipe.</div>;
-  }
+  const card = session.deck[currentCardIndex];
 
   return (
-    <CardContainer cardCount={1}>
-      <Card {...currentCard} />
-      <div>
-        <button onClick={() => handleSwipe('left')}>Swipe Left</button>
-        <button onClick={() => handleSwipe('right')}>Swipe Right</button>
-      </div>
-    </CardContainer>
+    <div className="flex items-center justify-center min-h-screen" {...handlers}>
+      <CardComponent card={card} />
+    </div>
   );
-};
-
-export default SwipePage;
+}

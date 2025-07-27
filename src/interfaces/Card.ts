@@ -1,9 +1,12 @@
 export interface ICard {
-  _id: string;
-  md5: string;
-  slug: string;
+  uuid: string;
   type: 'text' | 'media';
-  content: string;
-  created_at: Date;
-  created_by: string;
+  content: {
+    text?: string;
+    mediaUrl?: string;
+  };
+  title?: string;
+  tags?: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
