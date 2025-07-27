@@ -16,14 +16,17 @@ const Vote: React.FC = () => {
 
   useEffect(() => {
     const fetchInitialData = async () => {
+      console.log("Fetching initial data for Vote component...");
       try {
         const unrankedRes = await fetch('/api/cards?unranked=true');
         if (!unrankedRes.ok) {
           throw new Error('Failed to fetch unranked cards');
         }
         const unrankedCards = await unrankedRes.json();
+        console.log("Unranked cards:", unrankedCards);
 
         if (unrankedCards.length === 0) {
+          console.log("No unranked cards found, redirecting to swipe.");
           router.push('/swipe');
           return;
         }
@@ -34,6 +37,7 @@ const Vote: React.FC = () => {
           throw new Error('Failed to fetch ranked cards');
         }
         const rankedCardsData = await rankedRes.json();
+        console.log("Ranked cards:", rankedCardsData);
         setRankedCards(rankedCardsData);
       } catch (err) {
         if (err instanceof Error) {
