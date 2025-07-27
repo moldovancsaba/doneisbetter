@@ -5,39 +5,38 @@ import { useRouter } from 'next/navigation';
 import Card from '@/components/Card';
 import CardContainer from '@/components/CardContainer';
 import { ICard } from '@/interfaces/Card';
-import { getNextCardToSwipe } from '@/lib/logic';
 
 const SwipePage: React.FC = () => {
   const router = useRouter();
-  const [cards, setCards] = useState<ICard[]>([]);
+  const [unswipedCards, setUnswipedCards] = useState<ICard[]>([]);
+  const [nextCard, setNextCard] = useState<ICard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [seenCards, setSeenCards] = useState<string[]>([]);
-  const [nextCard, setNextCard] = useState<ICard | null>(null);
 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const [cardsRes, progressRes] = await Promise.all([
-          fetch('/api/cards'),
-          fetch('/api/progress'),
-        ]);
-
-        if (!cardsRes.ok) {
-          throw new Error('Failed to fetch cards');
+        const unrankedRes = await fetch('/api/cards?unranked=true');
+        if (!unrankedRes.ok) {
+          throw new Error('Failed to fetch unranked cards');
         }
-        if (!progressRes.ok) {
-          throw new Error('Failed to fetch progress');
+        const unrankedCards = await unrankedRes.json();
+
+        if (unrankedCards.length > 0) {
+          router.push('/vote');
+          return;
         }
 
-        const cardsData = await cardsRes.json();
-        const progressData = (await progressRes.json()) || { seenCards: [] };
+        const unswipedRes = await fetch('/api/cards?unswiped=true');
+        if (!unswipedRes.ok) {
+          throw new Error('Failed to fetch unswiped cards');
+        }
+        const unswipedCardsData = await unswipedRes.json();
+        setUnswipedCards(unswipedCardsData);
 
-        // TODO: This is a placeholder. Implement the actual logic.
-        const availableCards = cardsData.filter(
-          (card: ICard) => !progressData.seenCards.includes(card.md5)
-        );
-        setCards(availableCards);
+        if (unswipedCardsData.length === 0) {
+          router.push('/rankings');
+        }
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -50,24 +49,17 @@ const SwipePage: React.FC = () => {
     };
 
     fetchInitialData();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
-    const card = getNextCardToSwipe(cards, seenCards);
-    setNextCard(card);
-
-    if (card) {
-      // Mark the card as "in_progress"
-      // TODO: Implement the API call to update the progress
-      console.log(`Marking card ${card.md5} as in_progress`);
+    if (unswipedCards.length > 0) {
+      const randomIndex = Math.floor(Math.random() * unswipedCards.length);
+      setNextCard(unswipedCards[randomIndex]);
     }
-  }, [cards, seenCards]);
+  }, [unswipedCards]);
 
   const handleSwipe = async (direction: 'left' | 'right') => {
     if (nextCard) {
-      setSeenCards([...seenCards, nextCard.md5]);
-
-      // Record the swipe
       await fetch('/api/swipe/record', {
         method: 'POST',
         headers: {
@@ -76,23 +68,11 @@ const SwipePage: React.FC = () => {
         body: JSON.stringify({ cardId: nextCard.md5, direction }),
       });
 
-      if (direction === 'left') {
-        // Update progress to "swiped_left"
-        // TODO: Implement the API call to update the progress
-        console.log(`Updating progress for card ${nextCard.md5} to swiped_left`);
+      if (direction === 'right') {
+        router.push('/vote');
       } else {
-        // Update progress to "voting_incomplete"
-        // TODO: Implement the API call to update the progress
-        console.log(`Updating progress for card ${nextCard.md5} to voting_incomplete`);
-
-        // Add card to rankings
-        // TODO: Implement the API call to add the card to the rankings
-        console.log(`Adding card ${nextCard.md5} to rankings`);
-
-        // Store current card in session storage for voting
-        sessionStorage.setItem('cardToVote', JSON.stringify(nextCard));
-
-        router.push(`/vote?card=${nextCard.md5}`);
+        // Remove the swiped card from the list of unswiped cards
+        setUnswipedCards(unswipedCards.filter((card) => card.md5 !== nextCard.md5));
       }
     }
   };
@@ -106,13 +86,6 @@ const SwipePage: React.FC = () => {
   }
 
   if (!nextCard) {
-    // TODO: Fetch new batch of cards from "available cards" group
-    // If new cards available:
-    //   Set first card as active
-    //   remove the active card from the "available cards" group
-    //   Mark it as "in_progress"
-    // If no new cards:
-    //   Navigate to rankings page
     return <div>No more cards to swipe.</div>;
   }
 

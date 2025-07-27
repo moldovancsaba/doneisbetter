@@ -20,6 +20,12 @@ const cardSchema = new Schema<ICard>(
       originalUrl: { type: String },
       language: { type: String },
     },
+    swipe: { type: Number, default: null },
+    ranking: { type: Number, default: null },
+    swipeTimestamps: { type: [Date], default: [] },
+    likes: { type: Number, default: 0 },
+    dislikes: { type: Number, default: 0 },
+    lastUpdated: { type: Date, default: Date.now },
   },
   {
     timestamps: true,

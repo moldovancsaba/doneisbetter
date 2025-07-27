@@ -1,107 +1,121 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Card from '@/components/Card';
 import CardContainer from '@/components/CardContainer';
 import { ICard } from '@/interfaces/Card';
-import { getComparisonCard, updateRankings } from '@/lib/logic';
 
 const Vote: React.FC = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  searchParams.get('card');
-
-  const [cardToRank, setCardToRank] = useState<ICard | null>(null);
-  const [comparisonCard, setComparisonCard] = useState<ICard | null>(null);
+  const [unrankedCard, setUnrankedCard] = useState<ICard | null>(null);
   const [rankedCards, setRankedCards] = useState<ICard[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [lastComparison, setLastComparison] = useState<{
-    opponent: ICard;
-    result: "win" | "loss";
-  } | null>(null);
-
+  const [comparisonCard, setComparisonCard] = useState<ICard | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const cardJson = sessionStorage.getItem('cardToVote');
-    if (cardJson) {
-      setCardToRank(JSON.parse(cardJson));
-    } else {
-      // Handle the case where the card is not in session storage
-      setError("Card to vote not found in session storage.");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (cardToRank) {
-      const fetchRankings = async () => {
-        try {
-          const res = await fetch('/api/rankings');
-          if (!res.ok) {
-            throw new Error('Failed to fetch rankings');
-          }
-          const data = await res.json();
-          setRankedCards(data);
-        } catch (err) {
-          if (err instanceof Error) {
-            setError(err.message);
-          } else {
-            setError('An unknown error occurred');
-          }
-        } finally {
-          setLoading(false);
+    const fetchInitialData = async () => {
+      try {
+        const unrankedRes = await fetch('/api/cards?unranked=true');
+        if (!unrankedRes.ok) {
+          throw new Error('Failed to fetch unranked cards');
         }
-      };
+        const unrankedCards = await unrankedRes.json();
 
-      fetchRankings();
-    }
-  }, [cardToRank]);
+        if (unrankedCards.length === 0) {
+          router.push('/swipe');
+          return;
+        }
+        setUnrankedCard(unrankedCards[0]);
+
+        const rankedRes = await fetch('/api/rankings');
+        if (!rankedRes.ok) {
+          throw new Error('Failed to fetch ranked cards');
+        }
+        const rankedCardsData = await rankedRes.json();
+        setRankedCards(rankedCardsData);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialData();
+  }, [router]);
 
   useEffect(() => {
-    console.log("cardToRank:", cardToRank);
-    console.log("rankedCards:", rankedCards);
-    console.log("lastComparison:", lastComparison);
-    if (cardToRank) {
-      const newComparisonCard = getComparisonCard(rankedCards, cardToRank, lastComparison || undefined);
-      console.log("newComparisonCard:", newComparisonCard);
-      setComparisonCard(newComparisonCard);
+    if (unrankedCard) {
+      if (rankedCards.length === 0) {
+        // This is the first card to be ranked
+        updateRanking(unrankedCard, 1);
+        router.push('/swipe');
+      } else {
+        // Start with the most recently ranked card
+        setComparisonCard(rankedCards[rankedCards.length - 1]);
+      }
     }
-  }, [cardToRank, rankedCards, lastComparison]);
+  }, [unrankedCard, rankedCards, router]);
 
-  const handleVote = async (result: 'win' | 'loss') => {
-    if (cardToRank && comparisonCard) {
-      const newRankedCards = updateRankings(
-        rankedCards,
-        cardToRank,
-        comparisonCard,
-        result
-      );
-      setRankedCards(newRankedCards);
-      setLastComparison({ opponent: comparisonCard, result });
-
-      // Record vote in rankings
-      await fetch('/api/rankings', {
+  const handleVote = async (winner: 'left' | 'right') => {
+    if (unrankedCard && comparisonCard) {
+      // Record the vote
+      await fetch('/api/vote/record', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ newRankedCards }),
+        body: JSON.stringify({
+          cardA: unrankedCard.md5,
+          cardB: comparisonCard.md5,
+          winner: winner === 'left' ? unrankedCard.md5 : comparisonCard.md5,
+        }),
       });
 
-      const nextComparisonCard = getComparisonCard(newRankedCards, cardToRank, {
-        opponent: comparisonCard,
-        result,
-      });
+      // Adaptive pairwise comparison logic
+      const comparisonIndex = rankedCards.findIndex(
+        (card) => card.md5 === comparisonCard.md5
+      );
 
-      if (!nextComparisonCard) {
-        // Voting complete
-        // Update progress state to "voting_complete"
-        // TODO: Implement the API call to update the progress
-        console.log(`Updating progress for card ${cardToRank.md5} to voting_complete`);
-        router.push('/swipe');
+      if (winner === 'left') {
+        const higherRankedCards = rankedCards.slice(0, comparisonIndex);
+        if (higherRankedCards.length === 0) {
+          // Unranked card is the new top-ranked card
+          const newRanking = 1;
+          await updateRanking(unrankedCard, newRanking);
+          router.push('/swipe');
+        } else {
+          const randomIndex = Math.floor(Math.random() * higherRankedCards.length);
+          setComparisonCard(higherRankedCards[randomIndex]);
+        }
+      } else {
+        const lowerRankedCards = rankedCards.slice(comparisonIndex + 1);
+        if (lowerRankedCards.length === 0) {
+          // Unranked card is the new bottom-ranked card
+          const newRanking = rankedCards.length + 1;
+          await updateRanking(unrankedCard, newRanking);
+          router.push('/swipe');
+        } else {
+          const randomIndex = Math.floor(Math.random() * lowerRankedCards.length);
+          setComparisonCard(lowerRankedCards[randomIndex]);
+        }
       }
     }
+  };
+
+  const updateRanking = async (card: ICard, newRanking: number) => {
+    await fetch(`/api/cards?md5=${card.md5}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ranking: newRanking }),
+    });
   };
 
   if (loading) {
@@ -112,34 +126,28 @@ const Vote: React.FC = () => {
     return <div>Error: {error}</div>;
   }
 
-  if (!comparisonCard) {
-    // No more valid comparisons, go back to swipe
-    router.push('/swipe');
-    return null;
+  if (!unrankedCard || !comparisonCard) {
+    return <div>Loading comparison...</div>;
   }
 
   return (
     <CardContainer cardCount={2}>
-      {cardToRank && (
-        <div onClick={() => handleVote('win')}>
-          <Card
-            key={cardToRank._id}
-            type={cardToRank.type}
-            content={cardToRank.content}
-            metadata={cardToRank.metadata}
-          />
-        </div>
-      )}
-      {comparisonCard && (
-        <div onClick={() => handleVote('loss')}>
-          <Card
-            key={comparisonCard._id}
-            type={comparisonCard.type}
-            content={comparisonCard.content}
-            metadata={comparisonCard.metadata}
-          />
-        </div>
-      )}
+      <div onClick={() => handleVote('left')}>
+        <Card
+          key={unrankedCard._id}
+          type={unrankedCard.type}
+          content={unrankedCard.content}
+          metadata={unrankedCard.metadata}
+        />
+      </div>
+      <div onClick={() => handleVote('right')}>
+        <Card
+          key={comparisonCard._id}
+          type={comparisonCard.type}
+          content={comparisonCard.content}
+          metadata={comparisonCard.metadata}
+        />
+      </div>
     </CardContainer>
   );
 };

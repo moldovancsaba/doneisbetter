@@ -10,4 +10,10 @@ export interface ICard {
   metadata?: {
     aspectRatio?: number;
   };
+  swipe?: number | null;
+  ranking?: number | null;
+  swipeTimestamps?: Date[];
+  likes?: number;
+  dislikes?: number;
+  lastUpdated?: Date;
 }
