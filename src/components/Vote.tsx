@@ -10,7 +10,7 @@ import { getComparisonCard, updateRankings } from '@/lib/logic';
 const Vote: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const cardMd5 = searchParams.get('card');
+  searchParams.get('card');
 
   const [cardToRank, setCardToRank] = useState<ICard | null>(null);
   const [comparisonCard, setComparisonCard] = useState<ICard | null>(null);
@@ -115,22 +115,26 @@ const Vote: React.FC = () => {
 
   return (
     <CardContainer cardCount={2}>
-      <div onClick={() => handleVote('win')}>
-        <Card
-          key={cardToRank._id}
-          type={cardToRank.type}
-          content={cardToRank.content}
-          metadata={cardToRank.metadata}
-        />
-      </div>
-      <div onClick={() => handleVote('loss')}>
-        <Card
-          key={comparisonCard._id}
-          type={comparisonCard.type}
-          content={comparisonCard.content}
-          metadata={comparisonCard.metadata}
-        />
-      </div>
+      {cardToRank && (
+        <div onClick={() => handleVote('win')}>
+          <Card
+            key={cardToRank._id}
+            type={cardToRank.type}
+            content={cardToRank.content}
+            metadata={cardToRank.metadata}
+          />
+        </div>
+      )}
+      {comparisonCard && (
+        <div onClick={() => handleVote('loss')}>
+          <Card
+            key={comparisonCard._id}
+            type={comparisonCard.type}
+            content={comparisonCard.content}
+            metadata={comparisonCard.metadata}
+          />
+        </div>
+      )}
     </CardContainer>
   );
 };
