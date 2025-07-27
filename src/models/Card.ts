@@ -5,30 +5,12 @@ const cardSchema = new Schema<ICard>(
   {
     md5: { type: String, required: true, unique: true },
     slug: { type: String, required: true, unique: true },
-    type: { type: String, enum: ['image', 'text'], required: true },
+    type: { type: String, enum: ['text', 'media'], required: true },
     content: { type: String, required: true },
-    translations: [
-      {
-        language: { type: String, required: true },
-        content: { type: String, required: true },
-      },
-    ],
-    parentId: { type: String },
-    projectId: { type: String },
-    metadata: {
-      aspectRatio: { type: Number },
-      originalUrl: { type: String },
-      language: { type: String },
-    },
-    swipe: { type: Number, default: null },
-    ranking: { type: Number, default: null },
-    swipeTimestamps: { type: [Date], default: [] },
-    likes: { type: Number, default: 0 },
-    dislikes: { type: Number, default: 0 },
-    lastUpdated: { type: Date, default: Date.now },
+    created_by: { type: String, required: true },
   },
   {
-    timestamps: true,
+    timestamps: { createdAt: 'created_at' },
   }
 );
 

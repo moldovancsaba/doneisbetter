@@ -8,35 +8,29 @@ import { ICard } from '@/interfaces/Card';
 
 const SwipePage: React.FC = () => {
   const router = useRouter();
-  const [unswipedCards, setUnswipedCards] = useState<ICard[]>([]);
-  const [nextCard, setNextCard] = useState<ICard | null>(null);
+  const [deck, setDeck] = useState<ICard[]>([]);
+  const [currentCard, setCurrentCard] = useState<ICard | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const startSession = async () => {
       try {
-        const unrankedRes = await fetch('/api/cards?unranked=true');
-        if (!unrankedRes.ok) {
-          throw new Error('Failed to fetch unranked cards');
+        const sessionRes = await fetch('/api/session', { method: 'POST' });
+        if (!sessionRes.ok) {
+          throw new Error('Failed to start session');
         }
-        const unrankedCards = await unrankedRes.json();
+        const { session_id } = await sessionRes.json();
+        setSessionId(session_id);
 
-        if (unrankedCards.length > 0) {
-          router.push('/vote');
-          return;
+        const cardsRes = await fetch('/api/cards');
+        if (!cardsRes.ok) {
+          throw new Error('Failed to fetch cards');
         }
-
-        const unswipedRes = await fetch('/api/cards?unswiped=true');
-        if (!unswipedRes.ok) {
-          throw new Error('Failed to fetch unswiped cards');
-        }
-        const unswipedCardsData = await unswipedRes.json();
-        setUnswipedCards(unswipedCardsData);
-
-        if (unswipedCardsData.length === 0) {
-          router.push('/rankings');
-        }
+        const cardsData = await cardsRes.json();
+        setDeck(cardsData);
+        setCurrentCard(cardsData[0]);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -48,31 +42,36 @@ const SwipePage: React.FC = () => {
       }
     };
 
-    fetchInitialData();
-  }, [router]);
+    startSession();
+  }, []);
 
-  useEffect(() => {
-    if (unswipedCards.length > 0) {
-      const randomIndex = Math.floor(Math.random() * unswipedCards.length);
-      setNextCard(unswipedCards[randomIndex]);
-    }
-  }, [unswipedCards]);
-
-  const handleSwipe = async (direction: 'left' | 'right') => {
-    if (nextCard) {
-      await fetch('/api/swipe/record', {
+  const handleSwipe = async (action: 'left' | 'right') => {
+    if (currentCard && sessionId) {
+      await fetch('/api/swipe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ cardId: nextCard.md5, direction }),
+        body: JSON.stringify({
+          session_id: sessionId,
+          card_id: currentCard.md5,
+          action,
+        }),
       });
 
-      if (direction === 'right') {
-        router.push('/vote');
-      } else {
-        // Remove the swiped card from the list of unswiped cards
-        setUnswipedCards(unswipedCards.filter((card) => card.md5 !== nextCard.md5));
+      const newDeck = deck.slice(1);
+      setDeck(newDeck);
+
+      if (newDeck.length === 0) {
+        router.push(`/rankings?session_id=${sessionId}`);
+        return;
+      }
+
+      setCurrentCard(newDeck[0]);
+
+      if (action === 'right') {
+        sessionStorage.setItem('rightSwipedCard', JSON.stringify(currentCard));
+        router.push(`/vote?session_id=${sessionId}`);
       }
     }
   };
@@ -85,18 +84,13 @@ const SwipePage: React.FC = () => {
     return <div>Error: {error}</div>;
   }
 
-  if (!nextCard) {
+  if (!currentCard) {
     return <div>No more cards to swipe.</div>;
   }
 
   return (
     <CardContainer cardCount={1}>
-      <Card
-        key={nextCard._id}
-        type={nextCard.type}
-        content={nextCard.content}
-        metadata={nextCard.metadata}
-      />
+      <Card {...currentCard} />
       <div>
         <button onClick={() => handleSwipe('left')}>Swipe Left</button>
         <button onClick={() => handleSwipe('right')}>Swipe Right</button>

@@ -1,17 +1,24 @@
 import { connectDB } from "@/lib/db";
-import { Card } from "@/models/Card";
+import { UserResult } from "@/models/UserResult";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: Request) {
   await connectDB();
-  const rankedCards = await Card.find({ ranking: { $ne: null } }).sort({ ranking: 1 });
-  return NextResponse.json(rankedCards);
-}
+  const { searchParams } = new URL(request.url);
+  const session_id = searchParams.get("session_id");
 
-export async function POST(request: Request) {
-  await connectDB();
-  const { newRankedCards } = await request.json();
-  // TODO: Implement logic to save the new rankings
-  console.log("Saving new rankings:", newRankedCards);
-  return NextResponse.json({ status: "ok" });
+  if (!session_id) {
+    return NextResponse.json(
+      { error: "Missing required field: session_id" },
+      { status: 400 }
+    );
+  }
+
+  const userResult = await UserResult.findOne({ session_id });
+
+  if (!userResult) {
+    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(userResult.final_ranking);
 }

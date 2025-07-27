@@ -1,23 +1,40 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import Rankings from '@/components/Rankings';
+import { useSearchParams } from 'next/navigation';
 import { ICard } from '@/interfaces/Card';
 
 const RankingsPage: React.FC = () => {
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get('session_id');
   const [rankedCards, setRankedCards] = useState<ICard[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // In a real application, you would fetch the ranked cards from the database
-    // For now, we will use a hardcoded list of ranked cards
-    const hardcodedRankedCards: ICard[] = [
-      // Add some hardcoded ranked cards here
-    ];
-    setRankedCards(hardcodedRankedCards);
-    setLoading(false);
-  }, []);
+    if (sessionId) {
+      const fetchRankedCards = async () => {
+        try {
+          const res = await fetch(`/api/rankings?session_id=${sessionId}`);
+          if (!res.ok) {
+            throw new Error('Failed to fetch ranked cards');
+          }
+          const data = await res.json();
+          setRankedCards(data);
+        } catch (err) {
+          if (err instanceof Error) {
+            setError(err.message);
+          } else {
+            setError('An unknown error occurred');
+          }
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchRankedCards();
+    }
+  }, [sessionId]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -28,9 +45,17 @@ const RankingsPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Your Rankings</h1>
-      <Rankings rankedCards={rankedCards} />
+    <div>
+      <h1>Your Rankings</h1>
+      {rankedCards.length === 0 ? (
+        <p>You have no ranked cards yet.</p>
+      ) : (
+        <ol>
+          {rankedCards.map((card) => (
+            <li key={card.md5}>{card.content}</li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 };

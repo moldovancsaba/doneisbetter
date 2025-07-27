@@ -7,8 +7,7 @@ import crypto from "crypto";
 export async function GET(req: NextRequest) {
   await connectDB();
   const md5 = req.nextUrl.searchParams.get("md5");
-  const unswiped = req.nextUrl.searchParams.get("unswiped");
-  const unranked = req.nextUrl.searchParams.get("unranked");
+  console.log("Fetching card with md5:", md5);
 
   if (md5) {
     const card = await Card.findOne({ md5 });
@@ -16,20 +15,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Card not found" }, { status: 404 });
     }
     return NextResponse.json(card);
-  }
-
-  if (unswiped) {
-    const cards = await Card.find({ swipe: null }).sort({ createdAt: -1 });
+  } else {
+    const cards = await Card.find().sort({ createdAt: -1 });
     return NextResponse.json(cards);
   }
-
-  if (unranked) {
-    const cards = await Card.find({ swipe: 1, ranking: null }).sort({ createdAt: -1 });
-    return NextResponse.json(cards);
-  }
-
-  const cards = await Card.find().sort({ createdAt: -1 });
-  return NextResponse.json(cards);
 }
 
 // POST /api/cards → create a new card

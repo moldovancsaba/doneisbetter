@@ -1,11 +1,26 @@
+import { connectDB } from "@/lib/db";
+import { UserResult } from "@/models/UserResult";
 import { NextResponse } from "next/server";
-
-export async function GET() {
-  // TODO: Implement logic to get session data
-  return NextResponse.json({ status: "ok" });
-}
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request: Request) {
-  // TODO: Implement logic to create a new session
-  return NextResponse.json({ status: "ok" });
+  await connectDB();
+
+  const session_id = uuidv4();
+  const user_md5 = "hardcoded_user_md5"; // TODO: Replace with actual user md5 from session
+
+  const newSession = new UserResult({
+    user_md5,
+    session_id,
+  });
+
+  try {
+    await newSession.save();
+    return NextResponse.json({ session_id }, { status: 201 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+  }
 }
