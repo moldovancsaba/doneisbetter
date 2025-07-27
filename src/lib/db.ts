@@ -6,8 +6,13 @@ if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
+import { Mongoose } from 'mongoose';
+
 declare global {
-  var mongoose: any;
+  var mongoose: {
+    promise: Promise<Mongoose> | null;
+    conn: Mongoose | null;
+  };
 }
 
 let cached = global.mongoose;
