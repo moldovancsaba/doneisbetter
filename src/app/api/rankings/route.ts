@@ -22,3 +22,32 @@ export async function GET(request: Request) {
 
   return NextResponse.json(userResult.final_ranking);
 }
+
+export async function PUT(request: Request) {
+  await connectDB();
+  const { session_id, final_ranking } = await request.json();
+
+  if (!session_id || !final_ranking) {
+    return NextResponse.json(
+      { error: "Missing required fields: session_id, final_ranking" },
+      { status: 400 }
+    );
+  }
+
+  const update = {
+    $set: {
+      final_ranking,
+      completed_at: new Date(),
+    },
+  };
+
+  const updatedResult = await UserResult.findOneAndUpdate({ session_id }, update, {
+    new: true,
+  });
+
+  if (!updatedResult) {
+    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(updatedResult);
+}

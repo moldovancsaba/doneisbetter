@@ -82,6 +82,8 @@ const VotePage: React.FC = () => {
         const higherRankedCards = rankedCards.slice(0, comparisonIndex);
         if (higherRankedCards.length === 0) {
           // Right-swiped card is the new top-ranked card
+          const newFinalRanking = [rightSwipedCard.md5, ...rankedCards.map(c => c.md5)];
+          await updateFinalRanking(newFinalRanking);
           router.push(`/swipe?session_id=${sessionId}`);
         } else {
           const randomIndex = Math.floor(Math.random() * higherRankedCards.length);
@@ -91,6 +93,8 @@ const VotePage: React.FC = () => {
         const lowerRankedCards = rankedCards.slice(comparisonIndex + 1);
         if (lowerRankedCards.length === 0) {
           // Right-swiped card is the new bottom-ranked card
+          const newFinalRanking = [...rankedCards.map(c => c.md5), rightSwipedCard.md5];
+          await updateFinalRanking(newFinalRanking);
           router.push(`/swipe?session_id=${sessionId}`);
         } else {
           const randomIndex = Math.floor(Math.random() * lowerRankedCards.length);
@@ -112,6 +116,21 @@ const VotePage: React.FC = () => {
     // This should be handled by the logic that redirects to swipe if there are no ranked cards
     return <div>Loading comparison...</div>;
   }
+
+  const updateFinalRanking = async (final_ranking: string[]) => {
+    if (sessionId) {
+      await fetch('/api/rankings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          final_ranking,
+        }),
+      });
+    }
+  };
 
   return (
     <CardContainer cardCount={2}>
