@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { Session } from '@/models/Session';
 import { Card } from '@/models/Card';
+import { ISession } from '@/interfaces/Session';
+import { ICard } from '@/interfaces/Card';
 
 export async function GET(
   req: NextRequest,
@@ -12,18 +14,18 @@ export async function GET(
 
     const { sessionId } = await params;
 
-    const session = await Session.findOne({ sessionId }).lean();
+    const session = await Session.findOne({ sessionId }).lean() as ISession | null;
 
     if (!session) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
     const cardIds = session.personalRanking;
-    const cards = await Card.find({ uuid: { $in: cardIds } }).lean();
+    const cards = await Card.find({ uuid: { $in: cardIds } }).lean() as unknown as ICard[];
     const cardsById = cards.reduce((acc, card) => {
       acc[card.uuid] = card;
       return acc;
-    }, {});
+    }, {} as { [key: string]: ICard });
 
     const personalRanking = session.personalRanking.map((cardId, index) => ({
       rank: index + 1,

@@ -10,7 +10,7 @@ async function calculateGlobalRankings() {
         .limit(100)
         .lean();
 
-    const rankingPoints = {};
+    const rankingPoints: { [key: string]: { totalScore: number, appearanceCount: number, ranks: number[] } } = {};
 
     for (const session of recentSessions) {
         for (let i = 0; i < session.ranking.length; i++) {

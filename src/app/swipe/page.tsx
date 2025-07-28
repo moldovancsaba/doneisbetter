@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useSwipeable } from 'react-swipeable';
 import { Card as CardComponent } from '@/components/Card';
 import Link from 'next/link';
+import { ISession } from '@/interfaces/Session';
 
 export default function SwipePage() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<ISession | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const router = useRouter();

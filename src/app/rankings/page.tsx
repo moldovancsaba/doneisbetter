@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 interface IRanking {
   cardId: string;
-  score: number;
+  totalScore: number;
   card: ICard;
 }
 

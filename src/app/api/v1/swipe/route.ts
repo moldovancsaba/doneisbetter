@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     let votingContext = null;
 
     if (direction === 'right') {
-      const rightSwipes = session.swipes.filter(swipe => swipe.direction === 'right');
+      const rightSwipes = session.swipes.filter((swipe: {direction: string}) => swipe.direction === 'right');
       if (rightSwipes.length >= 2) {
         requiresVoting = true;
         const lastRightSwipedCard = rightSwipes[rightSwipes.length - 2].cardId;

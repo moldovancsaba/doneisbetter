@@ -32,10 +32,11 @@ export async function POST(req: Request) {
 
     session.votes.push({ cardA, cardB, winner, timestamp: new Date() });
 
-    const rightSwipedCards = session.swipes.filter(s => s.direction === 'right').map(s => s.cardId);
+    const rightSwipedCards = session.swipes.filter((s: {direction: string}) => s.direction === 'right').map((s: {cardId: string}) => s.cardId);
     const newCard = rightSwipedCards[rightSwipedCards.length - 1];
 
     if (session.personalRanking.length === 0) {
+        const rightSwipes = session.swipes.filter((s: {direction: string}) => s.direction === 'right');
         // First right swipe
         if(rightSwipes.length === 1) {
             session.personalRanking.push(newCard);
@@ -48,12 +49,12 @@ export async function POST(req: Request) {
             }
         }
     } else {
-        const votesForNewCard = session.votes.filter(v => v.cardA === newCard || v.cardB === newCard);
+    const votesForNewCard = session.votes.filter((v: {cardA: string, cardB: string}) => v.cardA === newCard || v.cardB === newCard);
         let insertIndex = session.personalRanking.length;
 
         for(let i=0; i<session.personalRanking.length; i++) {
             const rankedCard = session.personalRanking[i];
-            const vote = votesForNewCard.find(v => (v.cardA === newCard && v.B === rankedCard) || (v.cardA === rankedCard && v.cardB === newCard));
+        const vote = votesForNewCard.find((v: {cardA: string, cardB: string, winner: string}) => (v.cardA === newCard && v.cardB === rankedCard) || (v.cardA === rankedCard && v.cardB === newCard));
             if(vote && vote.winner === newCard) {
                 insertIndex = i;
                 break;
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
 
     let nextComparison = null;
     const rankedCards = session.personalRanking;
-    const unrankedCards = rightSwipedCards.filter(c => !rankedCards.includes(c));
+    const unrankedCards = rightSwipedCards.filter((c: string) => !rankedCards.includes(c));
 
     if(unrankedCards.length > 0) {
         const cardToRank = unrankedCards[0];

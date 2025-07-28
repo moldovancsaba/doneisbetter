@@ -12,7 +12,7 @@ const SessionSchema = new Schema({
   createdAt: { type: Date, default: Date.now, index: true },
   lastActivity: { type: Date, default: Date.now, index: true },
   completedAt: { type: Date, default: null },
-  expiresAt: { type: Date, required: true, index: true },
+  expiresAt: { type: Date, required: true },
 
   swipes: [{
     cardId: { type: String, required: true },

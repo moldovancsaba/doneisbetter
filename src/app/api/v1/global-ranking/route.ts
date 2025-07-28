@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { GlobalRanking } from '@/models/GlobalRanking';
 import { Card } from '@/models/Card';
+import { ICard } from '@/interfaces/Card';
 
 export async function GET() {
   try {
@@ -13,11 +14,11 @@ export async function GET() {
       .lean();
 
     const cardIds = rankings.map(r => r.cardId);
-    const cards = await Card.find({ uuid: { $in: cardIds } }).lean();
-    const cardsById = cards.reduce((acc, card) => {
+    const cards = await Card.find({ uuid: { $in: cardIds } }).lean() as unknown as ICard[];
+    const cardsById: { [key: string]: ICard } = cards.reduce((acc, card) => {
       acc[card.uuid] = card;
       return acc;
-    }, {});
+    }, {} as { [key: string]: ICard });
 
     const populatedRankings = rankings.map(r => ({
       ...r,

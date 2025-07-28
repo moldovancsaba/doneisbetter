@@ -5,10 +5,16 @@ import { useRouter } from 'next/navigation';
 import { Card as CardComponent } from '@/components/Card';
 import { ICard } from '@/interfaces/Card';
 import Link from 'next/link';
+import { ISession } from '@/interfaces/Session';
+
+interface VotingContext {
+    newCard: string;
+    compareAgainst: string;
+}
 
 export default function VotePage() {
-  const [session, setSession] = useState(null);
-  const [votingContext, setVotingContext] = useState(null);
+  const [session, setSession] = useState<ISession | null>(null);
+  const [votingContext, setVotingContext] = useState<VotingContext | null>(null);
   const [cards, setCards] = useState<ICard[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -21,9 +27,11 @@ export default function VotePage() {
       const parsedVotingContext = JSON.parse(votingContextData);
       setSession(parsedSession);
       setVotingContext(parsedVotingContext);
-      const cardA = parsedSession.deck.find(c => c.uuid === parsedVotingContext.newCard);
-      const cardB = parsedSession.deck.find(c => c.uuid === parsedVotingContext.compareAgainst);
-      setCards([cardA, cardB]);
+      const cardA = parsedSession.deck.find((c: ICard) => c.uuid === parsedVotingContext.newCard);
+      const cardB = parsedSession.deck.find((c: ICard) => c.uuid === parsedVotingContext.compareAgainst);
+      if (cardA && cardB) {
+        setCards([cardA, cardB]);
+      }
     }
     setLoading(false);
   }, []);
@@ -49,9 +57,11 @@ export default function VotePage() {
 
     if (data.nextComparison) {
       localStorage.setItem('votingContext', JSON.stringify(data.nextComparison));
-      const cardA = session.deck.find(c => c.uuid === data.nextComparison.newCard);
-      const cardB = session.deck.find(c => c.uuid === data.nextComparison.compareAgainst);
-      setCards([cardA, cardB]);
+      const cardA = session.deck.find((c: ICard) => c.uuid === data.nextComparison.newCard);
+      const cardB = session.deck.find((c: ICard) => c.uuid === data.nextComparison.compareAgainst);
+      if (cardA && cardB) {
+        setCards([cardA, cardB]);
+      }
       setVotingContext(data.nextComparison);
     } else {
       localStorage.removeItem('votingContext');
