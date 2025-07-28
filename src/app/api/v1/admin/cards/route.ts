@@ -4,6 +4,18 @@ import { Card } from '@/models/Card';
 import { CreateCardSchema } from '@/lib/zod/schemas';
 import { v4 as uuidv4 } from 'uuid';
 
+export async function GET() {
+  try {
+    await connectDB();
+
+    const cards = await Card.find({}).sort({ createdAt: -1 }).lean();
+    return NextResponse.json(cards);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     await connectDB();
