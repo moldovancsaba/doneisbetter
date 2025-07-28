@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
-import { Session } from '@/models/Session';
 import { GlobalRanking } from '@/models/GlobalRanking';
 import { PersonalRankingSnapshot } from '@/models/PersonalRankingSnapshot';
 

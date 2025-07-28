@@ -1,5 +1,6 @@
 import React from 'react';
 import { ICard } from '@/interfaces/Card';
+import Image from 'next/image';
 
 export const Card: React.FC<{ card: ICard }> = ({ card }) => {
   return (
@@ -7,7 +8,7 @@ export const Card: React.FC<{ card: ICard }> = ({ card }) => {
       {card.title && <h3 className="text-lg font-bold">{card.title}</h3>}
       {card.type === 'text' && <p className="text-gray-700">{card.content.text}</p>}
       {card.type === 'media' && card.content.mediaUrl && (
-        <img src={card.content.mediaUrl} alt={card.title || ''} className="object-cover w-full h-64" />
+        <Image src={card.content.mediaUrl} alt={card.title || ''} width={256} height={256} className="object-cover w-full h-64" />
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card as CardComponent } from '@/components/Card';
 import { ICard } from '@/interfaces/Card';
+import Link from 'next/link';
 
 export default function VotePage() {
   const [session, setSession] = useState(null);
@@ -65,7 +66,7 @@ export default function VotePage() {
   if (!session || !votingContext || cards.length < 2) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        Invalid voting state. <a href="/" className="ml-2 text-blue-500">Start a new session</a>.
+        Invalid voting state. <Link href="/" className="ml-2 text-blue-500">Start a new session</Link>.
       </div>
     );
   }

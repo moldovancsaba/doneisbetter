@@ -63,7 +63,6 @@ export async function POST(req: Request) {
     }
 
     let nextComparison = null;
-    const newCardToVote = rightSwipes[rightSwipes.length - 1];
     const rankedCards = session.personalRanking;
     const unrankedCards = rightSwipedCards.filter(c => !rankedCards.includes(c));
 

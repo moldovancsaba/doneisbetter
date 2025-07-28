@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSwipeable } from 'react-swipeable';
 import { Card as CardComponent } from '@/components/Card';
-import { ICard } from '@/interfaces/Card';
+import Link from 'next/link';
 
 export default function SwipePage() {
   const [session, setSession] = useState(null);
@@ -69,7 +69,7 @@ export default function SwipePage() {
   if (!session) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        No active session. <a href="/" className="ml-2 text-blue-500">Start a new one</a>.
+        No active session. <Link href="/" className="ml-2 text-blue-500">Start a new one</Link>.
       </div>
     );
   }
