@@ -10,9 +10,10 @@
     "test": "next lint"
   },
   "dependencies": {
+    "@upstash/ratelimit": "^2.0.6",
+    "@upstash/redis": "^1.35.1",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.1",
-    "express-rate-limit": "^8.0.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.4",
     "next": "15.4.3",

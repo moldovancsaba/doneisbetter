@@ -1,14 +1,12 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import { applyRateLimiter } from './lib/rate-limiter';
+import { ratelimit } from './lib/rate-limiter';
 
 export async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith('/api/')) {
-    try {
-      // @ts-ignore
-      await applyRateLimiter(req, new NextResponse());
-    } catch (error) {
+    const ip = req.ip ?? '127.0.0.1';
+    const { success } = await ratelimit.limit(ip);
+    if (!success) {
       return new NextResponse('Too many requests', { status: 429 });
     }
   }
