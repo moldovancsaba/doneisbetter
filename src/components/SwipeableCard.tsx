@@ -15,7 +15,7 @@ export const SwipeableCard = ({ card, onSwipe, isAnimating, dragOffset }: { card
     setStartPos({ x: clientX, y: clientY });
   };
 
-  const handleMove = (clientX: number, clientY: number) => {
+  const handleMove = useCallback((clientX: number, clientY: number) => {
     if (!isDragging || isAnimating) return;
 
     const diffX = clientX - startPos.x;
@@ -45,9 +45,9 @@ export const SwipeableCard = ({ card, onSwipe, isAnimating, dragOffset }: { card
         rightHint.style.opacity = '0.2';
       }
     }
-  };
+  }, [isDragging, isAnimating, startPos, dragOffset]);
 
-  const handleEnd = (clientX: number, clientY: number) => {
+  const handleEnd = useCallback((clientX: number, clientY: number) => {
     if (!isDragging || isAnimating) return;
     setIsDragging(false);
 
@@ -94,7 +94,7 @@ export const SwipeableCard = ({ card, onSwipe, isAnimating, dragOffset }: { card
     }
 
     dragOffset.current = 0;
-  };
+  }, [isDragging, isAnimating, startPos, card, onSwipe, dragOffset]);
 
   // Mouse events
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -107,14 +107,14 @@ export const SwipeableCard = ({ card, onSwipe, isAnimating, dragOffset }: { card
       e.preventDefault();
       handleMove(e.clientX, e.clientY);
     }
-  }, [isDragging]);
+  }, [isDragging, handleMove]);
 
   const handleMouseUp = useCallback((e: MouseEvent) => {
     if (isDragging) {
       e.preventDefault();
       handleEnd(e.clientX, e.clientY);
     }
-  }, [isDragging]);
+  }, [isDragging, handleEnd]);
 
   // Touch events
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -129,7 +129,7 @@ export const SwipeableCard = ({ card, onSwipe, isAnimating, dragOffset }: { card
       const touch = e.touches[0];
       handleMove(touch.clientX, touch.clientY);
     }
-  }, []);
+  }, [handleMove]);
 
   const handleTouchEnd = useCallback((e: TouchEvent) => {
     e.preventDefault();
@@ -137,7 +137,7 @@ export const SwipeableCard = ({ card, onSwipe, isAnimating, dragOffset }: { card
       const touch = e.changedTouches[0];
       handleEnd(touch.clientX, touch.clientY);
     }
-  }, []);
+  }, [handleEnd]);
 
   useEffect(() => {
     if (isDragging) {

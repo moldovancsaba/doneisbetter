@@ -16,7 +16,7 @@ export default function SwipePage() {
   const [phase, setPhase] = useState('loading'); // loading, swipe, vote, results
   const [personalRanking, setPersonalRanking] = useState<ICard[]>([]);
   const [globalRanking, setGlobalRanking] = useState([]);
-  const [currentVoteContext, setCurrentVoteContext] = useState(null);
+  const [currentVoteContext, setCurrentVoteContext] = useState<{ newCard: string, compareAgainst: string } | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const dragOffset = useRef(0);
   const router = useRouter();
@@ -32,15 +32,7 @@ export default function SwipePage() {
     }
   }, [router]);
 
-  const moveToNextCard = () => {
-    if (session && currentCardIndex < session.deck.length - 1) {
-      setCurrentCardIndex(currentCardIndex + 1);
-    } else {
-      finishSession();
-    }
-  };
-
-  const finishSession = async () => {
+  const finishSession = useCallback(async () => {
     if (session) {
       await fetch('/api/v1/session/complete', {
         method: 'POST',
@@ -52,7 +44,15 @@ export default function SwipePage() {
       setGlobalRanking(data.ranking);
       setPhase('results');
     }
-  };
+  }, [session]);
+
+  const moveToNextCard = useCallback(() => {
+    if (session && currentCardIndex < session.deck.length - 1) {
+      setCurrentCardIndex(currentCardIndex + 1);
+    } else {
+      finishSession();
+    }
+  }, [session, currentCardIndex, finishSession]);
 
   const handleSwipe = useCallback(async (cardId: string, direction: 'left' | 'right') => {
     if (isAnimating || phase !== 'swipe' || !session) return;
@@ -82,7 +82,7 @@ export default function SwipePage() {
       }
       setIsAnimating(false);
     }, 300);
-  }, [isAnimating, phase, session, currentCardIndex]);
+  }, [isAnimating, phase, session, moveToNextCard]);
 
   const handleVote = useCallback(async (cardA: string, cardB: string, winner: string) => {
     if (phase !== 'vote' || !currentVoteContext || !session) return;
@@ -110,7 +110,7 @@ export default function SwipePage() {
       setPhase('swipe');
       moveToNextCard();
     }
-  }, [phase, currentVoteContext, session, personalRanking]);
+  }, [phase, currentVoteContext, session, moveToNextCard]);
 
   const handleRestart = () => {
     localStorage.removeItem('session');
@@ -189,8 +189,8 @@ export default function SwipePage() {
         {phase === 'vote' && currentVoteContext && (
           <div className="h-full max-h-[calc(100vh-200px)]">
             <VoteComparison
-              cardA={session.deck.find(c => c.uuid === currentVoteContext.newCard)}
-              cardB={session.deck.find(c => c.uuid === currentVoteContext.compareAgainst)}
+              cardA={session.deck.find(c => c.uuid === currentVoteContext?.newCard)!}
+              cardB={session.deck.find(c => c.uuid === currentVoteContext?.compareAgainst)!}
               onVote={handleVote}
             />
           </div>
