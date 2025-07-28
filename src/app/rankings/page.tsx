@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { ICard } from '@/interfaces/Card';
-import Image from 'next/image';
 
 interface IRanking {
   cardId: string;
@@ -42,10 +41,7 @@ export default function RankingsPage() {
             <div className="mr-4 text-xl font-bold">{index + 1}</div>
             <div className="w-full">
               {ranking.card.title && <h3 className="text-lg font-bold">{ranking.card.title}</h3>}
-              {ranking.card.type === 'text' && <p className="text-gray-700">{ranking.card.content.text}</p>}
-              {ranking.card.type === 'media' && ranking.card.content.mediaUrl && (
-                <Image src={ranking.card.content.mediaUrl} alt={ranking.card.title || ''} width={256} height={256} className="object-cover w-full h-64" />
-              )}
+              <p className="text-gray-700">{ranking.card.content.text}</p>
             </div>
             <div className="ml-4 text-xl font-bold">{ranking.totalScore}</div>
           </div>

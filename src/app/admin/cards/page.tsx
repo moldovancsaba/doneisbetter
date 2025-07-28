@@ -93,36 +93,13 @@ export default function CardManagementPage() {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="block mb-2 text-sm font-bold text-gray-700">Type</label>
-                        <select
-                            value={formData.type || 'text'}
-                            onChange={(e) => setFormData({ ...formData, type: e.target.value as 'text' | 'media' })}
+                        <label className="block mb-2 text-sm font-bold text-gray-700">Text Content</label>
+                        <textarea
+                            value={formData.content?.text || ''}
+                            onChange={(e) => setFormData({ ...formData, content: { ...formData.content, text: e.target.value } })}
                             className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-                        >
-                            <option value="text">Text</option>
-                            <option value="media">Media</option>
-                        </select>
+                        />
                     </div>
-                    {formData.type === 'text' ? (
-                        <div className="mb-4">
-                            <label className="block mb-2 text-sm font-bold text-gray-700">Text Content</label>
-                            <textarea
-                                value={formData.content?.text || ''}
-                                onChange={(e) => setFormData({ ...formData, content: { ...formData.content, text: e.target.value } })}
-                                className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-                            />
-                        </div>
-                    ) : (
-                        <div className="mb-4">
-                            <label className="block mb-2 text-sm font-bold text-gray-700">Media URL</label>
-                            <input
-                                type="text"
-                                value={formData.content?.mediaUrl || ''}
-                                onChange={(e) => setFormData({ ...formData, content: { ...formData.content, mediaUrl: e.target.value } })}
-                                className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-                            />
-                        </div>
-                    )}
                     <button type="submit" className="px-4 py-2 font-bold text-white bg-green-500 rounded hover:bg-green-700">
                         {isEditing ? 'Update Card' : 'Create Card'}
                     </button>

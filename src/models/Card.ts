@@ -2,26 +2,15 @@ import mongoose, { Schema } from "mongoose";
 
 const CardSchema = new Schema({
   uuid: { type: String, required: true, unique: true, index: true },
-  type: { type: String, enum: ['text', 'media'], required: true },
+  type: { type: String, default: 'text', required: true },
   content: {
-    text: { type: String },
-    mediaUrl: { type: String }
+    text: { type: String, required: true },
   },
   title: { type: String, default: '' },
   tags: [{ type: String }],
   isActive: { type: Boolean, default: true, index: true },
   createdAt: { type: Date, default: Date.now, index: true },
   updatedAt: { type: Date, default: Date.now }
-});
-
-CardSchema.pre('save', function(next) {
-  if (this.content && this.type === 'text' && !this.content.text) {
-    next(new Error('Text content is required for text cards'));
-  } else if (this.content && this.type === 'media' && !this.content.mediaUrl) {
-    next(new Error('Media URL is required for media cards'));
-  } else {
-    next();
-  }
 });
 
 // Compound Index for performance

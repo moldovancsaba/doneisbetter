@@ -1,9 +1,8 @@
 export interface ICard {
   uuid: string;
-  type: 'text' | 'media';
+  type: 'text';
   content: {
-    text?: string;
-    mediaUrl?: string;
+    text: string;
   };
   title?: string;
   tags?: string[];
