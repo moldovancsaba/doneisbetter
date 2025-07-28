@@ -1,16 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { Card } from '@/models/Card';
 import { CreateCardSchema } from '@/lib/zod/schemas';
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { cardId: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ cardId: string }> }
 ) {
   try {
     await connectDB();
 
-    const { cardId } = params;
+    const { cardId } = await params;
     const body = await req.json();
     const { success, data } = CreateCardSchema.partial().safeParse(body);
 
@@ -39,13 +39,13 @@ export async function PUT(
 }
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { cardId: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ cardId: string }> }
 ) {
   try {
     await connectDB();
 
-    const { cardId } = params;
+    const { cardId } = await params;
 
     const card = await Card.findOneAndDelete({ uuid: cardId }).lean();
 

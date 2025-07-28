@@ -1,15 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { Session } from '@/models/Session';
 
 export async function GET(
-  req: Request,
-  { params }: { params: { sessionId: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     await connectDB();
 
-    const { sessionId } = params;
+    const { sessionId } = await params;
 
     const session = await Session.findOne({ sessionId }).lean();
 
