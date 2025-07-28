@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const CardSchema = new Schema({
   uuid: { type: String, required: true, unique: true, index: true },
+  slug: { type: String, required: true, unique: true },
   type: { type: String, default: 'text', required: true },
   content: {
     text: { type: String, required: true },

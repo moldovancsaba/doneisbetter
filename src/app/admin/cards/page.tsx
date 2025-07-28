@@ -83,12 +83,27 @@ export default function CardManagementPage() {
 
             {showForm && (
                 <form onSubmit={handleSubmit} className="p-4 mb-4 bg-white rounded shadow-md">
+                    {isEditing && (
+                        <div className="mb-4">
+                            <label className="block mb-2 text-sm font-bold text-gray-700">UUID</label>
+                            <p className="w-full px-3 py-2 text-gray-700 bg-gray-200 border rounded">{formData.uuid}</p>
+                        </div>
+                    )}
                     <div className="mb-4">
                         <label className="block mb-2 text-sm font-bold text-gray-700">Title</label>
                         <input
                             type="text"
                             value={formData.title || ''}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block mb-2 text-sm font-bold text-gray-700">Slug</label>
+                        <input
+                            type="text"
+                            value={formData.slug || ''}
+                            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                             className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
                         />
                     </div>
@@ -113,7 +128,8 @@ export default function CardManagementPage() {
                 {cards.map((card) => (
                     <div key={card.uuid} className="p-4 bg-white rounded shadow-md">
                         <h3 className="text-lg font-bold">{card.title}</h3>
-                        <p className="text-sm text-gray-500">{card.type}</p>
+                        <p className="text-sm text-gray-500">{card.uuid}</p>
+                        <p className="text-sm text-gray-500">{card.slug}</p>
                         <div className="mt-4">
                             <button onClick={() => handleEdit(card)} className="px-2 py-1 mr-2 text-sm font-bold text-white bg-yellow-500 rounded hover:bg-yellow-700">
                                 Edit
